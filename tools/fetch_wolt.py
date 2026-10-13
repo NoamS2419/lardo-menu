@@ -15,6 +15,10 @@ TOOLS = pathlib.Path(__file__).resolve().parent
 IMAGES = TOOLS.parent / "data" / "images"
 IMAGE_WIDTH = 500
 IMAGE_HOSTS = ("imageproxy.wolt.com", "wolt-menu-images-cdn.wolt.com")
+MIN_KEEP = 0.8  # refuse a snapshot with fewer rows than this share of the previous one
+
+sys.path.insert(0, str(TOOLS))
+from build import DATA, image_file  # noqa: E402
 FIELDS = ["wolt_category", "id", "name", "price_agorot", "description", "image", "options"]
 SKIP_DESCRIPTIONS = {"בחרו טעם"}
 
@@ -30,9 +34,11 @@ def get(url):
 
 
 def download_images(rows):
+    """Download missing photos; delete photos no product uses any more. A failed photo is skipped."""
     from PIL import Image  # only needed for --images
 
     IMAGES.mkdir(parents=True, exist_ok=True)
+    wanted = set()
     for r in rows:
         if not r["image"]:
             continue
@@ -41,14 +47,23 @@ def download_images(rows):
         if not re.fullmatch(r"[0-9a-f]{24}", r["id"]) or url.scheme != "https" or url.hostname not in IMAGE_HOSTS:
             print(f"skipping image for {r['id']!r}: unexpected id or URL {r['image']!r}", file=sys.stderr)
             continue
-        target = IMAGES / f"{r['id']}.webp"
+        target = DATA / image_file(r["id"], r["image"])
+        wanted.add(target.name)
         if target.exists():
             continue
-        img = Image.open(io.BytesIO(fetch(f"{r['image']}?w={IMAGE_WIDTH * 2}", "image/*"))).convert("RGB")
-        if img.width > IMAGE_WIDTH:
-            img = img.resize((IMAGE_WIDTH, round(img.height * IMAGE_WIDTH / img.width)), Image.LANCZOS)
-        img.save(target, "WEBP", quality=78, method=6)
-        print(f"image {target.name} {target.stat().st_size // 1024}KB")
+        try:
+            img = Image.open(io.BytesIO(fetch(f"{r['image']}?w={IMAGE_WIDTH * 2}", "image/*"))).convert("RGB")
+            if img.width > IMAGE_WIDTH:
+                img = img.resize((IMAGE_WIDTH, round(img.height * IMAGE_WIDTH / img.width)), Image.LANCZOS)
+            img.save(target, "WEBP", quality=78, method=6)
+            print(f"image {target.name} {target.stat().st_size // 1024}KB")
+        except Exception as e:  # one bad photo must not stop the refresh; the site falls back to Wolt's URL
+            print(f"WARNING: image for {r['name']} ({r['id']}) failed: {e}", file=sys.stderr)
+            target.unlink(missing_ok=True)
+    for old in IMAGES.glob("*.webp"):
+        if old.name not in wanted:
+            old.unlink()
+            print(f"removed old image {old.name}")
 
 
 def one_line(text):
@@ -89,7 +104,13 @@ def main():
                 "image": images[0]["url"].split("?")[0] if images else "",
                 "options": ";".join(opts),
             })
-    with open(TOOLS / "wolt_snapshot.tsv", "w", encoding="utf-8", newline="") as f:
+    snapshot = TOOLS / "wolt_snapshot.tsv"
+    if snapshot.exists():
+        before = sum(1 for _ in open(snapshot, encoding="utf-8")) - 1
+        if len(rows) < MIN_KEEP * before:
+            sys.exit(f"Wolt returned {len(rows)} items, the last snapshot had {before}. "
+                     "Looks like a partial response; nothing was changed.")
+    with open(snapshot, "w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, FIELDS, delimiter="\t", lineterminator="\n")
         w.writeheader()
         w.writerows(rows)

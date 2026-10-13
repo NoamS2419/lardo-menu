@@ -7,7 +7,7 @@
 | `wolt_snapshot.tsv` | העתק גולמי של וולט, שורה למוצר (נוצר ע"י `fetch_wolt.py`) |
 | `staff_overlay.json` | מה שהעובדות הוסיפו או תיקנו. גובר על וולט. **עורכים ידנית** |
 | `build.py` | ממזג את שניהם ל־`data/products.json` |
-| `fetch_wolt.py` | מושך מוולט מחדש ומריץ את `build.py`. עם `--images` מוריד גם תמונות חסרות ל־`data/images/<id>.webp` (רוחב 500) |
+| `fetch_wolt.py` | מושך מוולט מחדש ומריץ את `build.py`. עם `--images` מוריד גם תמונות חסרות ל־`data/images/<id>-<hash>.webp` (רוחב 500; ה־hash הוא של כתובת התמונה בוולט, כך שתמונה שהוחלפה בוולט יורדת מחדש) ומוחק תמונות שאף מוצר לא משתמש בהן. תמונה שנכשלה מדולגת עם אזהרה |
 
 ## רענון ("תעדכן")
 
@@ -18,7 +18,11 @@
    `https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/lart-du-pain-r/assortment/categories/slug/menucategory-<N>?language=he`.
    מעדכנים את `wolt_snapshot.tsv` ומריצים `python3 tools/build.py`.
 
-## בדיקות ב־build
+## בדיקות
+
+`fetch_wolt.py` נעצר בלי לשנות כלום אם וולט החזיר פחות מ־80% מהמוצרים של ה־snapshot הקודם (תשובה חלקית).
+
+### ב־build
 
 `build.py` מדפיס `WARNING` על כל רשומה ב־`staff_overlay.json` שכבר לא מתאימה ל־snapshot: מזהה שוולט שינה (ואז תגיות כמו חלב נוכרי או הריון לא מוחלות), קטגוריה לא קיימת או מפתח לא מוכר. עם `--strict` הוא נכשל. מוצר שנעלם או שינה שם מאז ה־build הקודם מודפס כ־`note`.
 כשמוצר מקבל מזהה חדש: מעבירים את הרשומה שלו ב־`staff_overlay.json` למזהה החדש.
@@ -44,7 +48,7 @@
     "price": 38,                     // ₪. עם גדלים: מחיר הגודל הקטן. null = לא ידוע
     "sizes": [{"label": "קוטר 16", "price": 150}],
     "choices": ["פטל", "פיסטוק"],    // טעמים לבחירה
-    "image": "images/<id>.webp" | "https://imageproxy.wolt.com/..." | null,
+    "image": "images/<id>-<hash>.webp" | "https://imageproxy.wolt.com/..." | null,
     "tags": ["חלב נוכרי"],           // "חלב נוכרי" / "לא מומלץ בהריון" / "אולי לא מומלץ בהריון"
     "notes": [],
     "source": "wolt" | "wolt+staff" | "staff",
