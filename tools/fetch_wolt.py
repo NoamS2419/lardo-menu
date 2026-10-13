@@ -7,13 +7,14 @@ Usage: python3 tools/fetch_wolt.py [--images]
   --images  also download missing product photos to data/images/<id>.webp
             (500px wide; needs Pillow: pip install pillow)
 """
-import csv, io, json, pathlib, subprocess, sys, urllib.request
+import csv, io, json, pathlib, re, subprocess, sys, urllib.parse, urllib.request
 
 SLUG = "lart-du-pain-r"
 API = f"https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/{SLUG}/assortment"
 TOOLS = pathlib.Path(__file__).resolve().parent
 IMAGES = TOOLS.parent / "data" / "images"
 IMAGE_WIDTH = 500
+IMAGE_HOSTS = ("imageproxy.wolt.com", "wolt-menu-images-cdn.wolt.com")
 FIELDS = ["wolt_category", "id", "name", "price_agorot", "description", "image", "options"]
 SKIP_DESCRIPTIONS = {"בחרו טעם"}
 
@@ -33,8 +34,15 @@ def download_images(rows):
 
     IMAGES.mkdir(parents=True, exist_ok=True)
     for r in rows:
+        if not r["image"]:
+            continue
+        # The id becomes a file name and the URL is fetched: accept only what Wolt really sends.
+        url = urllib.parse.urlsplit(r["image"])
+        if not re.fullmatch(r"[0-9a-f]{24}", r["id"]) or url.scheme != "https" or url.hostname not in IMAGE_HOSTS:
+            print(f"skipping image for {r['id']!r}: unexpected id or URL {r['image']!r}", file=sys.stderr)
+            continue
         target = IMAGES / f"{r['id']}.webp"
-        if not r["image"] or target.exists():
+        if target.exists():
             continue
         img = Image.open(io.BytesIO(fetch(f"{r['image']}?w={IMAGE_WIDTH * 2}", "image/*"))).convert("RGB")
         if img.width > IMAGE_WIDTH:

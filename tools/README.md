@@ -12,7 +12,7 @@
 ## רענון ("תעדכן")
 
 1. **GitHub:** לשונית Actions ← "Refresh from Wolt" ← Run workflow. נפתח PR עם השינויים ועם אזהרות, אם יש.
-   (פעם אחת צריך לאפשר: Settings ← Actions ← General ← "Allow GitHub Actions to create and approve pull requests".)
+   (פעם אחת: Settings ← Actions ← General ← לסמן "Allow GitHub Actions to create and approve pull requests". את Workflow permissions משאירים על "Read repository contents"; ה־workflow מבקש הרשאת כתיבה בעצמו.)
 2. **ממחשב:** `pip install pillow && python3 tools/fetch_wolt.py --images`.
 3. **מ־Claude בענן:** wolt.com חסום שם, אבל WebFetch עובד לכל קטגוריה בנפרד:
    `https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/lart-du-pain-r/assortment/categories/slug/menucategory-<N>?language=he`.
