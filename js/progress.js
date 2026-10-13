@@ -4,7 +4,7 @@
 const PROGRESS_KEY = 'lardo.progress.v1';
 
 function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0 };
+  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, autoNext: true };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
     if (!p || typeof p !== 'object') return fresh;
@@ -18,6 +18,9 @@ function loadProgress() {
       miss: clean(p.miss, isNum),
       best: clean(p.best, isBest),
       xp: isNum(p.xp) ? Math.floor(p.xp) : 0,
+      gameXp: isNum(p.gameXp) ? Math.floor(p.gameXp) : 0,
+      daily: clean(p.daily, (v) => Number.isInteger(v) && v >= 0 && v <= 10),
+      autoNext: p.autoNext !== false,
       days: Array.isArray(p.days) ? p.days.filter((d) => typeof d === 'string' && /^\d{4}-\d\d-\d\d$/.test(d)) : []
     };
   } catch (e) { /* private mode or corrupt value: start fresh */ }
@@ -33,7 +36,8 @@ export function saveProgress() {
 export function markResult(id, correct) {
   touchDay();
   if (correct) {
-    progress.miss[id] = Math.max(0, (progress.miss[id] || 0) - 1);
+    const m = (progress.miss[id] || 0) - 1;
+    if (m > 0) progress.miss[id] = m; else delete progress.miss[id];
   } else {
     progress.miss[id] = (progress.miss[id] || 0) + 1;
     delete progress.known[id];
@@ -81,8 +85,11 @@ const LEVELS = [
   { name: 'שף קונדיטור', min: 800 }
 ];
 
-export function addXp(n) {
+// fromGame: points earned by answering game questions. Only these count on the team board,
+// so ticking "אני מכיר" can't inflate a score.
+export function addXp(n, fromGame = false) {
   progress.xp = (progress.xp || 0) + n;
+  if (fromGame) progress.gameXp = (progress.gameXp || 0) + n;
   saveProgress();
 }
 

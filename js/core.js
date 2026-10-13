@@ -87,7 +87,7 @@ export const family = (p) => {
 export const productCard = (p, known = false) => `
   <li class="rise">
     <a class="card${known ? ' is-known' : ''}" href="#/p/${encodeURIComponent(p.id)}">
-      <span class="thumb-wrap">${imgHtml(p, 'thumb', 400, '')}${known ? '<span class="known-badge" aria-label="מכיר/ה">✓</span>' : ''}</span>
+      <span class="thumb-wrap">${imgHtml(p, 'thumb', 400, '')}${known ? '<span class="known-badge"><span aria-hidden="true">✓</span><span class="sr-only">מכיר/ה</span></span>' : ''}</span>
       <span class="card-body">
         <span class="card-title">${esc(p.name)}</span>
         <span class="card-sub price"><bdi>${esc(priceLabel(p))}</bdi></span>
@@ -105,6 +105,7 @@ export function announce(text) {
 export function setPage(title, html) {
   document.title = title ? `${title} · לארדו תפריט` : 'לארדו תפריט';
   main.innerHTML = html;
+  document.body.classList.remove('in-game');
   // Replay the page entrance and stagger cards in (CSS skips this under reduced motion).
   main.classList.remove('enter');
   void main.offsetWidth;

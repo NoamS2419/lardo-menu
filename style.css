@@ -21,6 +21,7 @@
   --muted: #6B5546;
   --accent: #8C2F39;
   --accent-2: #B8862B;
+  --accent-2-text: #86601C;
   --accent-soft: #F6E3E1;
   --accent-text: #FFFFFF;
   --border: #E6D7C3;
@@ -50,9 +51,10 @@
     --surface-2: #2E2219;
     --text: #F6ECE2;
     --muted: #C9B4A2;
-    --accent: #E39AA2;
+    --accent: #D9A27A;
     --accent-2: #E0B45E;
-    --accent-soft: #3A2224;
+    --accent-2-text: #E0B45E;
+    --accent-soft: #3A2A1F;
     --accent-text: #1B1410;
     --border: #3E3026;
     --control-border: #8A725F;
@@ -147,7 +149,7 @@ h1:focus, h2:focus, .flash-q:focus, main:focus { outline: none; }
 
 .tabs {
   position: fixed; inset-inline: 0; bottom: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   height: calc(var(--tab-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--surface); border-top: 1px solid var(--border);
@@ -228,7 +230,7 @@ main {
 .level .ring-wrap { grid-row: span 3; }
 .level-name { font-family: var(--head-font); font-size: 1.2rem; }
 .level-sub { color: var(--muted); font-size: .9rem; }
-.streak { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--accent-2); font-size: .92rem; }
+.streak { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--accent-2-text); font-size: .92rem; }
 
 .ring { width: 64px; height: 64px; transform: rotate(-90deg); }
 .ring circle { fill: none; stroke-width: 7; }
@@ -361,7 +363,7 @@ main {
   position: relative; margin: 16px 0; padding: 14px 16px;
   background: var(--surface); border: 1px solid var(--border); border-inline-start: 4px solid var(--accent-2); border-radius: 12px;
 }
-.staff-title { display: block; font-weight: 800; font-size: .85rem; color: var(--accent-2); margin-bottom: 2px; }
+.staff-title { display: block; font-weight: 800; font-size: .85rem; color: var(--accent-2-text); margin-bottom: 2px; }
 .staff p { margin: 0; }
 .notes { padding-inline-start: 1.2rem; margin: 0 0 1rem; }
 .notes li { margin-bottom: 4px; }
@@ -458,9 +460,9 @@ main {
 
 .game-body { display: grid; gap: 12px; }
 @media (min-width: 900px) {
-  .flash.wide { max-width: 1000px; }
+  .flash.wide { max-width: 1100px; margin-top: max(0px, calc(50vh - 380px)); }
   .flash.wide .game-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
-  .flash.wide .quiz-img { max-height: 56vh; }
+  .flash.wide .quiz-img { max-height: 62vh; }
 }
 
 .options { display: grid; gap: 10px; }
@@ -578,3 +580,50 @@ main {
   margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--surface-2);
   font-size: 1.15rem; line-height: 1.6; border-inline-start: 4px solid var(--accent-2);
 }
+
+/* ---------- games: phones hide the tab bar so the answer and "next" stay visible ---------- */
+
+@media (max-width: 899px) {
+  body.in-game { padding-bottom: env(safe-area-inset-bottom); }
+  body.in-game .tabs { display: none; }
+}
+.auto-toggle {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px;
+  color: var(--muted); font-size: .92rem; cursor: pointer;
+}
+.auto-toggle input { width: 22px; height: 22px; accent-color: var(--accent); }
+.level-sub { line-height: 1.45; }
+
+/* ---------- team ---------- */
+
+.board { width: 100%; border-collapse: separate; border-spacing: 0 6px; margin: 18px 0; }
+.board caption { text-align: start; font-family: var(--head-font); font-size: 1.25rem; padding-bottom: 4px; }
+.board th, .board td { padding: 10px 12px; text-align: start; background: var(--surface); }
+.board thead th { background: none; color: var(--muted); font-size: .85rem; font-weight: 600; padding-block: 2px; }
+.board tbody th { font-weight: 600; }
+.board tbody tr > :first-child { border-start-start-radius: 12px; border-end-start-radius: 12px; width: 3.5rem; }
+.board tbody tr > :last-child { border-start-end-radius: 12px; border-end-end-radius: 12px; font-weight: 800; white-space: nowrap; }
+.rank {
+  display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface-2); font-weight: 800; font-size: .9rem;
+}
+.board .top1 .rank { background: var(--accent-2); color: #1B1410; }
+.board .top2 .rank { background: #CFC6BA; color: #1B1410; }
+.board .top3 .rank { background: #C58A5A; color: #1B1410; }
+.board tr.me > * { background: var(--accent-soft); }
+.you { color: var(--muted); font-weight: 400; font-size: .88rem; }
+
+.name-form { display: grid; gap: 8px; max-width: 460px; margin: 16px 0; }
+.name-form label { font-weight: 700; }
+.name-form input {
+  font: inherit; font-size: 1.05rem; min-height: 48px; padding: 8px 12px;
+  border: 1.5px solid var(--control-border); border-radius: 12px; background: var(--surface); color: var(--text);
+}
+.hint { color: var(--muted); font-size: .9rem; margin: 0; }
+.form-err { color: var(--bad); font-weight: 700; margin: 0; min-height: 1.2em; }
+.settings {
+  margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 4px 16px;
+}
+.settings summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
+.settings h2 { font-size: 1.1rem; margin-top: 18px; }
+.done-today { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; }

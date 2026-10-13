@@ -93,9 +93,9 @@ export function viewHome() {
         <p class="hello">${greeting()}!</p>
         <h1>מה לומדים היום?</h1>
         <div class="level">
-          ${ring(lvl.pct)}
+          ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
           <span class="level-name">${esc(lvl.name)}</span>
-          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'} · מכיר/ה ${known} מתוך ${total}</span>
+          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}<br>מכיר/ה ${known} מתוך ${total} מוצרים</span>
           ${days > 1 ? `<span class="streak"><span aria-hidden="true">🔥</span> ${days} ימים ברצף</span>` : '<span class="streak">כל יום קצת, וזה נדבק</span>'}
         </div>
         ${daily ? `
@@ -110,7 +110,7 @@ export function viewHome() {
         <nav class="quick" aria-label="קיצורים">
           <a class="main-cta" href="#/learn/all"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>להמשיך ללמוד</a>
           <a href="#/game/what"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>מה זה?</a>
-          <a href="#/game/made"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h14l-1.8 9H6.8z"/><path d="M5 11a7 7 0 0 1 14 0"/></svg>ממה זה עשוי?</a>
+          <a href="#/game/daily"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>האתגר היומי</a>
         </nav>
       </aside>
       <section aria-labelledby="cats-h">
@@ -247,15 +247,16 @@ export function viewAccessibility() {
         <li>ניגודיות צבעים מספקת, גם במצב כהה.</li>
         <li>לכל תמונה יש תיאור, ואפשר לנווט בכל האתר גם במקלדת.</li>
         <li>מידע לא מועבר בצבע בלבד, ואין אנימציות למי שביקש להפחית תנועה.</li>
+        <li>במשחקים אין מעבר אוטומטי לשאלה הבאה אלא אם מפעילים אותו ("מעבר אוטומטי"), ואין הגבלת זמן.</li>
       </ul>
       <h2>מגבלות ידועות</h2>
       <ul>
-        <li>תמונות המוצרים מגיעות מוולט. אם תמונה לא נטענת, מוצג במקומה ריבוע עם האות הראשונה.</li>
+        <li>תמונות המוצרים מגיעות מוולט. אם תמונה לא נטענת, מוצג במקומה איור של הקטגוריה.</li>
         <li>במשחק "מה זה?" מי שלא רואה את התמונה מקבל רמז מילולי מהתיאור, שהוא פחות מדויק מהתמונה.</li>
         <li>חלק מהמוצרים עוד בלי תמונה ובלי תיאור מלא.</li>
       </ul>
-      <p>נבדק באוקטובר 2026 בכלי axe ובבדיקה ידנית עם מקלדת וקורא מסך.</p>
-            <h2>נתקלתם בבעיה?</h2>
+      <p>נבדק באוקטובר 2026 עם מקלדת ובכלים אוטומטיים.</p>
+      <h2>נתקלתם בבעיה?</h2>
       <p>אם משהו באתר לא נגיש לכם, ספרו לנועם שער או לאחראי המשמרת, ונתקן.</p>
       <p>עודכן לאחרונה: אוקטובר 2026.</p>
     </article>

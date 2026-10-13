@@ -4,13 +4,29 @@ import { db, announce, esc, norm, priceLabel, imgSrc, imgHtml, family, setPage, 
 import { progress, saveProgress, markResult, setKnown, knownCount, addXp, levelInfo } from './progress.js';
 import { viewNotFound, ring } from './catalog.js';
 import { burst, shower, countUp } from './fx.js';
+import { cloudEnabled, myPlayer, submitDaily, syncTotal } from './cloud.js';
 
 /* ---------- random helpers ---------- */
+
+// Swappable random source: the daily challenge uses a seeded one so the whole team gets the same questions.
+let rand = Math.random;
+
+// Small deterministic PRNG (mulberry32) seeded from a string such as a date.
+function seeded(key) {
+  let a = 0;
+  for (const ch of key) a = (Math.imul(a, 31) + ch.charCodeAt(0)) | 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(rand() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -19,7 +35,7 @@ function shuffle(arr) {
 // Items the employee misses more, or hasn't marked as known, come up first.
 function weightedOrder(items) {
   return items
-    .map((p) => ({ p, w: (progress.known[p.id] ? 0 : 2) + (progress.miss[p.id] || 0) * 2 + Math.random() * 2.5 }))
+    .map((p) => ({ p, w: (progress.known[p.id] ? 0 : 2) + (progress.miss[p.id] || 0) * 2 + rand() * 2.5 }))
     .sort((a, b) => b.w - a.w)
     .map((x) => x.p);
 }
@@ -110,13 +126,19 @@ export function viewFlashcards(catId) {
   function render() {
     if (pos >= deck.length) return finish();
     const p = deck[pos];
+    // No photo and no ingredients: nothing to guess the name from, so ask the price instead.
+    const bare = !p.image && !(p.ingredients || []).length;
+    const catName = (db.categories.find((c) => c.id === p.category) || {}).name || '';
     box.innerHTML = `
       <div class="flip q-in" id="card">
         <div class="flip-inner">
           <section class="face face-front" aria-label="צד קדמי">
             <p class="counter">כרטיס ${seen + 1} · מכיר/ה ${knownCount(items)}/${items.length}</p>
-            ${clueHtml(p)}
-            <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>
+            ${bare
+              ? `<p class="flash-name">${esc(p.name)}</p><p class="counter">${esc(catName)}</p>
+                 <p class="flash-q" tabindex="-1" id="fq">כמה זה עולה?</p>`
+              : `${clueHtml(p)}
+                 <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>`}
             <button class="btn btn-wide" id="flip" type="button">הפוך</button>
           </section>
           <section class="face face-back" aria-label="התשובה" hidden>
@@ -150,8 +172,8 @@ export function viewFlashcards(catId) {
     const p = deck[pos];
     markResult(p.id, knew);
     if (knew) {
+      if (!progress.known[p.id]) addXp(2); // no repeat points for a card already known
       setKnown(p.id, true);
-      addXp(2);
       knewInRow += 1;
       if (knewInRow % 5 === 0) burst(btn, 22);
     } else {
@@ -243,9 +265,9 @@ const STREAK_PRAISE = { 3: 'שלוש ברצף!', 5: 'חמש ברצף! 🔥', 8: 
 
 const ROUND = 10;
 
-function questionsWhat() {
+function questionsWhat(order = weightedOrder) {
   const showable = db.products.filter((p) => p.image && hintText(p));
-  const pool = weightedOrder(showable).slice(0, ROUND);
+  const pool = order(showable).slice(0, ROUND);
   return pool.map((p) => {
     // Distractors never share the answer's name (some names repeat across categories).
     const names = new Set([norm(p.name)]);
@@ -281,9 +303,9 @@ const madeAnswers = (p) => (p.ingredients || [])
   .filter(isShort)
   .filter((i) => !words(i).some((w) => norm(p.name).includes(w)));
 
-function questionsMade() {
+function questionsMade(order = weightedOrder) {
   const eligible = db.products.filter((p) => madeAnswers(p).length >= 1 && (p.ingredients || []).length >= 2);
-  const pool = weightedOrder(eligible).slice(0, ROUND);
+  const pool = order(eligible).slice(0, ROUND);
   return pool.map((p) => {
     const mine = norm([p.name, p.description, p.staff_description, ...(p.ingredients || [])].join(' '));
     const fair = (i) => !mine.includes(norm(i))
@@ -326,9 +348,9 @@ function nameDistractors(p, n = 3) {
 
 const basePrice = (p) => (typeof p.price === 'number' ? p.price : null);
 
-function questionsPrice() {
+function questionsPrice(order = weightedOrder) {
   const eligible = db.products.filter((p) => basePrice(p) != null);
-  const pool = weightedOrder(eligible).slice(0, ROUND);
+  const pool = order(eligible).slice(0, ROUND);
   return pool.map((p) => {
     const right = basePrice(p);
     // Wrong prices: real prices from the same family that are close, so it takes knowing, not guessing.
@@ -354,9 +376,9 @@ function questionsPrice() {
   });
 }
 
-function questionsWho() {
+function questionsWho(order = weightedOrder) {
   const eligible = db.products.filter((p) => hintText(p).replace(/[….,\s]/g, '').length >= 12);
-  const pool = weightedOrder(eligible).slice(0, ROUND);
+  const pool = order(eligible).slice(0, ROUND);
   return pool.map((p) => {
     const options = shuffle([p, ...nameDistractors(p)]).map((o) => o.name);
     return {
@@ -369,10 +391,39 @@ function questionsWho() {
   });
 }
 
+/* ---------- daily challenge ---------- */
+
+// The shop's calendar day, the same on every phone.
+export const jerusalemDate = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+
+// 10 questions, identical for the whole team on a given day: a mix of all four games.
+function questionsDaily() {
+  const date = jerusalemDate();
+  rand = seeded(`lardo-${date}`);
+  try {
+    const plain = (items) => shuffle(items);
+    const qs = [
+      ...questionsWhat(plain).slice(0, 3),
+      ...questionsMade(plain).slice(0, 2),
+      ...questionsPrice(plain).slice(0, 3),
+      ...questionsWho(plain).slice(0, 2)
+    ];
+    // One question per product.
+    const seen = new Set();
+    return shuffle(qs.filter((q) => !seen.has(q.id) && seen.add(q.id))).slice(0, ROUND);
+  } finally {
+    rand = Math.random;
+  }
+}
+
 export function viewGame(id) {
-  const game = GAMES.find((g) => g.id === id && g.ready);
+  const daily = id === 'daily';
+  const game = daily ? { id, name: 'האתגר היומי' } : GAMES.find((g) => g.id === id && g.ready);
   if (!game) return viewNotFound();
-  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho }[id];
+  const date = jerusalemDate();
+  if (daily && progress.daily[date] != null) return viewDailyDone(date);
+  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho, daily: questionsDaily }[id];
   let qs = make();
   let i = 0;
   let score = 0;
@@ -386,7 +437,12 @@ export function viewGame(id) {
     <h1 class="sr-only">${esc(game.name)}</h1>
     <div id="game"></div>
   `);
+  document.body.classList.add('in-game');
   const box = document.getElementById('game');
+  // Any touch, key or scroll in the game means "I'm reading": cancel a pending auto-advance.
+  for (const ev of ['pointerdown', 'keydown', 'wheel', 'touchmove']) {
+    box.addEventListener(ev, (e) => { if (!e.target.closest || !e.target.closest('.opt')) clearTimeout(timer); }, { passive: true });
+  }
 
   const dots = () => `<ol class="dots" aria-hidden="true">${qs.map((_, k) =>
     `<li class="${results[k] === true ? 'ok' : results[k] === false ? 'bad' : k === i ? 'now' : ''}"></li>`).join('')}</ol>`;
@@ -397,12 +453,12 @@ export function viewGame(id) {
     const q = qs[i];
     box.innerHTML = `
       <section class="flash${id === 'what' || id === 'price' ? ' wide' : ''} q-in">
-        <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}${id === 'what' ? ': מה זה?' : ''}</h2>
+        <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}, ניקוד ${score}${id === 'what' ? ': מה זה?' : ''}</h2>
         <p class="game-head">
-          <a href="#/games" aria-label="חזרה למשחקים">→</a>
+          <a href="${daily ? '#/' : '#/games'}"><span aria-hidden="true">→</span><span class="sr-only">${daily ? 'לדף הבית' : 'חזרה למשחקים'}</span></a>
           <strong>${esc(game.name)}</strong>
           ${run >= 3 ? `<span class="chip-streak"><span aria-hidden="true">🔥</span> ${run} ברצף</span>` : ''}
-          <span class="game-score" aria-label="ניקוד ${score}"><span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
+          <span class="game-score"><span class="sr-only">ניקוד </span><span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
         </p>
         ${dots()}
         <div class="game-body">
@@ -412,9 +468,18 @@ export function viewGame(id) {
               ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}"><bdi>${esc(o)}</bdi></button>`).join('')}
             </div>
             <div id="feedback"></div>
+            <label class="auto-toggle">
+              <input type="checkbox" id="auto"${progress.autoNext ? ' checked' : ''}>
+              מעבר אוטומטי אחרי תשובה נכונה
+            </label>
           </div>
         </div>
       </section>`;
+    document.getElementById('auto').addEventListener('change', (e) => {
+      progress.autoNext = e.target.checked;
+      saveProgress();
+      if (!e.target.checked) clearTimeout(timer);
+    });
     box.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(Number(b.dataset.k), b)));
   }
 
@@ -422,7 +487,7 @@ export function viewGame(id) {
     const q = qs[i];
     const ok = k === q.correct;
     results[i] = ok;
-    if (ok) { score += 1; run += 1; addXp(10); } else { run = 0; missed.push(q.id); }
+    if (ok) { score += 1; run += 1; addXp(10, true); } else { run = 0; missed.push(q.id); box.querySelector('.chip-streak')?.remove(); }
     markResult(q.id, ok);
     box.querySelectorAll('.opt').forEach((b) => {
       const n = Number(b.dataset.k);
@@ -455,11 +520,17 @@ export function viewGame(id) {
     const next = document.getElementById('next');
     next.addEventListener('click', go);
     next.focus({ preventScroll: true });
+    // Make sure the verdict and "next" are on screen (phones: under the answers).
+    document.getElementById('feedback').scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
     // After a right answer the game moves on by itself; after a mistake it waits, so you can read.
-    if (ok && !prefersReducedMotion()) timer = setTimeout(() => { if (document.getElementById('next') === next) go(); }, 1600);
+    if (ok && progress.autoNext && !prefersReducedMotion()) {
+      timer = setTimeout(() => { if (document.getElementById('next') === next) go(); }, 1600);
+    }
   }
 
   function end() {
+    if (daily) return endDaily();
+    syncTotal(progress.gameXp || 0).catch(() => {});
     const prev = progress.best[id];
     const record = !prev || score / qs.length > prev.score / prev.of;
     if (record) { progress.best[id] = { score, of: qs.length }; saveProgress(); }
@@ -495,5 +566,46 @@ export function viewGame(id) {
     });
   }
 
+  function endDaily() {
+    progress.daily[date] = score;
+    saveProgress();
+    const pct = Math.round((score / qs.length) * 100);
+    const named = cloudEnabled() && myPlayer();
+    box.innerHTML = `
+      <section class="flash result q-in">
+        ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
+        <h2 tabindex="-1" id="res" class="result-line">${score >= 8 ? 'אלופ/ה של היום!' : score >= 5 ? 'יפה מאוד!' : 'מחר יש עוד הזדמנות'}</h2>
+        <p class="sr-only">${score} מתוך ${qs.length}</p>
+        <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצה להופיע בטבלת הצוות? בחר/י כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
+        <div class="two">
+          <a class="btn btn-no" href="#/">לדף הבית</a>
+          <a class="btn btn-yes" href="#/team">לטבלת הצוות</a>
+        </div>
+      </section>`;
+    fillMeters(box);
+    countUp(document.getElementById('sc'), score);
+    if (score >= 8) setTimeout(shower, 300);
+    window.scrollTo(0, 0);
+    document.getElementById('res').focus({ preventScroll: true });
+    if (named) {
+      Promise.all([submitDaily(date, score), syncTotal(progress.gameXp || 0)])
+        .then(() => { document.getElementById('daily-status').textContent = 'התוצאה נכנסה לטבלת הצוות.'; })
+        .catch(() => { document.getElementById('daily-status').textContent = 'לא הצלחנו לשלוח לטבלה. התוצאה נשמרה בטלפון.'; });
+    }
+  }
+
   ask();
+}
+
+function viewDailyDone(date) {
+  setPage('האתגר היומי', `
+    <section class="flash result">
+      ${ring(progress.daily[date] * 10, 150, 64, `${progress.daily[date]}/10`)}
+      <h1 class="result-line">כבר עשית את האתגר של היום</h1>
+      <p>אתגר חדש מחכה מחר בבוקר. בינתיים אפשר לשחק בשאר המשחקים.</p>
+      <div class="two">
+        <a class="btn btn-no" href="#/games">משחקים</a>
+        <a class="btn btn-yes" href="#/team">לטבלת הצוות</a>
+      </div>
+    </section>`);
 }

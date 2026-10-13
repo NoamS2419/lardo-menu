@@ -5,6 +5,7 @@ import {
   loadData, viewHome, viewCategory, viewProduct, viewSearch, viewFaq, viewAccessibility, viewNotFound
 } from './catalog.js';
 import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './learn.js';
+import { viewTeam } from './team.js';
 
 // A Wolt photo that fails to load is swapped for the placeholder tile,
 // or, inside a game, for the ingredients clue. Inline onerror is blocked by the CSP.
@@ -45,6 +46,7 @@ function route() {
     case 'games': viewGames(); break;
     case 'game': viewGame(parts[1]); break;
     case 'accessibility': viewAccessibility(); break;
+    case 'team': viewTeam(); break;
     default: viewNotFound();
   }
   focusMain();
@@ -52,7 +54,7 @@ function route() {
 
 // Highlight the tab for the current section.
 function markTab(section) {
-  const tab = { learn: 'learn', games: 'games', game: 'games', search: 'search' }[section] || 'home';
+  const tab = { learn: 'learn', games: 'games', game: 'games', search: 'search', team: 'team' }[section] || 'home';
   document.querySelectorAll('.tabs a').forEach((a) => {
     if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
