@@ -1,8 +1,9 @@
 /* Learning: flashcards and games. */
 
-import { db, announce, esc, norm, priceLabel, imgSrc, imgHtml, family, setPage } from './core.js';
-import { progress, saveProgress, markResult, setKnown, knownCount, progressBar } from './progress.js';
-import { viewNotFound } from './catalog.js';
+import { db, announce, esc, norm, priceLabel, imgSrc, imgHtml, family, setPage, catIcon, meter, fillMeters, prefersReducedMotion } from './core.js';
+import { progress, saveProgress, markResult, setKnown, knownCount, addXp, levelInfo } from './progress.js';
+import { viewNotFound, ring } from './catalog.js';
+import { burst, shower, countUp } from './fx.js';
 
 /* ---------- random helpers ---------- */
 
@@ -60,20 +61,24 @@ export function viewLearnHub() {
     const items = db.byCat.get(c.id);
     const k = knownCount(items);
     return `
-      <li>
-        <a class="row-link" href="#/learn/${encodeURIComponent(c.id)}">
+      <li class="rise">
+        <a class="row-link tint-${esc(c.id)}" href="#/learn/${encodeURIComponent(c.id)}">
+          ${catIcon(c.id)}
           <span class="row-title">${esc(c.name)}</span>
           <span class="row-sub">${k}/${items.length}</span>
-          ${progressBar(k, items.length, c.name)}
+          ${meter(k, items.length, `${c.name}: ${k} מתוך ${items.length}`)}
         </a>
       </li>`;
   }).join('');
   setPage('כרטיסיות', `
-    <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <h1>כרטיסיות</h1>
-    <p>רואים את המוצר, מנסים להיזכר בשם, והופכים. מה שלא ידעת יחזור יותר.</p>
-    <p class="summary">את/ה מכיר/ה <strong>${done}</strong> מתוך ${total} מוצרים.</p>
-    <p><a class="btn" href="#/learn/all">כל המוצרים</a></p>
+    <p>רואים את המוצר, נזכרים בשם, והופכים את הכרטיס. מה שלא ידעת יחזור אלייך יותר.</p>
+    <div class="level">
+      ${ring(total ? Math.round((done / total) * 100) : 0, 64, 27, `${total ? Math.round((done / total) * 100) : 0}%`)}
+      <span class="level-name">מכיר/ה ${done} מתוך ${total}</span>
+      <span class="level-sub">כל מוצר שסימנת שווה 5 נקודות</span>
+      <span><a class="btn" href="#/learn/all">לכל המוצרים</a></span>
+    </div>
     <h2>לפי קטגוריה</h2>
     <ul class="rows">${rows}</ul>
   `);
@@ -89,6 +94,7 @@ export function viewFlashcards(catId) {
   let deck = weightedOrder(items);
   let pos = 0;
   let seen = 0;
+  let knewInRow = 0;
 
   setPage(`כרטיסיות: ${title}`, `
     <a class="back" href="#/learn"><span aria-hidden="true">→</span> כרטיסיות</a>
@@ -97,65 +103,96 @@ export function viewFlashcards(catId) {
   `);
   const box = document.getElementById('fc');
 
-  function front() {
+  function render() {
     if (pos >= deck.length) return finish();
     const p = deck[pos];
     box.innerHTML = `
-      <section class="flash" aria-label="כרטיסייה">
-        <p class="counter">כרטיס ${seen + 1}</p>
-        ${clueHtml(p)}
-        <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>
-        <button class="btn btn-wide" id="flip" type="button">הפוך</button>
-      </section>`;
-    document.getElementById('flip').addEventListener('click', back);
-  }
-
-  function back() {
-    const p = deck[pos];
-    box.innerHTML = `
-      <section class="flash" aria-label="כרטיסייה">
-        ${clueHtml(p)}
-        <h2 class="flash-name" tabindex="-1" id="ans">${esc(p.name)}</h2>
-        <p class="price"><bdi>${esc(priceLabel(p))}</bdi></p>
-        ${p.description ? `<p>${esc(p.description)}</p>` : ''}
-        <div class="two">
-          <button class="btn btn-no" id="no" type="button">✗ עוד לא</button>
-          <button class="btn btn-yes" id="yes" type="button">✓ ידעתי</button>
+      <div class="flip q-in" id="card">
+        <div class="flip-inner">
+          <section class="face face-front" aria-label="צד קדמי">
+            <p class="counter">כרטיס ${seen + 1} · מכיר/ה ${knownCount(items)}/${items.length}</p>
+            ${clueHtml(p)}
+            <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>
+            <button class="btn btn-wide" id="flip" type="button">הפוך</button>
+          </section>
+          <section class="face face-back" aria-label="התשובה" hidden>
+            ${imgHtml(p, 'quiz-img', 600, '')}
+            <h2 class="flash-name" tabindex="-1" id="ans">${esc(p.name)}</h2>
+            <p class="price"><bdi>${esc(priceLabel(p))}</bdi></p>
+            ${(p.staff_description || p.description) ? `<p>${esc(p.staff_description || p.description)}</p>` : ''}
+            <div class="two">
+              <button class="btn btn-no" id="no" type="button">✗ עוד לא</button>
+              <button class="btn btn-yes" id="yes" type="button">✓ ידעתי</button>
+            </div>
+          </section>
         </div>
-      </section>`;
-    document.getElementById('ans').focus();
-    document.getElementById('yes').addEventListener('click', () => answer(true));
+      </div>`;
+    document.getElementById('flip').addEventListener('click', flip);
+    document.getElementById('yes').addEventListener('click', (e) => answer(true, e.currentTarget));
     document.getElementById('no').addEventListener('click', () => answer(false));
   }
 
-  function answer(knew) {
+  function flip() {
+    const card = document.getElementById('card');
+    const back = card.querySelector('.face-back');
+    back.hidden = false;
+    card.classList.add('flipped');
+    card.querySelector('.face-front').setAttribute('aria-hidden', 'true');
+    card.querySelector('.face-front').inert = true;
+    document.getElementById('ans').focus({ preventScroll: true });
+  }
+
+  function answer(knew, btn) {
     const p = deck[pos];
     markResult(p.id, knew);
-    if (knew) setKnown(p.id, true);
-    else deck.splice(Math.min(deck.length, pos + 4), 0, p); // comes back in a few cards
+    if (knew) {
+      setKnown(p.id, true);
+      addXp(2);
+      knewInRow += 1;
+      if (knewInRow % 5 === 0) burst(btn, 22);
+    } else {
+      knewInRow = 0;
+      deck.splice(Math.min(deck.length, pos + 4), 0, p); // comes back in a few cards
+    }
     pos += 1;
     seen += 1;
-    front();
-    document.getElementById('fq')?.focus();
+    render();
+    document.getElementById('fq')?.focus({ preventScroll: true });
   }
 
   function finish() {
+    const k = knownCount(items);
     box.innerHTML = `
-      <section class="flash">
+      <section class="flash result q-in">
+        ${ring(Math.round((k / items.length) * 100), 150, 64, `<span id="pct">0</span>%`)}
         <h2 tabindex="-1" id="done">סיימת את החבילה!</h2>
-        <p>את/ה מכיר/ה ${knownCount(items)} מתוך ${items.length} מוצרים כאן.</p>
+        <p>את/ה מכיר/ה ${k} מתוך ${items.length} מוצרים כאן.</p>
         <p><button class="btn" id="again" type="button">עוד סיבוב</button></p>
       </section>`;
-    document.getElementById('done').focus();
+    fillMeters(box);
+    countUp(document.getElementById('pct'), Math.round((k / items.length) * 100));
+    if (k === items.length) shower();
+    window.scrollTo(0, 0);
+    document.getElementById('done').focus({ preventScroll: true });
     document.getElementById('again').addEventListener('click', () => {
-      deck = weightedOrder(items); pos = 0; seen = 0; front();
+      deck = weightedOrder(items); pos = 0; seen = 0; knewInRow = 0; render();
     });
   }
 
-  front();
+  render();
 }
 
 /* ---------- games ---------- */
+
+const GAME_ICONS = {
+  what: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/>',
+  made: '<path d="M5 11h14l-1.8 9H6.8z"/><path d="M5 11a7 7 0 0 1 14 0"/>',
+  price: '<path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  who: '<circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/><path d="M9 9.5a2 2 0 1 1 2.5 2c-.5.2-.5.6-.5 1"/>',
+  customer: '<path d="M4 5h16v10H9l-5 4z"/>',
+  clock: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>'
+};
+const gameIcon = (id) => `<svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true">${GAME_ICONS[id]}</svg>`;
 
 const GAMES = [
   { id: 'what', name: 'מה זה?', desc: 'רואים מוצר ובוחרים את השם הנכון.', ready: true },
@@ -167,21 +204,38 @@ const GAMES = [
 ];
 
 export function viewGames() {
-  const items = GAMES.map((g) => g.ready
-    ? `<li><a class="row-link" href="#/game/${g.id}">
-         <span class="row-title">${esc(g.name)}</span>
-         <span class="row-sub">${esc(g.desc)}${progress.best[g.id] ? ` · שיא: ${Number(progress.best[g.id].score)}/${Number(progress.best[g.id].of)}` : ''}</span>
-       </a></li>`
-    : `<li><span class="row-link disabled" aria-disabled="true">
-         <span class="row-title">${esc(g.name)}</span>
-         <span class="row-sub">בקרוב</span>
-       </span></li>`).join('');
+  const lvl = levelInfo();
+  const items = GAMES.map((g) => {
+    const best = progress.best[g.id];
+    return g.ready
+      ? `<li class="rise"><a class="row-link" href="#/game/${g.id}">
+           ${gameIcon(g.id)}
+           <span class="row-title">${esc(g.name)}</span>
+           ${best ? `<span class="soon">שיא ${Number(best.score)}/${Number(best.of)}</span>` : '<span></span>'}
+           <span class="row-sub full">${esc(g.desc)}</span>
+         </a></li>`
+      : `<li class="rise"><span class="row-link disabled" aria-disabled="true">
+           ${gameIcon(g.id)}
+           <span class="row-title">${esc(g.name)}</span>
+           <span class="soon">בקרוב</span>
+           <span class="row-sub full">${esc(g.desc)}</span>
+         </span></li>`;
+  }).join('');
   setPage('משחקים', `
-    <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <h1>משחקים</h1>
+    <div class="level">
+      ${ring(lvl.pct)}
+      <span class="level-name">${esc(lvl.name)} · ${lvl.points} נקודות</span>
+      <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}</span>
+      <span class="level-sub">כל תשובה נכונה: 10 נקודות</span>
+    </div>
+    <h2>בחר/י משחק</h2>
     <ul class="rows">${items}</ul>
   `);
 }
+
+const PRAISE = ['בול!', 'יש לך עין של קונדיטור', 'נכון!', 'מקצוען/ית', 'בדיוק ככה', 'יפה מאוד!'];
+const STREAK_PRAISE = { 3: 'שלוש ברצף!', 5: 'חמש ברצף! 🔥', 8: 'שמונה ברצף! מי עוצר אותך?' };
 
 const ROUND = 10;
 
@@ -259,7 +313,10 @@ export function viewGame(id) {
   let qs = make();
   let i = 0;
   let score = 0;
+  let run = 0;
   let missed = [];
+  let results = [];
+  let timer = null;
 
   // Compact header so all four answers fit on a phone screen without scrolling.
   setPage(game.name, `
@@ -268,30 +325,41 @@ export function viewGame(id) {
   `);
   const box = document.getElementById('game');
 
+  const dots = () => `<ol class="dots" aria-hidden="true">${qs.map((_, k) =>
+    `<li class="${results[k] === true ? 'ok' : results[k] === false ? 'bad' : k === i ? 'now' : ''}"></li>`).join('')}</ol>`;
+
   function ask() {
+    clearTimeout(timer);
     if (i >= qs.length) return end();
     const q = qs[i];
     box.innerHTML = `
-      <section class="flash">
+      <section class="flash${id === 'what' ? ' wide' : ''} q-in">
         <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}${id === 'what' ? ': מה זה?' : ''}</h2>
         <p class="game-head">
           <a href="#/games" aria-label="חזרה למשחקים">→</a>
           <strong>${esc(game.name)}</strong>
-          <span>${i + 1}/${qs.length} · ניקוד ${score}</span>
+          ${run >= 3 ? `<span class="chip-streak"><span aria-hidden="true">🔥</span> ${run} ברצף</span>` : ''}
+          <span class="game-score" aria-label="ניקוד ${score}"><span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
         </p>
-        ${q.prompt}
-        <div class="options" role="group" aria-label="תשובות">
-          ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}">${esc(o)}</button>`).join('')}
+        ${dots()}
+        <div class="game-body">
+          <div>${q.prompt}</div>
+          <div>
+            <div class="options" role="group" aria-label="תשובות">
+              ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}">${esc(o)}</button>`).join('')}
+            </div>
+            <div id="feedback"></div>
+          </div>
         </div>
-        <div id="feedback"></div>
       </section>`;
-    box.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(Number(b.dataset.k))));
+    box.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(Number(b.dataset.k), b)));
   }
 
-  function choose(k) {
+  function choose(k, btn) {
     const q = qs[i];
     const ok = k === q.correct;
-    if (ok) score += 1; else missed.push(q.id);
+    results[i] = ok;
+    if (ok) { score += 1; run += 1; addXp(10); } else { run = 0; missed.push(q.id); }
     markResult(q.id, ok);
     box.querySelectorAll('.opt').forEach((b) => {
       const n = Number(b.dataset.k);
@@ -299,15 +367,33 @@ export function viewGame(id) {
       if (n === q.correct) { b.classList.add('right'); b.textContent = `✓ ${b.textContent}`; }
       else if (n === k) { b.classList.add('wrong'); b.textContent = `✗ ${b.textContent}`; }
     });
-    const fb = document.getElementById('feedback');
-    fb.innerHTML = `
-      <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון!' : '✗ לא נכון'}</p>
+    box.querySelector('.dots').outerHTML = dots();
+    if (ok) {
+      const s = document.getElementById('score');
+      s.textContent = String(score);
+      s.parentElement.classList.remove('bump'); void s.offsetWidth; s.parentElement.classList.add('bump');
+      document.getElementById('plus').classList.add('go');
+      burst(btn, run >= 3 ? 30 : 16);
+    }
+    const line = ok
+      ? (STREAK_PRAISE[run] || PRAISE[Math.floor(Math.random() * PRAISE.length)])
+      : `כמעט! זה ${q.options[q.correct]}`;
+    const last = i + 1 >= qs.length;
+    document.getElementById('feedback').innerHTML = `
+      <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓' : '✗'} ${esc(line)}</p>
       <p class="explain">${esc(q.explain)}</p>
-      <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${i + 1 < qs.length ? 'הבא' : 'לתוצאה'}</button>`;
-    announce(ok ? 'נכון' : `לא נכון. התשובה: ${q.options[q.correct]}`);
+      <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${last ? 'לתוצאה' : 'הבא'}</button>`;
+    announce(ok ? `נכון. ${line}` : `לא נכון. התשובה: ${q.options[q.correct]}`);
+    const go = () => {
+      clearTimeout(timer); i += 1; ask();
+      window.scrollTo(0, 0);
+      document.getElementById('qh')?.focus({ preventScroll: true });
+    };
     const next = document.getElementById('next');
-    next.addEventListener('click', () => { i += 1; ask(); document.getElementById('qh')?.focus(); });
-    next.focus();
+    next.addEventListener('click', go);
+    next.focus({ preventScroll: true });
+    // After a right answer the game moves on by itself; after a mistake it waits, so you can read.
+    if (ok && !prefersReducedMotion()) timer = setTimeout(() => { if (document.getElementById('next') === next) go(); }, 1600);
   }
 
   function end() {
@@ -315,25 +401,35 @@ export function viewGame(id) {
     const record = !prev || score / qs.length > prev.score / prev.of;
     if (record) { progress.best[id] = { score, of: qs.length }; saveProgress(); }
     const newBest = record && prev;
+    const pct = Math.round((score / qs.length) * 100);
     const review = missed.length
       ? `<h3>כדאי לחזור על</h3>
          <ul class="missed">${[...new Set(missed)].map((pid) => db.byId.get(pid)).filter(Boolean).map((p) => `
            <li><a href="#/p/${encodeURIComponent(p.id)}">${imgHtml(p, 'mini', 120, '')}<span>${esc(p.name)}</span></a></li>`).join('')}
          </ul>`
       : '';
+    const line = score === qs.length ? 'מושלם! שף קונדיטור אמיתי'
+      : score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `
-      <section class="flash result">
-        ${newBest ? '<p class="celebrate" aria-hidden="true">🎉</p>' : ''}
-        <h2 tabindex="-1" id="res" class="score"><bdi>${score}/${qs.length}</bdi></h2>
-        <p>${newBest ? 'שיא חדש! ' : ''}${score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם.' : 'כדאי לעבור על הכרטיסיות ולנסות שוב.'}</p>
+      <section class="flash result q-in">
+        ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
+        <h2 tabindex="-1" id="res" class="result-line">${newBest ? 'שיא חדש! ' : ''}${esc(line)}</h2>
+        <p class="sr-only">${score} מתוך ${qs.length}</p>
+        <p><span class="xp-gain">+${score * 10} נקודות</span> · ${esc(levelInfo().name)}</p>
         ${review}
         <div class="two">
           <a class="btn btn-no" href="#/games">משחקים</a>
           <button class="btn btn-yes" id="again" type="button">עוד סיבוב</button>
         </div>
       </section>`;
-    document.getElementById('res').focus();
-    document.getElementById('again').addEventListener('click', () => { qs = make(); i = 0; score = 0; missed = []; ask(); });
+    fillMeters(box);
+    countUp(document.getElementById('sc'), score);
+    if (score >= 8 || newBest) setTimeout(shower, 300);
+    window.scrollTo(0, 0);
+    document.getElementById('res').focus({ preventScroll: true });
+    document.getElementById('again').addEventListener('click', () => {
+      qs = make(); i = 0; score = 0; run = 0; missed = []; results = []; ask();
+    });
   }
 
   ask();

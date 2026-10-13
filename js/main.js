@@ -33,6 +33,7 @@ function route() {
     parts = ['?']; // malformed link: show "not found"
   }
   const params = new URLSearchParams(query);
+  markTab(parts[0]);
 
   switch (parts[0]) {
     case undefined: viewHome(); break;
@@ -47,6 +48,14 @@ function route() {
     default: viewNotFound();
   }
   focusMain();
+}
+
+// Highlight the tab for the current section.
+function markTab(section) {
+  const tab = { learn: 'learn', games: 'games', game: 'games', search: 'search' }[section] || 'home';
+  document.querySelectorAll('.tabs a').forEach((a) => {
+    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
 }
 
 (async function start() {

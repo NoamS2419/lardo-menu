@@ -1,9 +1,11 @@
 /* Catalog: data loading, categories, product pages, search, info pages. */
 
 import {
-  DATA_URL, db, announce, esc, norm, shekel, priceLabel, initial, imgSrc, imgHtml, tagsHtml, productCard, setPage
+  DATA_URL, db, announce, esc, norm, shekel, priceLabel, imgSrc, imgHtml, tagsHtml, productCard, setPage,
+  catIcon, placeholder, meter
 } from './core.js';
-import { progress, setKnown, knownCount, progressBar } from './progress.js';
+import { progress, setKnown, knownCount, streak, today, levelInfo } from './progress.js';
+import { burst } from './fx.js';
 
 /* ---------- data ---------- */
 
@@ -31,32 +33,91 @@ export async function loadData() {
 
 /* ---------- views ---------- */
 
+const ring = (pct, size = 64, r = 27, label = '') => `
+  <span class="ring-wrap">
+    <svg class="ring" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+      <circle class="ring-bg" cx="${size / 2}" cy="${size / 2}" r="${r}"/>
+      <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" data-pct="${pct}"/>
+    </svg>
+    ${label ? `<b>${label}</b>` : ''}
+  </span>`;
+
+export { ring };
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 5 ? 'לילה טוב' : h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
+};
+
+// Same product for the whole team on a given day.
+function productOfDay() {
+  const pool = db.products.filter((p) => p.image && (p.staff_description || p.description));
+  const key = today();
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return pool[h % pool.length];
+}
+
 export function viewHome() {
-  const cards = db.categories.map((c) => {
+  const lvl = levelInfo();
+  const days = streak();
+  const total = db.products.length;
+  const known = knownCount(db.products);
+  const daily = productOfDay();
+
+  const cats = db.categories.map((c) => {
     const items = db.byCat.get(c.id);
-    const cover = items.find((p) => p.image) || items[0];
+    const k = knownCount(items);
+    const cover = items.find((p) => p.image);
     return `
-      <li>
-        <a class="card" href="#/c/${encodeURIComponent(c.id)}">
-          ${cover.image
-            ? `<img class="thumb" src="${esc(imgSrc(cover.image))}" alt="" data-pid="${esc(cover.id)}" loading="lazy" decoding="async">`
-            : `<div class="thumb ph" aria-hidden="true">${initial(c.name)}</div>`}
+      <li class="rise">
+        <a class="card cat-card" href="#/c/${encodeURIComponent(c.id)}">
+          <span class="thumb-wrap">
+            ${cover
+              ? `<img class="thumb" src="${esc(imgSrc(cover.image, 500))}" alt="" data-pid="${esc(cover.id)}" loading="lazy" decoding="async">`
+              : placeholder(c.id, 'thumb')}
+            <span class="cat-name">${esc(c.name)}</span>
+            ${k === items.length ? '<span class="cat-done">✓ הכל</span>' : ''}
+          </span>
           <span class="card-body">
-            <span class="card-title">${esc(c.name)}</span>
-            <span class="card-sub">מכיר/ה ${knownCount(items)} מתוך ${items.length}</span>
-            ${progressBar(knownCount(items), items.length, c.name)}
+            <span class="meter-row"><span>${k} מתוך ${items.length}</span></span>
+            ${meter(k, items.length, `${c.name}: ${k} מתוך ${items.length}`)}
           </span>
         </a>
       </li>`;
   }).join('');
+
   setPage('', `
-    <div class="actions">
-      <a class="action" href="#/learn"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="13" height="16" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>כרטיסיות</a>
-      <a class="action" href="#/games"><svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>משחקים</a>
+    <div class="home">
+      <aside class="home-side">
+        <p class="hello">${greeting()}!</p>
+        <h1>מה לומדים היום?</h1>
+        <div class="level">
+          ${ring(lvl.pct)}
+          <span class="level-name">${esc(lvl.name)}</span>
+          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'} · מכיר/ה ${known} מתוך ${total}</span>
+          ${days > 1 ? `<span class="streak"><span aria-hidden="true">🔥</span> ${days} ימים ברצף</span>` : '<span class="streak">כל יום קצת, וזה נדבק</span>'}
+        </div>
+        ${daily ? `
+        <a class="daily" href="#/p/${encodeURIComponent(daily.id)}">
+          <img class="daily-img" src="${esc(imgSrc(daily.image, 700))}" alt="" data-pid="${esc(daily.id)}" decoding="async">
+          <span class="daily-body">
+            <span class="daily-kicker">המוצר של היום</span>
+            <span class="daily-name">${esc(daily.name)}</span>
+            <span class="daily-line">${esc(daily.staff_description || daily.description)}</span>
+          </span>
+        </a>` : ''}
+        <nav class="quick" aria-label="קיצורים">
+          <a class="main-cta" href="#/learn/all"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>להמשיך ללמוד</a>
+          <a href="#/game/what"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>מה זה?</a>
+          <a href="#/game/made"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 11h14l-1.8 9H6.8z"/><path d="M5 11a7 7 0 0 1 14 0"/></svg>ממה זה עשוי?</a>
+        </nav>
+      </aside>
+      <section aria-labelledby="cats-h">
+        <div class="section-head"><h2 id="cats-h">הוויטרינה</h2></div>
+        <ul class="grid">${cats}</ul>
+      </section>
     </div>
-    <p class="summary">מכיר/ה ${knownCount(db.products)} מתוך ${db.products.length} מוצרים</p>
-    <h1>מה יש אצלנו</h1>
-    <ul class="grid">${cards}</ul>
   `);
 }
 
@@ -64,29 +125,35 @@ export function viewCategory(id) {
   const cat = db.categories.find((c) => c.id === id);
   if (!cat) return viewNotFound();
   const items = db.byCat.get(id);
+  const k = knownCount(items);
   setPage(cat.name, `
-    <a class="back" href="#/"><span aria-hidden="true">→</span> כל הקטגוריות</a>
-    <h1>${esc(cat.name)}</h1>
-    <ul class="grid">${items.map(productCard).join('')}</ul>
+    <a class="back" href="#/"><span aria-hidden="true">→</span> הוויטרינה</a>
+    <div class="banner tint-${esc(cat.id)}">
+      ${catIcon(cat.id)}
+      <div class="banner-text">
+        <h1>${esc(cat.name)}</h1>
+        <span class="meter-row"><span>מכיר/ה ${k} מתוך ${items.length}</span>
+          <a href="#/learn/${encodeURIComponent(cat.id)}">לתרגל את הקטגוריה</a></span>
+        ${meter(k, items.length, `${cat.name}: ${k} מתוך ${items.length}`)}
+      </div>
+    </div>
+    <ul class="grid">${items.map((p) => productCard(p, !!progress.known[p.id])).join('')}</ul>
   `);
 }
+
+const CHECK = '<svg class="check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 export function viewProduct(id) {
   const p = db.byId.get(id);
   if (!p) return viewNotFound();
   const cat = db.categories.find((c) => c.id === p.category);
   const sizes = (p.sizes && p.sizes.length)
-    ? `<h2>גדלים ומחירים</h2>
-       <ul class="sizes">${p.sizes.map((s) =>
+    ? `<ul class="sizes" aria-label="גדלים ומחירים">${p.sizes.map((s) =>
          `<li>${esc(s.label)}: <strong><bdi>${esc(shekel(s.price) ?? '?')}</bdi></strong></li>`).join('')}</ul>`
     : `<p class="big-price"><bdi>${esc(priceLabel(p))}</bdi></p>`;
   // Skip the chips when they only repeat the description word for word.
   const sameAsDesc = norm((p.ingredients || []).join(' ')) === norm((p.description || '').replace(/,/g, ' '));
-  const ingredients = (p.ingredients && p.ingredients.length && !sameAsDesc)
-    ? `<h2>מרכיבים עיקריים</h2>
-       <ul class="ingredients">${p.ingredients.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`
-    : '';
-  const list = (title, arr) => (arr && arr.length)
+  const chips = (title, arr) => (arr && arr.length)
     ? `<h2>${title}</h2><ul class="ingredients">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`
     : '';
   const notes = (p.notes && p.notes.length)
@@ -95,26 +162,25 @@ export function viewProduct(id) {
   const notWolt = p.is_wolt === false
     ? '<p class="note">נמכר בדלפק בלבד, לא מופיע בוולט.</p>'
     : '';
+  const knowLabel = (on) => on ? `${CHECK} אני מכיר/ה` : 'סמן/י שאני מכיר/ה';
   const known = !!progress.known[p.id];
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}"><span aria-hidden="true">→</span> ${esc(cat.name)}</a>` : ''}
     <article class="product">
-      ${imgHtml(p, 'product-hero', 800)}
+      <div class="product-media">${imgHtml(p, 'product-hero', 900)}</div>
       <div>
         <h1>${esc(p.name)}${p.unit ? ` <span class="unit">(${esc(p.unit)})</span>` : ''}</h1>
         ${(p.aliases && p.aliases.length) ? `<p class="aka">נקרא גם: ${p.aliases.map(esc).join(', ')}</p>` : ''}
         ${sizes}
         ${tagsHtml(p.tags)}
-        ${p.description ? `<h2>תיאור</h2><p>${esc(p.description)}</p>` : ''}
         ${p.staff_description && p.staff_description !== p.description
-          ? `<h2>בשפה של הצוות</h2><p>${esc(p.staff_description)}</p>` : ''}
-        ${list('טעמים', p.choices)}
-        ${ingredients}
+          ? `<div class="staff"><span class="staff-title">מה אומרים בצוות</span><p>${esc(p.staff_description)}</p></div>` : ''}
+        ${p.description && sameAsDesc ? `<h2>מה יש בפנים</h2><p>${esc(p.description)}</p>` : ''}
+        ${sameAsDesc ? '' : chips('מה יש בפנים', p.ingredients)}
+        ${chips('טעמים', p.choices)}
         ${notes}
         ${notWolt}
-        <button class="btn know${known ? ' on' : ''}" id="know" type="button" aria-pressed="${known}">
-          ${known ? '✓ אני מכיר/ה' : 'סמן/י שאני מכיר/ה'}
-        </button>
+        <button class="btn know${known ? ' on' : ''}" id="know" type="button" aria-pressed="${known}">${knowLabel(known)}</button>
       </div>
     </article>
   `);
@@ -124,7 +190,8 @@ export function viewProduct(id) {
     const on = !!progress.known[p.id];
     b.classList.toggle('on', on);
     b.setAttribute('aria-pressed', String(on));
-    b.textContent = on ? '✓ אני מכיר/ה' : 'סמן/י שאני מכיר/ה';
+    b.innerHTML = knowLabel(on);
+    if (on) burst(b, 18);
   });
 }
 

@@ -1,11 +1,10 @@
 /* Personal progress, kept only on this phone (localStorage). */
 
-import { esc } from './core.js';
 
 const PROGRESS_KEY = 'lardo.progress.v1';
 
 function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {} };
+  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0 };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
     if (!p || typeof p !== 'object') return fresh;
@@ -17,7 +16,9 @@ function loadProgress() {
     return {
       known: clean(p.known, (v) => v === true),
       miss: clean(p.miss, isNum),
-      best: clean(p.best, isBest)
+      best: clean(p.best, isBest),
+      xp: isNum(p.xp) ? Math.floor(p.xp) : 0,
+      days: Array.isArray(p.days) ? p.days.filter((d) => typeof d === 'string' && /^\d{4}-\d\d-\d\d$/.test(d)) : []
     };
   } catch (e) { /* private mode or corrupt value: start fresh */ }
   return fresh;
@@ -30,6 +31,7 @@ export function saveProgress() {
 }
 
 export function markResult(id, correct) {
+  touchDay();
   if (correct) {
     progress.miss[id] = Math.max(0, (progress.miss[id] || 0) - 1);
   } else {
@@ -40,11 +42,56 @@ export function markResult(id, correct) {
 }
 
 export function setKnown(id, known) {
+  touchDay();
   if (known) progress.known[id] = true; else delete progress.known[id];
   saveProgress();
 }
 
 export const knownCount = (items) => items.filter((p) => progress.known[p.id]).length;
 
-export const progressBar = (done, total, label) =>
-  `<progress class="bar" max="${total}" value="${done}" aria-label="${esc(label)}: ${done} מתוך ${total}"></progress>`;
+export { meter as progressBar } from './core.js';
+
+/* ---------- daily streak ---------- */
+
+// Local calendar day, so the streak follows the shop's day, not UTC.
+export const today = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+export function touchDay() {
+  const days = new Set(progress.days);
+  if (!days.has(today())) { days.add(today()); progress.days = [...days].slice(-60); saveProgress(); }
+}
+
+// Consecutive days with any learning, counting back from today (or yesterday).
+export function streak() {
+  const days = new Set(progress.days);
+  const d = new Date();
+  if (!days.has(today(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (days.has(today(d))) { n += 1; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+/* ---------- bakery levels ---------- */
+
+const LEVELS = [
+  { name: 'שוליה', min: 0 },
+  { name: 'אופה', min: 150 },
+  { name: 'אופה בכיר', min: 400 },
+  { name: 'שף קונדיטור', min: 800 }
+];
+
+export function addXp(n) {
+  progress.xp = (progress.xp || 0) + n;
+  saveProgress();
+}
+
+// Points come from game answers plus 5 for every product marked as known.
+export function levelInfo() {
+  const points = (progress.xp || 0) + Object.keys(progress.known).length * 5;
+  let i = LEVELS.length - 1;
+  while (points < LEVELS[i].min) i -= 1;
+  const next = LEVELS[i + 1];
+  const pct = next ? Math.round(((points - LEVELS[i].min) / (next.min - LEVELS[i].min)) * 100) : 100;
+  return { points, name: LEVELS[i].name, next: next && next.name, toNext: next ? next.min - points : 0, pct };
+}
