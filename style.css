@@ -155,6 +155,7 @@ h1:focus, h2:focus, .flash-q:focus, main:focus { outline: none; }
   background: var(--surface); border-top: 1px solid var(--border);
   box-shadow: 0 -4px 16px rgba(60, 35, 15, .06);
 }
+.tabs.four { grid-template-columns: repeat(4, 1fr); }
 .tabs a {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   color: var(--muted); text-decoration: none; font-size: .78rem; font-weight: 600;

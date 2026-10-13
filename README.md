@@ -8,6 +8,7 @@
 - `js/catalog.js` — קטלוג, קטגוריות, דף מוצר, חיפוש, דפי מידע.
 - `js/learn.js` — כרטיסיות ומשחקים.
 - `js/progress.js` — התקדמות אישית (נשמרת רק בטלפון).
+- `js/team.js`, `js/cloud.js` — טבלת הצוות דרך Firebase (REST, בלי SDK). כבויה כל עוד `js/config.js` ריק; הכללים ב־`firestore.rules`.
 - `js/core.js` — מצב משותף ועזרי עיצוב; `js/fx.js` — אנימציות חגיגה (מושבתות ב־reduced motion).
 
 בלי Analytics ובלי עוגיות. חסום לאינדוקס בגוגל (`noindex`).

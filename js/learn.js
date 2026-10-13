@@ -583,7 +583,7 @@ export function viewGame(id) {
         <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצה להופיע בטבלת הצוות? בחר/י כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
         <div class="two">
           <a class="btn btn-no" href="#/">לדף הבית</a>
-          <a class="btn btn-yes" href="#/team">לטבלת הצוות</a>
+          ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">עוד משחקים</a>'}
         </div>
       </section>`;
     fillMeters(box);
@@ -608,8 +608,8 @@ function viewDailyDone(date) {
       <h1 class="result-line">כבר עשית את האתגר של היום</h1>
       <p>אתגר חדש מחכה מחר בבוקר. בינתיים אפשר לשחק בשאר המשחקים.</p>
       <div class="two">
-        <a class="btn btn-no" href="#/games">משחקים</a>
-        <a class="btn btn-yes" href="#/team">לטבלת הצוות</a>
+        <a class="btn btn-no" href="#/">לדף הבית</a>
+        ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">משחקים</a>'}
       </div>
     </section>`);
 }

@@ -6,6 +6,13 @@ import {
 } from './catalog.js';
 import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './learn.js';
 import { viewTeam } from './team.js';
+import { cloudEnabled } from './cloud.js';
+
+// The team tab only shows once the shared board is configured (js/config.js).
+if (!cloudEnabled()) {
+  document.querySelector('.tabs a[data-tab="team"]')?.remove();
+  document.querySelector('.tabs')?.classList.add('four');
+}
 
 // A Wolt photo that fails to load is swapped for the placeholder tile,
 // or, inside a game, for the ingredients clue. Inline onerror is blocked by the CSP.
