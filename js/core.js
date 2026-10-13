@@ -45,6 +45,7 @@ const CAT_ICONS = {
   patisserie: '<path d="M5 11h14l-1.8 9H6.8z"/><path d="M5 11a7 7 0 0 1 14 0"/><circle cx="12" cy="3.6" r="1.4"/>',
   cakes: '<path d="M4 20h16v-8H4z"/><path d="M4 15.5c2 1.5 4 1.5 6 0s4-1.5 6 0 3 1 4 0"/><path d="M8 12V8.5M12 12V8M16 12V8.5"/><path d="M8 6.5v-.5M12 6v-.5M16 6.5v-.5"/>',
   tarts: '<ellipse cx="12" cy="12" rx="9" ry="3.6"/><path d="M3 12v2.5c0 2 4 3.8 9 3.8s9-1.8 9-3.8V12"/><circle cx="9" cy="11.5" r="1"/><circle cx="14.5" cy="11" r="1"/><circle cx="12" cy="13.2" r="1"/>',
+  pizzas: '<path d="M12 3 3 19.5c5.6 2 12.4 2 18 0z"/><circle cx="10" cy="13" r="1.3"/><circle cx="14" cy="16" r="1.3"/><circle cx="12.5" cy="9.5" r="1"/>',
   sandwiches: '<path d="M3 10c0-3 4-5 9-5s9 2 9 5z"/><path d="M3 13.5h18"/><path d="M4 17h16l-1 2.5H5z"/>',
   cookies: '<circle cx="12" cy="12" r="9"/><circle cx="9" cy="9" r=".9"/><circle cx="15" cy="9.5" r=".9"/><circle cx="9.5" cy="15" r=".9"/><circle cx="15" cy="15" r=".9"/><circle cx="12" cy="12" r=".9"/>',
   breads: '<path d="M5 20v-9a4 4 0 0 1 1.5-7.5h11A4 4 0 0 1 19 11v9z"/><path d="M9 9.5l2 2M13 9.5l2 2"/>',
@@ -74,7 +75,7 @@ export const tagsHtml = (tags) => (tags && tags.length)
   : '';
 
 // Sweet / savory / drink, so game distractors come from the same family.
-const SAVORY_CATS = ['sandwiches', 'salads', 'breads'];
+const SAVORY_CATS = ['sandwiches', 'pizzas', 'salads', 'breads'];
 const SAVORY_WORDS = ['גבינ', 'פטה', 'צדר', 'מוצרלה', 'גודה', 'פרמז', 'לבנה', 'מנגולד', 'תרד', 'פיצה', 'כמהין', 'עגבני'].map(norm);
 export const family = (p) => {
   if (p.category === 'drinks') return 'drink';
