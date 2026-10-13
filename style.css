@@ -658,3 +658,4 @@ main {
 .badge-how { font-size: .82rem; }
 .badge.got { border: 2px solid var(--accent-2); background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
 .badge.got .badge-icon { filter: none; opacity: 1; }
+.badge-got { font-size: .8rem; font-weight: 800; color: var(--ok-text, var(--ok)); }

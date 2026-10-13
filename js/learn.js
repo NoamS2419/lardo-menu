@@ -232,12 +232,12 @@ const GAMES = [
 export function viewGames() {
   const lvl = levelInfo();
   const items = GAMES.map((g) => {
-    const best = progress.best[g.id];
+    const best = progress.best[g.id === 'clock' ? 'clock60' : g.id];
     return g.ready
       ? `<li class="rise"><a class="row-link" href="#/game/${g.id}">
            ${gameIcon(g.id)}
            <span class="row-title">${esc(g.name)}</span>
-           ${best ? `<span class="soon">שיא ${Number(best.score)}${g.id === 'clock' ? '' : `/${Number(best.of)}`}</span>` : '<span></span>'}
+           ${best ? `<span class="soon">שיא ${Number(best.score)}${g.id === 'clock' ? ' בדקה' : `/${Number(best.of)}`}</span>` : '<span></span>'}
            <span class="row-sub full">${esc(g.desc)}</span>
          </a></li>`
       : `<li class="rise"><span class="row-link disabled" aria-disabled="true">
@@ -273,7 +273,7 @@ function badges() {
     { icon: '🧾', name: 'קורא/ת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
     { icon: '🔎', name: 'בלש/ית', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
     { icon: '🛎️', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
-    { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות ב"נגד השעון"', got: () => (progress.best.clock || {}).score >= 15 },
+    { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
     { icon: '🏅', name: 'אלופ/ת היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
     { icon: '🔥', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
     { icon: '🎓', name: 'מכיר/ה את כל הוויטרינה', how: 'מסמנים "מכיר/ה" על כל המוצרים', got: () => db.products.every((p) => progress.known[p.id]) }
@@ -290,7 +290,8 @@ function badgesHtml() {
       <li class="badge${b.got ? ' got' : ''}">
         <span class="badge-icon" aria-hidden="true">${b.icon}</span>
         <span class="badge-name">${esc(b.name)}</span>
-        <span class="badge-how">${b.got ? '<span class="sr-only">הושג. </span>' : '<span class="sr-only">עוד לא. </span>'}${esc(b.how)}</span>
+        ${b.got ? '<span class="badge-got">✓ הושג</span>' : ''}
+        <span class="badge-how">${b.got ? '' : '<span class="sr-only">עוד לא. </span>'}${esc(b.how)}</span>
       </li>`).join('')}
     </ul>`;
 }
@@ -300,8 +301,23 @@ const STREAK_PRAISE = { 3: 'שלוש ברצף!', 5: 'חמש ברצף! 🔥', 8: 
 
 const ROUND = 10;
 
+// Some products share one Wolt photo (three breads, for one). A photo is only a fair question when it's unique.
+const photoKey = (p) => {
+  if (!p.image) return '';
+  const base = String(p.image).split('?')[0].split('/').pop();
+  return base.startsWith(`${p.id}-`) ? base.slice(p.id.length + 1) : base;
+};
+let photoCounts = null;
+const sharedPhoto = (p) => {
+  if (!photoCounts) {
+    photoCounts = new Map();
+    for (const o of db.products) { const k = photoKey(o); if (k) photoCounts.set(k, (photoCounts.get(k) || 0) + 1); }
+  }
+  return (photoCounts.get(photoKey(p)) || 0) > 1;
+};
+
 function questionsWhat(order = weightedOrder) {
-  const showable = db.products.filter((p) => p.image && hintText(p));
+  const showable = db.products.filter((p) => p.image && hintText(p) && !sharedPhoto(p));
   const pool = order(showable).slice(0, ROUND);
   return pool.map((p) => {
     // Distractors never share the answer's name (some names repeat across categories).
@@ -310,7 +326,7 @@ function questionsWhat(order = weightedOrder) {
     const fam = db.products.filter((o) => family(o) === family(p));
     for (const o of [...shuffle(db.byCat.get(p.category)), ...shuffle(fam), ...shuffle(db.products)]) {
       if (wrong.length === 3) break;
-      if (names.has(norm(o.name))) continue;
+      if (names.has(norm(o.name)) || photoKey(o) === photoKey(p)) continue;
       names.add(norm(o.name));
       wrong.push(o);
     }
@@ -445,6 +461,12 @@ const pregOf = (p) => hasTag(p, 'לא מומלץ בהריון') ? 'no' : hasTag(
 // Staff notes worth saying at the counter (no data-fix notes, no allergens: the site doesn't cover them).
 const noteOf = (p, skip = '') => (p.notes || []).filter((n) => !/וולט|תוקן|גלוטן/.test(n) && !skip.includes(n)).join('. ');
 
+// Shuffled options with the right one found by its text, so its position teaches nothing.
+const choices = (opts, right) => {
+  const options = shuffle(opts);
+  return { options, correct: options.indexOf(opts[right]) };
+};
+
 function questionsCustomer(order = weightedOrder) {
   const qs = [];
   // Kosher: every tagged product, balanced with plain sweet products of the same kind.
@@ -487,22 +509,19 @@ function questionsCustomer(order = weightedOrder) {
   qs.push({
     id: 'faq:travel',
     prompt: '<p class="flash-q">לקוח שואל: "זה יחזיק נסיעה של שעה באוטו?"</p>',
-    options: ['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'],
-    correct: 1,
+    ...choices(['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'], 1),
     explain: 'מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי.'
   });
   qs.push({
     id: 'faq:freeze',
     prompt: '<p class="flash-q">לקוחה רוצה לקנות היום לאירוע בעוד כמה ימים. מה ממליצים?</p>',
-    options: ['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'],
-    correct: 0,
+    ...choices(['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
     explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
   });
   qs.push({
     id: 'faq:dolce',
     prompt: '<p class="flash-q">"מקל קרואסון בטעם דולצ׳ה, זה חלב נוכרי?"</p>',
-    options: ['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'],
-    correct: 0,
+    ...choices(['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'], 0),
     explain: 'ג׳אנדויה: חלב נוכרי. דולצ׳ה (שוקולד לבן מקורמל): כשרות רעננה בלי חלב נוכרי.'
   });
   return shuffle(qs).slice(0, ROUND);
@@ -541,12 +560,13 @@ const CLOCK_MODES = [
 ];
 
 function viewClock() {
-  const best = progress.best.clock;
+  const b60 = progress.best.clock60;
+  const b120 = progress.best.clock120;
   setPage('נגד השעון', `
     <section class="flash clock-start">
       <h1>נגד השעון</h1>
       <p>תמונות, מחירים ותיאורים. כמה שיותר תשובות נכונות לפני שהזמן נגמר.</p>
-      ${best ? `<p class="counter">השיא שלך: <bdi>${Number(best.score)}</bdi> נכונות</p>` : ''}
+      ${b60 || b120 ? `<p class="counter">השיאים שלך: ${b60 ? `דקה <bdi>${Number(b60.score)}</bdi>` : ''}${b60 && b120 ? ' · ' : ''}${b120 ? `שתי דקות <bdi>${Number(b120.score)}</bdi>` : ''}</p>` : ''}
       <div class="clock-modes" role="group" aria-label="כמה זמן">
         ${CLOCK_MODES.map((m, k) => `<button class="btn${k ? ' btn-no' : ''} btn-wide" type="button" data-secs="${m.secs}">${esc(m.label)}</button>`).join('')}
       </div>
@@ -620,7 +640,8 @@ function playClock(secs) {
     document.querySelectorAll('#q .opt').forEach((b) => {
       b.disabled = true;
       const n = Number(b.dataset.k);
-      if (n === q.correct) b.classList.add('right'); else if (n === k) b.classList.add('wrong');
+      if (n === q.correct) { b.classList.add('right'); b.insertAdjacentText('afterbegin', '✓ '); }
+      else if (n === k) { b.classList.add('wrong'); b.insertAdjacentText('afterbegin', '✗ '); }
     });
     if (ok) {
       score += 1;
@@ -632,20 +653,38 @@ function playClock(secs) {
     }
     announce(ok ? 'נכון' : `לא. ${q.options[q.correct]}`);
     update();
-    setTimeout(() => {
+    const go = () => {
+      clearTimeout(wait);
       if (!document.body.contains(box) || box.dataset.done) return;
       if (!secs && answered >= PRACTICE) return finish();
       ask();
-    }, ok ? 450 : 1100);
+    };
+    let wait = null;
+    if (secs) {
+      // Against the clock, the next question comes by itself: that is the game.
+      wait = setTimeout(go, ok ? 450 : 1100);
+    } else {
+      // Practice has no clock, so nothing moves on its own unless auto-advance is switched on.
+      const opts = document.querySelector('#q .options');
+      opts.insertAdjacentHTML('afterend', `
+        <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון' : `✗ זה ${esc(q.options[q.correct])}`}</p>
+        <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${answered >= PRACTICE ? 'לתוצאה' : 'הבא'}</button>`);
+      const nb = document.getElementById('next');
+      nb.addEventListener('click', go);
+      nb.focus({ preventScroll: true });
+      nb.scrollIntoView({ block: 'nearest' });
+      if (ok && progress.autoNext && !prefersReducedMotion()) wait = setTimeout(go, 1600);
+    }
   }
 
   function finish() {
     if (box.dataset.done) return;
     box.dataset.done = '1';
     clearInterval(tick);
-    const prev = progress.best.clock;
+    const key = `clock${secs}`;
+    const prev = progress.best[key];
     const record = secs && (!prev || score > prev.score);
-    if (record) { progress.best.clock = { score, of: Math.max(answered, 1) }; saveProgress(); }
+    if (record) { progress.best[key] = { score, of: Math.max(answered, 1) }; saveProgress(); }
     box.innerHTML = `
       <section class="flash result q-in">
         <p class="result-big"><span id="sc">0</span></p>
