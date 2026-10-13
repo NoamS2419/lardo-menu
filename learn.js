@@ -141,7 +141,7 @@ function viewFlashcards(catId) {
       <section class="flash" aria-label="כרטיסייה">
         ${clueHtml(p)}
         <h2 class="flash-name" tabindex="-1" id="ans">${esc(p.name)}</h2>
-        <p class="price">${esc(priceLabel(p))}</p>
+        <p class="price"><bdi>${esc(priceLabel(p))}</bdi></p>
         ${p.description ? `<p>${esc(p.description)}</p>` : ''}
         <div class="two">
           <button class="btn btn-no" id="no" type="button">✗ עוד לא</button>
@@ -211,7 +211,7 @@ function viewGames() {
 const ROUND = 10;
 
 function questionsWhat() {
-  const showable = db.products.filter((p) => p.image || (p.ingredients || []).length >= 2);
+  const showable = db.products.filter((p) => p.image);
   const pool = weightedOrder(showable).slice(0, ROUND);
   return pool.map((p) => {
     const same = db.products.filter((o) => o.id !== p.id && o.category === p.category);

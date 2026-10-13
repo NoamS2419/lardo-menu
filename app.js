@@ -29,7 +29,7 @@ const priceLabel = (p) => {
     const prices = p.sizes.map((s) => s.price).filter((n) => typeof n === 'number');
     if (prices.length) return `מ־${Math.min(...prices)} ₪`;
   }
-  return shekel(p.price) ?? 'מחיר יעודכן';
+  return shekel(p.price) ?? 'מחיר בדלפק';
 };
 
 const initial = (name) => esc((name || '?').trim().charAt(0));
@@ -54,7 +54,7 @@ const productCard = (p) => `
       ${imgHtml(p, 'thumb')}
       <span class="card-body">
         <span class="card-title">${esc(p.name)}</span>
-        <span class="card-sub price">${esc(priceLabel(p))}</span>
+        <span class="card-sub price"><bdi>${esc(priceLabel(p))}</bdi></span>
         ${tagsHtml(p.tags)}
       </span>
     </a>
@@ -143,8 +143,8 @@ function viewProduct(id) {
   const sizes = (p.sizes && p.sizes.length)
     ? `<h2>גדלים ומחירים</h2>
        <ul class="sizes">${p.sizes.map((s) =>
-         `<li>${esc(s.label)}: <strong>${esc(shekel(s.price) ?? '?')}</strong></li>`).join('')}</ul>`
-    : `<p class="big-price">${esc(priceLabel(p))}</p>`;
+         `<li>${esc(s.label)}: <strong><bdi>${esc(shekel(s.price) ?? '?')}</bdi></strong></li>`).join('')}</ul>`
+    : `<p class="big-price"><bdi>${esc(priceLabel(p))}</bdi></p>`;
   const ingredients = (p.ingredients && p.ingredients.length)
     ? `<h2>מרכיבים עיקריים</h2>
        <ul class="ingredients">${p.ingredients.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`
