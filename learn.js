@@ -8,11 +8,21 @@
 const PROGRESS_KEY = 'lardo.progress.v1';
 
 function loadProgress() {
+  const fresh = { known: {}, miss: {}, best: {} };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
-    if (p && typeof p === 'object') return { known: {}, miss: {}, best: {}, ...p };
+    if (!p || typeof p !== 'object') return fresh;
+    // Keep only well-formed entries: true flags and finite numbers.
+    const clean = (obj, ok) => Object.fromEntries(
+      Object.entries(obj && typeof obj === 'object' ? obj : {}).filter(([, v]) => ok(v)));
+    const isNum = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+    return {
+      known: clean(p.known, (v) => v === true),
+      miss: clean(p.miss, isNum),
+      best: clean(p.best, isNum)
+    };
   } catch (e) { /* private mode or corrupt value: start fresh */ }
-  return { known: {}, miss: {}, best: {} };
+  return fresh;
 }
 
 const progress = loadProgress();
@@ -195,7 +205,7 @@ function viewGames() {
   const items = GAMES.map((g) => g.ready
     ? `<li><a class="row-link" href="#/game/${g.id}">
          <span class="row-title">${esc(g.name)}</span>
-         <span class="row-sub">${esc(g.desc)}${progress.best[g.id] != null ? ` · שיא: ${progress.best[g.id]}/10` : ''}</span>
+         <span class="row-sub">${esc(g.desc)}${progress.best[g.id] != null ? ` · שיא: ${Number(progress.best[g.id])}/10` : ''}</span>
        </a></li>`
     : `<li><span class="row-link disabled" aria-disabled="true">
          <span class="row-title">${esc(g.name)}</span>
