@@ -1,0 +1,64 @@
+{
+  "updated": "2026-10-13",
+  "note": "נתונים זמניים מסיכום העובדת. יוחלפו בשליפה המלאה מוולט.",
+  "categories": [
+    { "id": "pastries", "name": "מאפים" },
+    { "id": "patisserie", "name": "פטיסרי" },
+    { "id": "cakes", "name": "עוגות" },
+    { "id": "tarts", "name": "טארטים" },
+    { "id": "sandwiches", "name": "כריכים" },
+    { "id": "cookies", "name": "עוגיות" },
+    { "id": "breads", "name": "לחמים" },
+    { "id": "salads", "name": "סלטים" },
+    { "id": "boxes", "name": "מארזים" },
+    { "id": "drinks", "name": "שתייה" }
+  ],
+  "products": [
+    { "id": "butter-croissant", "name": "קרואסון חמאה", "category": "pastries", "description": "קרואסון חמאה קלאסי.", "ingredients": ["חמאה", "בצק עלים"], "price": null, "image": null, "wolt": false },
+    { "id": "pain-chocolat", "name": "פאן שוקולד", "category": "pastries", "description": "קרואסון במילוי שני מקלות שוקולד.", "ingredients": ["בצק קרואסון", "מקלות שוקולד"], "price": null, "image": null, "wolt": false },
+    { "id": "pain-suisse", "name": "פאן סוויס", "category": "pastries", "description": "קרואסון במילוי קרם שקדים אפוי, קרם פטיסייר, שוקולד חלב ומריר.", "ingredients": ["קרם שקדים", "קרם פטיסייר", "שוקולד חלב", "שוקולד מריר"], "price": null, "image": null, "tags": ["חלב נוכרי"], "wolt": true },
+    { "id": "croissant-stick", "name": "מקל קרואסון", "category": "pastries", "description": "בשני טעמים: שוקולד גאנדויה (שוקולד חלב איטלקי) או שוקולד דולצ'ה (שוקולד לבן מקורמל). הגאנדויה בחלב נוכרי.", "ingredients": ["שוקולד גאנדויה", "שוקולד דולצ'ה"], "price": null, "image": null, "tags": ["גאנדויה: חלב נוכרי"], "wolt": false },
+    { "id": "japanese-croissant", "name": "קרואסון יפני", "category": "pastries", "description": "קריספי מבחוץ ואוורירי מבפנים. מילויים: קרם פטיסייר ושבבי שוקולד חלב קורנפלקס / קרם פטיסייר וקולי פירות / קרם שוקולד גאנדויה / קרם פטיסייר וקוקיז / קרם פיסטוק.", "ingredients": ["קרם פטיסייר", "קורנפלקס", "קולי פירות", "גאנדויה", "פיסטוק"], "price": null, "image": null, "wolt": false },
+    { "id": "pistachio-danish", "name": "דניש פיסטוק", "category": "pastries", "description": "קרואסון במילוי קרם פיסטוק.", "ingredients": ["בצק קרואסון", "קרם פיסטוק"], "price": null, "image": null, "wolt": false },
+    { "id": "bread-pudding", "name": "בראד פודינג", "category": "pastries", "description": "תערובת של קרואסון עם שוקולד חלב, שוקולד לבן וקרמל.", "ingredients": ["קרואסון", "שוקולד חלב", "שוקולד לבן", "קרמל"], "price": null, "image": null, "wolt": false },
+    { "id": "cream-croissant", "name": "מאפה קרואסון עם קרם", "category": "pastries", "description": "מילויים: פטיסייר וקולי פירות / קרם פיסטוק / קרם שוקולד דולצ'ה ובייגלה / קרם שוקולד גאנדויה וקוקיז / שנטי וניל ופטל עם שוקולד לבן וחלב / שנטי וניל עם בננות מקורמלות וקרמל.", "ingredients": ["קרם פטיסייר", "פיסטוק", "דולצ'ה", "בייגלה", "שנטי וניל", "בננה מקורמלת"], "price": null, "image": null, "wolt": false },
+    { "id": "spinach-pastry", "name": "מאפה תרד", "category": "pastries", "description": "תערובת של גבינות עם תרד.", "ingredients": ["תרד", "גבינות"], "price": null, "image": null, "wolt": false },
+    { "id": "caprese-pastry", "name": "מאפה קפרזה", "category": "pastries", "description": "קרואסון במילוי מוצרלה פרסקה, עגבנייה, בזיליקום ובלסמי.", "ingredients": ["מוצרלה", "עגבנייה", "בזיליקום", "בלסמי"], "price": null, "image": null, "wolt": true },
+    { "id": "truffle-pastry", "name": "מאפה כמהין", "category": "pastries", "description": "קרואסון במילוי רוקט, גאודה, כמהין, שמנת, פסטו וריבת בצל.", "ingredients": ["רוקט", "גאודה", "כמהין", "שמנת", "פסטו", "ריבת בצל"], "price": null, "image": null, "wolt": true },
+    { "id": "labneh-sumac", "name": "קרואסון בצל סומק", "category": "pastries", "description": "בצל סומק, שמנת בסגנון לבנה, זעתר ושומשום.", "ingredients": ["בצל", "סומק", "לבנה", "זעתר", "שומשום"], "price": null, "image": null, "wolt": true },
+    { "id": "cheddar-pastry", "name": "מאפה צ'דר", "category": "pastries", "description": "קרואסון במילוי גבינת צ'דר ופטה פסטו.", "ingredients": ["צ'דר", "פטה", "פסטו"], "price": null, "image": null, "wolt": false },
+    { "id": "pretzel", "name": "פרעצל", "category": "pastries", "description": "עם צ'דר ופרמזן.", "ingredients": ["צ'דר", "פרמזן"], "price": null, "image": null, "wolt": false },
+    { "id": "burrata-pizza", "name": "פיצה בוראטה", "category": "pastries", "description": "פיצה עם גבינת בוראטה.", "ingredients": ["בוראטה"], "price": null, "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": false },
+
+    { "id": "millefeuille", "name": "מילפיי", "category": "patisserie", "description": "שכבות של בצק עלים, קרם פטיסייר, קרמל, פקאנים מקורמלים ומלח גס אטלנטי.", "ingredients": ["בצק עלים", "קרם פטיסייר", "קרמל", "פקאן", "מלח גס"], "price": null, "image": null, "wolt": true },
+    { "id": "faberge-egg", "name": "ביצת פברז'ה", "category": "patisserie", "description": "מוס יוגורט וקולי מנגו פסיפלורה על ספוג וניל. הביצה עשויה משוקולד דולצ'ה (לבן מקורמל).", "ingredients": ["מוס יוגורט", "מנגו", "פסיפלורה", "ספוג וניל", "דולצ'ה"], "price": null, "image": null, "wolt": true },
+    { "id": "chocolate-flower", "name": "פרח שוקולד", "category": "patisserie", "description": "שכבות של מוסים משוקולד ג'אנדויה ופרלינה של אגוזי לוז.", "ingredients": ["גאנדויה", "פרלינה", "אגוזי לוז"], "price": null, "image": null, "tags": ["חלב נוכרי"], "wolt": false },
+    { "id": "raspberry-mousse", "name": "מוס פטל אישי", "category": "patisserie", "description": "מרנג אפוי עטוף מוס וניל, עם דיסקית שוקולד לבן וקולי פטל. בוולט נקרא \"מוס תותים | אישי\".", "ingredients": ["מרנג", "מוס וניל", "שוקולד לבן", "קולי פטל"], "price": 58, "image": null, "wolt": true },
+    { "id": "vanilla-mousse", "name": "מוס וניל", "category": "patisserie", "description": "פודינג אורז בחלב, שכבות של וניל ופרלינה של אגוזי לוז.", "ingredients": ["פודינג אורז", "וניל", "פרלינה", "אגוזי לוז"], "price": null, "image": null, "wolt": false },
+    { "id": "croissant-mousse", "name": "מוס קרואסון", "category": "patisserie", "description": "יושב על ביסקוויט חמאה חומה, ממולא מוס וניל קרמל וקרעים של קרואסון חמאה.", "ingredients": ["ביסקוויט חמאה חומה", "מוס וניל", "קרמל", "קרואסון"], "price": null, "image": null, "wolt": false },
+    { "id": "peanut-mousse", "name": "מוס בוטנים", "category": "patisserie", "description": "בצק פריך, פטיסייר בוטנים ומוס בוטנים, מצופה שוקולד דולצ'ה.", "ingredients": ["בצק פריך", "פטיסייר בוטנים", "מוס בוטנים", "דולצ'ה"], "price": null, "image": null, "wolt": true },
+    { "id": "dark-chocolate-mousse", "name": "מוס שוקולד מריר", "category": "patisserie", "description": "ביסקוויט טבול באספרסו, קרמו שוקולד מריר, פרלינה שקדים וקפה וגנאש שוקולד מריר.", "ingredients": ["אספרסו", "שוקולד מריר", "פרלינה שקדים", "קפה", "גנאש"], "price": null, "image": null, "wolt": false },
+    { "id": "madeleine", "name": "מדלן", "category": "patisserie", "description": "עוגה צרפתית נימוחה ממולאת בקרם ומצופה בשוקולד. בטעמים: פיסטוק, פטל, קרמל ואגוזי לוז.", "ingredients": ["קרם", "שוקולד", "פיסטוק", "פטל", "קרמל", "אגוזי לוז"], "price": null, "image": null, "wolt": false },
+    { "id": "truffles", "name": "טראפלס", "category": "patisserie", "description": "שלושה סוגים של שוקולד עם קראנץ'.", "ingredients": ["שוקולד", "קראנץ'"], "price": null, "image": null, "wolt": false },
+
+    { "id": "bar-mousse-chocolate", "name": "מוס שוקולד בפס", "category": "cakes", "description": "עוגת מוס שוקולד בפס. כל הפסים באותו מחיר.", "ingredients": ["מוס שוקולד"], "price": 85, "image": null, "wolt": true },
+    { "id": "bar-mousse-raspberry", "name": "מוס פטל בפס", "category": "cakes", "description": "עוגת מוס פטל בפס. שונה מהמוס פטל האישי.", "ingredients": ["מוס פטל"], "price": 85, "image": null, "wolt": true },
+    { "id": "bar-tiramisu", "name": "טירמיסו בפס", "category": "cakes", "description": "טירמיסו בפס. כל הפסים באותו מחיר.", "ingredients": ["מסקרפונה", "קפה"], "price": 85, "image": null, "wolt": false },
+    { "id": "bowl-tiramisu", "name": "קערת טירמיסו", "category": "cakes", "description": "קערה גדולה של טירמיסו.", "ingredients": ["מסקרפונה", "קפה"], "price": 280, "image": null, "wolt": true },
+    { "id": "bowl-chocolate", "name": "קערת שוקולד", "category": "cakes", "description": "קערה גדולה של מוס שוקולד.", "ingredients": ["מוס שוקולד"], "price": 280, "image": null, "wolt": true },
+    { "id": "raspberry-flower", "name": "מוס פרח פטל", "category": "cakes", "description": "עוגת מוס פטל בצורת פרח אדום.", "ingredients": ["מוס פטל"], "price": 250, "image": null, "wolt": true },
+    { "id": "saint-honore", "name": "סנט הונורה", "category": "cakes", "description": "פחזניות מקורמלות ממולאות בקרם פטיסייר עם גנאש וניל מוקצף.", "ingredients": ["פחזניות", "קרמל", "קרם פטיסייר", "גנאש וניל"], "price": 150, "sizes": [ { "label": "גודל 14", "price": 150 }, { "label": "גודל 16", "price": 200 }, { "label": "גודל 18", "price": 250 } ], "image": null, "wolt": true },
+
+    { "id": "tart-chocolate-hazelnut", "name": "טארט שוקולד ואגוזי לוז", "category": "tarts", "description": "פרלינה אגוזי לוז ושנטי שוקולד חלב גאנדויה.", "ingredients": ["פרלינה", "אגוזי לוז", "שנטי", "גאנדויה"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "tags": ["חלב נוכרי"], "wolt": true },
+    { "id": "tart-pecan", "name": "טארט פקאן", "category": "tarts", "description": "פקאן ושוקולד דולצ'ה (לבן מקורמל).", "ingredients": ["פקאן", "דולצ'ה"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": true },
+    { "id": "tart-pistachio", "name": "טארט פיסטוק", "category": "tarts", "description": "טעמי פיסטוק ושוקולד לבן.", "ingredients": ["פיסטוק", "שוקולד לבן"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
+    { "id": "tart-peanut", "name": "טארט בוטנים", "category": "tarts", "description": "קראנץ' בוטנים, פטיסייר בוטנים ומוס בוטנים.", "ingredients": ["קראנץ' בוטנים", "פטיסייר בוטנים", "מוס בוטנים"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
+    { "id": "tart-mango-passion", "name": "טארט מנגו פסיפלורה", "category": "tarts", "description": "טארט מנגו ופסיפלורה.", "ingredients": ["מנגו", "פסיפלורה"], "price": 150, "sizes": [ { "label": "קטן", "price": 150 }, { "label": "גדול", "price": 200 } ], "image": null, "wolt": false },
+    { "id": "tart-lemon", "name": "טארט לימון", "category": "tarts", "description": "בסיס סאבלה שקדים, קרם לימון, קולי לימונענע ומרנג חרוך. מכיל גלוטן.", "ingredients": ["סאבלה שקדים", "קרם לימון", "לימונענע", "מרנג"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": true },
+    { "id": "tart-berries", "name": "טארט פטיסייר ופירות יער", "category": "tarts", "description": "קרם פטיסייר ופירות יער.", "ingredients": ["קרם פטיסייר", "פירות יער"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
+
+    { "id": "beet-sandwich", "name": "כריך סלק", "category": "sandwiches", "description": "כריך סלק עם גבינה במים.", "ingredients": ["סלק", "גבינה"], "price": null, "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": false },
+
+    { "id": "cookies", "name": "קוקיז", "category": "cookies", "description": "בטעמים: גאנדויה / פטל ושוקולד לבן / פרלינה ואגוזי לוז / פיסטוק ושוקולד לבן.", "ingredients": ["גאנדויה", "פטל", "שוקולד לבן", "פרלינה", "פיסטוק"], "price": null, "image": null, "wolt": false }
+  ]
+}
