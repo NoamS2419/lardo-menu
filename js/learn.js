@@ -403,15 +403,19 @@ function questionsDaily() {
   rand = seeded(`lardo-${date}`);
   try {
     const plain = (items) => shuffle(items);
-    const qs = [
-      ...questionsWhat(plain).slice(0, 3),
-      ...questionsMade(plain).slice(0, 2),
-      ...questionsPrice(plain).slice(0, 3),
-      ...questionsWho(plain).slice(0, 2)
-    ];
-    // One question per product.
+    const pools = [[questionsWhat(plain), 3], [questionsMade(plain), 2], [questionsPrice(plain), 3], [questionsWho(plain), 2]];
+    // One question per product; if a pool runs short, the others top up to a full round.
     const seen = new Set();
-    return shuffle(qs.filter((q) => !seen.has(q.id) && seen.add(q.id))).slice(0, ROUND);
+    const qs = [];
+    const take = (pool, n) => {
+      for (const q of pool) {
+        if (n <= 0 || qs.length >= ROUND) break;
+        if (!seen.has(q.id)) { seen.add(q.id); qs.push(q); n -= 1; }
+      }
+    };
+    for (const [pool, n] of pools) take(pool, n);
+    for (const [pool] of pools) take(pool, ROUND);
+    return shuffle(qs);
   } finally {
     rand = Math.random;
   }
