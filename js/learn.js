@@ -127,7 +127,10 @@ export function viewFlashcards(catId) {
     if (pos >= deck.length) return finish();
     const p = deck[pos];
     // No photo and no ingredients: nothing to guess the name from, so ask the price instead.
-    const bare = !p.image && !(p.ingredients || []).length;
+    const shared = sharedPhoto(p);
+    const bare = (!p.image || (shared && !hintText(p))) && !(p.ingredients || []).length;
+    // A photo several products share can't tell them apart: give the text hint instead.
+    const clue = shared && hintText(p) ? `<blockquote class="who-quote">${esc(hintText(p))}</blockquote>` : clueHtml(p);
     const catName = (db.categories.find((c) => c.id === p.category) || {}).name || '';
     box.innerHTML = `
       <div class="flip q-in" id="card">
@@ -137,7 +140,7 @@ export function viewFlashcards(catId) {
             ${bare
               ? `<p class="flash-name">${esc(p.name)}</p><p class="counter">${esc(catName)}</p>
                  <p class="flash-q" tabindex="-1" id="fq">כמה זה עולה?</p>`
-              : `${clueHtml(p)}
+              : `${clue}
                  <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>`}
             <button class="btn btn-wide" id="flip" type="button">הפוך</button>
           </section>
@@ -267,16 +270,16 @@ const perfect = (id) => { const b = progress.best[id]; return Boolean(b && b.sco
 
 function badges() {
   const list = [
-    { icon: '🥐', name: 'מלך/ת הקרואסונים', how: 'מכיר/ה את כל המאפים', got: () => (db.byCat.get('pastries') || []).every((p) => progress.known[p.id]) },
-    { icon: '💰', name: 'יודע/ת את כל המחירים', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
+    { icon: '🥐', name: 'כתר הקרואסונים', how: 'מכירים את כל המאפים', got: () => (db.byCat.get('pastries') || []).every((p) => progress.known[p.id]) },
+    { icon: '💰', name: 'מחירון מהלך', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
     { icon: '👀', name: 'עין של קונדיטור', how: '10 מתוך 10 ב"מה זה?"', got: () => perfect('what') },
-    { icon: '🧾', name: 'קורא/ת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
-    { icon: '🔎', name: 'בלש/ית', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
+    { icon: '🧾', name: 'קריאת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
+    { icon: '🔎', name: 'עין של בלש', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
     { icon: '🛎️', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
     { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
-    { icon: '🏅', name: 'אלופ/ת היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
+    { icon: '🏅', name: 'אליפות היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
     { icon: '🔥', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
-    { icon: '🎓', name: 'מכיר/ה את כל הוויטרינה', how: 'מסמנים "מכיר/ה" על כל המוצרים', got: () => db.products.every((p) => progress.known[p.id]) }
+    { icon: '🎓', name: 'כל הוויטרינה בראש', how: 'מסמנים "מכיר/ה" על כל המוצרים', got: () => db.products.every((p) => progress.known[p.id]) }
   ];
   return list.map((b) => ({ ...b, got: b.got() }));
 }
@@ -461,6 +464,14 @@ const pregOf = (p) => hasTag(p, 'לא מומלץ בהריון') ? 'no' : hasTag(
 // Staff notes worth saying at the counter (no data-fix notes, no allergens: the site doesn't cover them).
 const noteOf = (p, skip = '') => (p.notes || []).filter((n) => !/וולט|תוקן|גלוטן/.test(n) && !skip.includes(n)).join('. ');
 
+// Suez One draws ₪ like "שח"; amounts go in the body font.
+const nums = (html) => html.replace(/(\d+(?:\.\d+)? ₪)/g, '<bdi class="num">$1</bdi>');
+
+// The customer's question leads, as a speech bubble; the product photo is a small hint under it.
+const bubble = (html, who, p) => `
+  <p class="ask-bubble"><span class="ask-who">${who}:</span> ${html}</p>
+  ${p ? `<div class="clue-small">${clueHtml(p)}</div>` : ''}`;
+
 // Shuffled options with the right one found by its text, so its position teaches nothing.
 const choices = (opts, right) => {
   const options = shuffle(opts);
@@ -480,7 +491,7 @@ function questionsCustomer(order = weightedOrder) {
     const options = [KOSHER.yes, KOSHER.no];
     qs.push({
       id: p.id,
-      prompt: `${clueHtml(p)}<p class="flash-q">לקוח שואל: <strong>${esc(p.name)}</strong>, זה בלי חלב נוכרי?</p>`,
+      prompt: bubble(`<strong>${esc(p.name)}</strong>, זה בלי חלב נוכרי?`, 'לקוח שואל', p),
       options,
       correct: isDairy ? 1 : 0,
       explain: isDairy
@@ -499,7 +510,7 @@ function questionsCustomer(order = weightedOrder) {
     const why = noteOf(p, PREG[k]);
     qs.push({
       id: p.id,
-      prompt: `${clueHtml(p)}<p class="flash-q">לקוחה בהריון שואלת על <strong>${esc(p.name)}</strong>. מה עונים?</p>`,
+      prompt: bubble(`אני בהריון. אפשר <strong>${esc(p.name)}</strong>?`, 'לקוחה שואלת', p),
       options,
       correct: ['ok', 'no', 'maybe'].indexOf(k),
       explain: k === 'ok' ? `${p.name}: אפשר. עקרונית הכול מפוסטר.` : `${p.name}: ${PREG[k]}.${why ? ` ${why}.` : ''}`
@@ -508,19 +519,19 @@ function questionsCustomer(order = weightedOrder) {
   // From the FAQ.
   qs.push({
     id: 'faq:travel',
-    prompt: '<p class="flash-q">לקוח שואל: "זה יחזיק נסיעה של שעה באוטו?"</p>',
+    prompt: bubble('זה יחזיק נסיעה של שעה באוטו?', 'לקוח שואל'),
     ...choices(['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'], 1),
     explain: 'מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי.'
   });
   qs.push({
     id: 'faq:freeze',
-    prompt: '<p class="flash-q">לקוחה רוצה לקנות היום לאירוע בעוד כמה ימים. מה ממליצים?</p>',
+    prompt: bubble('אני קונה היום לאירוע בעוד כמה ימים. איך שומרים?', 'לקוחה שואלת'),
     ...choices(['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
     explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
   });
   qs.push({
     id: 'faq:dolce',
-    prompt: '<p class="flash-q">"מקל קרואסון בטעם דולצ׳ה, זה חלב נוכרי?"</p>',
+    prompt: bubble('מקל קרואסון בטעם דולצ׳ה, זה חלב נוכרי?', 'לקוח שואל'),
     ...choices(['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'], 0),
     explain: 'ג׳אנדויה: חלב נוכרי. דולצ׳ה (שוקולד לבן מקורמל): כשרות רעננה בלי חלב נוכרי.'
   });
@@ -549,6 +560,17 @@ function questionsDaily() {
   } finally {
     rand = Math.random;
   }
+}
+
+// "Worth another look": the products answered wrong, each linking to its page.
+function missedHtml(missed) {
+  const items = [...new Set(missed)].map((pid) => db.byId.get(pid)).filter(Boolean);
+  return items.length
+    ? `<h3>כדאי לחזור על</h3>
+       <ul class="missed">${items.map((p) => `
+         <li><a href="#/p/${encodeURIComponent(p.id)}">${imgHtml(p, 'mini', 120, '')}<span>${esc(p.name)}</span></a></li>`).join('')}
+       </ul>`
+    : '';
 }
 
 /* ---------- "נגד השעון": as many right answers as possible before time runs out ---------- */
@@ -583,6 +605,7 @@ function playClock(secs) {
   let tick = null;
   let warned = false;
   let busy = false;
+  const missed = [];
   const next = () => {
     if (!pool.length) pool = shuffle([...questionsWhat(), ...questionsPrice(), ...questionsWho()]);
     return pool.pop();
@@ -637,6 +660,7 @@ function playClock(secs) {
     const ok = k === q.correct;
     answered += 1;
     markResult(q.id, ok);
+    if (!ok) missed.push(q.id);
     document.querySelectorAll('#q .opt').forEach((b) => {
       b.disabled = true;
       const n = Number(b.dataset.k);
@@ -667,7 +691,7 @@ function playClock(secs) {
       // Practice has no clock, so nothing moves on its own unless auto-advance is switched on.
       const opts = document.querySelector('#q .options');
       opts.insertAdjacentHTML('afterend', `
-        <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון' : `✗ זה ${esc(q.options[q.correct])}`}</p>
+        <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון' : `✗ זה ${nums(esc(q.options[q.correct]))}`}</p>
         <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${answered >= PRACTICE ? 'לתוצאה' : 'הבא'}</button>`);
       const nb = document.getElementById('next');
       nb.addEventListener('click', go);
@@ -683,20 +707,23 @@ function playClock(secs) {
     clearInterval(tick);
     const key = `clock${secs}`;
     const prev = progress.best[key];
-    const record = secs && (!prev || score > prev.score);
+    const record = secs && score > 0 && (!prev || score > prev.score);
     if (record) { progress.best[key] = { score, of: Math.max(answered, 1) }; saveProgress(); }
+    const newBest = record && prev;
+    const right = score === 1 ? 'תשובה נכונה אחת' : `${score} תשובות נכונות`;
     box.innerHTML = `
       <section class="flash result q-in">
         <p class="result-big"><span id="sc">0</span></p>
-        <h2 tabindex="-1" id="res" class="result-line">${secs ? `${score} תשובות נכונות ב${secs === 60 ? 'דקה' : 'שתי דקות'}` : `${score} מתוך ${answered}`}</h2>
-        ${record ? '<p class="new-best">שיא חדש!</p>' : prev && secs ? `<p class="counter">השיא שלך: ${Number(prev.score)}</p>` : ''}
+        <h2 tabindex="-1" id="res" class="result-line">${secs ? `${right} ב${secs === 60 ? 'דקה' : 'שתי דקות'}` : `${score} מתוך ${answered}`}</h2>
+        ${newBest ? '<p class="new-best">שיא חדש!</p>' : prev && secs ? `<p class="counter">השיא שלך: ${Number(prev.score)}</p>` : ''}
+        ${missedHtml(missed)}
         <div class="two">
           <a class="btn btn-no" href="#/games">משחקים</a>
           <button class="btn btn-yes" type="button" id="again">עוד פעם</button>
         </div>
       </section>`;
     countUp(document.getElementById('sc'), score);
-    if (record && score > 0) setTimeout(shower, 300);
+    if (newBest) setTimeout(shower, 300);
     document.getElementById('again').addEventListener('click', () => playClock(secs));
     window.scrollTo(0, 0);
     document.getElementById('res').focus({ preventScroll: true });
@@ -808,7 +835,7 @@ export function viewGame(id) {
       : `כמעט! זה ${q.options[q.correct]}`;
     const last = i + 1 >= qs.length;
     document.getElementById('feedback').innerHTML = `
-      <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓' : '✗'} ${esc(line)}</p>
+      <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓' : '✗'} ${nums(esc(line))}</p>
       <p class="explain">${esc(q.explain)}</p>
       <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${last ? 'לתוצאה' : 'הבא'}</button>`;
     announce(ok ? `נכון. ${line}` : `לא נכון. התשובה: ${q.options[q.correct]}`);
@@ -836,12 +863,7 @@ export function viewGame(id) {
     if (record) { progress.best[id] = { score, of: qs.length }; saveProgress(); }
     const newBest = record && prev;
     const pct = Math.round((score / qs.length) * 100);
-    const review = missed.length
-      ? `<h3>כדאי לחזור על</h3>
-         <ul class="missed">${[...new Set(missed)].map((pid) => db.byId.get(pid)).filter(Boolean).map((p) => `
-           <li><a href="#/p/${encodeURIComponent(p.id)}">${imgHtml(p, 'mini', 120, '')}<span>${esc(p.name)}</span></a></li>`).join('')}
-         </ul>`
-      : '';
+    const review = missedHtml(missed);
     const line = score === qs.length ? 'מושלם! שף קונדיטור אמיתי'
       : score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `

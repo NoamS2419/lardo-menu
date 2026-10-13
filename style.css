@@ -659,3 +659,13 @@ main {
 .badge.got { border: 2px solid var(--accent-2); background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
 .badge.got .badge-icon { filter: none; opacity: 1; }
 .badge-got { font-size: .8rem; font-weight: 800; color: var(--ok-text, var(--ok)); }
+
+/* customer question: the question first, as a speech bubble */
+.ask-bubble {
+  position: relative; margin: 4px 0 14px; padding: 14px 16px; border-radius: 18px 18px 18px 4px;
+  background: var(--accent-soft); color: var(--text); font-size: 1.2rem; font-weight: 600; line-height: 1.4;
+}
+.ask-who { display: block; font-size: .85rem; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+.clue-small .quiz-img { width: auto; max-width: 160px; max-height: 18vh; margin: 0 auto; }
+.clue-small .clue { font-size: .9rem; }
+.num { font-family: system-ui, -apple-system, "Segoe UI", "Arial Hebrew", Arial, sans-serif; font-weight: 700; }
