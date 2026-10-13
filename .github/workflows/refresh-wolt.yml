@@ -1,0 +1,44 @@
+# Manual: Actions tab -> "Refresh from Wolt" -> Run workflow.
+# Pulls the menu from Wolt, downloads missing photos to data/images/,
+# rebuilds data/products.json and opens a PR with the changes.
+name: Refresh from Wolt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==10.4.0
+      - name: Fetch Wolt menu and photos
+        run: python3 tools/fetch_wolt.py --images
+      - name: Check staff notes still match
+        id: check
+        run: |
+          {
+            echo 'warnings<<EOF'
+            python3 tools/build.py --strict 2>&1 >/dev/null || true
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: wolt-refresh
+          delete-branch: true
+          commit-message: Refresh product data from Wolt
+          title: רענון נתונים מוולט
+          body: |
+            רענון אוטומטי של `tools/wolt_snapshot.tsv`, `data/products.json` ותמונות חדשות ב־`data/images/`.
+
+            אזהרות מ־`tools/build.py` (הערות עובדות שלא הוחלו, למשל כי וולט שינה מזהה מוצר). ריק = הכל תקין:
+            ```
+            ${{ steps.check.outputs.warnings }}
+            ```
