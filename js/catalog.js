@@ -95,7 +95,7 @@ export function viewHome() {
         <div class="level">
           ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
           <span class="level-name">${esc(lvl.name)}</span>
-          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}<br>מכיר/ה ${known} מתוך ${total} מוצרים</span>
+          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}<br>מוכרים לך ${known} מתוך ${total} מוצרים</span>
           ${days > 1 ? `<span class="streak"><span aria-hidden="true">🔥</span> ${days} ימים ברצף</span>` : '<span class="streak">כל יום קצת, וזה נדבק</span>'}
         </div>
         ${daily ? `
@@ -132,7 +132,7 @@ export function viewCategory(id) {
       ${catIcon(cat.id)}
       <div class="banner-text">
         <h1>${esc(cat.name)}</h1>
-        <span class="meter-row"><span>מכיר/ה ${k} מתוך ${items.length}</span>
+        <span class="meter-row"><span>מוכרים: ${k} מתוך ${items.length}</span>
           <a href="#/learn/${encodeURIComponent(cat.id)}">לתרגל את הקטגוריה</a></span>
         ${meter(k, items.length, `${cat.name}: ${k} מתוך ${items.length}`)}
       </div>
@@ -162,7 +162,7 @@ export function viewProduct(id) {
   const notWolt = p.is_wolt === false
     ? '<p class="note">נמכר בדלפק בלבד, לא מופיע בוולט.</p>'
     : '';
-  const knowLabel = (on) => on ? `${CHECK} אני מכיר/ה` : 'סמן/י שאני מכיר/ה';
+  const knowLabel = (on) => on ? `${CHECK} מוכר לי` : 'לסמן: מוכר לי';
   const known = !!progress.known[p.id];
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}"><span aria-hidden="true">→</span> ${esc(cat.name)}</a>` : ''}

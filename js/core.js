@@ -88,7 +88,7 @@ export const family = (p) => {
 export const productCard = (p, known = false) => `
   <li class="rise">
     <a class="card${known ? ' is-known' : ''}" href="#/p/${encodeURIComponent(p.id)}">
-      <span class="thumb-wrap">${imgHtml(p, 'thumb', 400, '')}${known ? '<span class="known-badge"><span aria-hidden="true">✓</span><span class="sr-only">מכיר/ה</span></span>' : ''}</span>
+      <span class="thumb-wrap">${imgHtml(p, 'thumb', 400, '')}${known ? '<span class="known-badge"><span aria-hidden="true">✓</span><span class="sr-only">מוכר לי</span></span>' : ''}</span>
       <span class="card-body">
         <span class="card-title">${esc(p.name)}</span>
         <span class="card-sub price"><bdi>${esc(priceLabel(p))}</bdi></span>

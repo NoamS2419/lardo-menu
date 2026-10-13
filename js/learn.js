@@ -95,7 +95,7 @@ export function viewLearnHub() {
     <p>רואים את המוצר, נזכרים בשם, והופכים את הכרטיס. מה שלא ידעת יחזור אלייך יותר.</p>
     <div class="level">
       ${ring(total ? Math.round((done / total) * 100) : 0, 64, 27, `${total ? Math.round((done / total) * 100) : 0}%`)}
-      <span class="level-name">מכיר/ה ${done} מתוך ${total}</span>
+      <span class="level-name">מוכרים: ${done} מתוך ${total}</span>
       <span class="level-sub">כל מוצר שסימנת שווה 5 נקודות</span>
       <span><a class="btn" href="#/learn/all">לכל המוצרים</a></span>
     </div>
@@ -136,7 +136,7 @@ export function viewFlashcards(catId) {
       <div class="flip q-in" id="card">
         <div class="flip-inner">
           <section class="face face-front" aria-label="צד קדמי">
-            <p class="counter">כרטיס ${seen + 1} · מכיר/ה ${knownCount(items)}/${items.length}</p>
+            <p class="counter">כרטיס ${seen + 1} · מוכרים ${knownCount(items)}/${items.length}</p>
             ${bare
               ? `<p class="flash-name">${esc(p.name)}</p><p class="counter">${esc(catName)}</p>
                  <p class="flash-q" tabindex="-1" id="fq">כמה זה עולה?</p>`
@@ -195,7 +195,7 @@ export function viewFlashcards(catId) {
       <section class="flash result q-in">
         ${ring(Math.round((k / items.length) * 100), 150, 64, `<span id="pct">0</span>%`)}
         <h2 tabindex="-1" id="done">סיימת את החבילה!</h2>
-        <p>את/ה מכיר/ה ${k} מתוך ${items.length} מוצרים כאן.</p>
+        <p>מוכרים לך ${k} מתוך ${items.length} מוצרים כאן.</p>
         <p><button class="btn" id="again" type="button">עוד סיבוב</button></p>
       </section>`;
     fillMeters(box);
@@ -258,7 +258,7 @@ export function viewGames() {
       <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}</span>
       <span class="level-sub">כל תשובה נכונה: 10 נקודות</span>
     </div>
-    <h2>בחר/י משחק</h2>
+    <h2>איזה משחק?</h2>
     <ul class="rows">${items}</ul>
     ${badgesHtml()}
   `);
@@ -279,7 +279,7 @@ function badges() {
     { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
     { icon: '🏅', name: 'אליפות היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
     { icon: '🔥', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
-    { icon: '🎓', name: 'כל הוויטרינה בראש', how: 'מסמנים "מכיר/ה" על כל המוצרים', got: () => db.products.every((p) => progress.known[p.id]) }
+    { icon: '🎓', name: 'כל הוויטרינה בראש', how: 'כל המוצרים מסומנים "מוכר לי"', got: () => db.products.every((p) => progress.known[p.id]) }
   ];
   return list.map((b) => ({ ...b, got: b.got() }));
 }
@@ -865,7 +865,7 @@ export function viewGame(id) {
     const pct = Math.round((score / qs.length) * 100);
     const review = missedHtml(missed);
     const line = score === qs.length ? 'מושלם! שף קונדיטור אמיתי'
-      : score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
+      : score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, כמעט שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
@@ -897,9 +897,9 @@ export function viewGame(id) {
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
-        <h2 tabindex="-1" id="res" class="result-line">${score >= 8 ? 'אלופ/ה של היום!' : score >= 5 ? 'יפה מאוד!' : 'מחר יש עוד הזדמנות'}</h2>
+        <h2 tabindex="-1" id="res" class="result-line">${score >= 8 ? 'אליפות של היום!' : score >= 5 ? 'יפה מאוד!' : 'מחר יש עוד הזדמנות'}</h2>
         <p class="sr-only">${score} מתוך ${qs.length}</p>
-        <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצה להופיע בטבלת הצוות? בחר/י כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
+        <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצים להופיע בטבלת הצוות? אפשר לבחור כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
         <div class="two">
           <a class="btn btn-no" href="#/">לדף הבית</a>
           ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">עוד משחקים</a>'}

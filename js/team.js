@@ -17,7 +17,7 @@ const table = (caption, rows, scoreLabel, scoreOf) => rows.length
        <tbody>${rows.map((r, i) => `
          <tr class="${r.me ? 'me' : ''}${i < 3 ? ` top${i + 1}` : ''}">
            <td><span class="rank">${i + 1}</span></td>
-           <th scope="row"><bdi>${esc(r.name)}</bdi>${r.me ? ' <span class="you">(את/ה)</span>' : ''}</th>
+           <th scope="row"><bdi>${esc(r.name)}</bdi>${r.me ? ' <span class="you">(אני)</span>' : ''}</th>
            <td><bdi>${esc(scoreOf(r))}</bdi></td>
          </tr>`).join('')}
        </tbody>
