@@ -88,7 +88,7 @@ body {
   /* a dusting of flour */
   background-color: var(--bg);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .3 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+  padding-bottom: var(--tab-real, calc(var(--tab-h) + env(safe-area-inset-bottom)));
 }
 @media (min-width: 900px) { body { padding-bottom: 0; } }
 
@@ -149,18 +149,19 @@ h1:focus, h2:focus, .flash-q:focus, main:focus { outline: none; }
 
 .tabs {
   position: fixed; inset-inline: 0; bottom: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  height: calc(var(--tab-h) + env(safe-area-inset-bottom));
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  height: auto; min-height: calc(var(--tab-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--surface); border-top: 1px solid var(--border);
   box-shadow: 0 -4px 16px rgba(60, 35, 15, .06);
 }
-.tabs.four { grid-template-columns: repeat(4, 1fr); }
+.tabs.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .tabs a {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   color: var(--muted); text-decoration: none; font-size: .78rem; font-weight: 600;
-  position: relative;
+  position: relative; min-width: 0; padding: 6px 2px;
 }
+.tabs a span { max-width: 100%; overflow-wrap: anywhere; text-align: center; line-height: 1.15; }
 .tabs svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .tabs a[aria-current="page"] { color: var(--accent); }
 .tabs a[aria-current="page"]::before {
@@ -474,7 +475,8 @@ main {
   border: 2px solid var(--control-border); border-radius: 14px; cursor: pointer;
   box-shadow: 0 3px 0 var(--border);
 }
-.opt:hover:not(:disabled) { border-color: var(--accent); }
+/* Hover only where there is a real pointer: on phones a tap leaves a sticky hover on the next question's first answer. */
+@media (hover: hover) { .opt:hover:not(:disabled) { border-color: var(--accent); } }
 .opt:disabled { cursor: default; color: var(--text); opacity: 1; }
 .opt.right { border-color: var(--ok); background: var(--ok-bg); color: var(--ok-text); }
 .opt.wrong { border-color: var(--bad); background: var(--bad-bg); color: var(--bad-text); }
@@ -628,3 +630,30 @@ main {
 .settings summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: 700; }
 .settings h2 { font-size: 1.1rem; margin-top: 18px; }
 .done-today { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; }
+
+/* ---------- against the clock ---------- */
+
+.clock-start { text-align: center; }
+.clock-modes { display: grid; gap: 10px; margin-top: 16px; }
+.clock {
+  display: inline-flex; align-items: center; gap: 4px; font-weight: 800; color: var(--text);
+  font-variant-numeric: tabular-nums; padding: 2px 10px; border-radius: 999px; background: var(--surface-2);
+}
+.clock.low { background: var(--bad-bg); color: var(--bad); }
+.clock-meter { margin: 0 0 12px; }
+.clock-meter .meter-fill { transition: none; }
+.result-big { font-family: var(--head-font); font-size: 4rem; line-height: 1; margin: 8px 0 0; color: var(--accent); }
+.new-best { font-weight: 800; color: var(--accent-2-text); }
+
+/* ---------- badges ---------- */
+
+.badges { list-style: none; padding: 0; margin: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.badge {
+  display: grid; justify-items: center; gap: 2px; text-align: center; padding: 14px 10px;
+  background: var(--surface); border: 1px dashed var(--control-border); border-radius: 16px; color: var(--muted);
+}
+.badge-icon { font-size: 2rem; filter: grayscale(1); opacity: .45; }
+.badge-name { font-weight: 800; color: var(--text); }
+.badge-how { font-size: .82rem; }
+.badge.got { border: 2px solid var(--accent-2); background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
+.badge.got .badge-icon { filter: none; opacity: 1; }

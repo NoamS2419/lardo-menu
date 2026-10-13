@@ -33,12 +33,14 @@ export const myPlayer = () => {
   return p && typeof p.name === 'string' && typeof p.key === 'string' ? p : null;
 };
 
-// Same rule as firestore.rules validName: 1-20 chars, no control, bidi-override or angle brackets.
+// Same rule as firestore.rules validName: 1-20 chars, trimmed, single spaces,
+// no control, zero-width, bidi or line-separator characters, no < > or /.
+const BAD_CHARS = /[\u0000-\u001F\u007F\u00AD\u061C\u200B-\u200F\u2028-\u202E\u2060-\u206F\uFEFF<>/]/;
 export function checkName(raw) {
   const name = String(raw || '').replace(/\s+/g, ' ').trim();
   if (!name) return { error: 'צריך לכתוב שם או כינוי' };
   if (name.length > 20) return { error: 'עד 20 תווים' };
-  if (/[\u0000-\u001F\u202A-\u202E\u2066-\u2069<>/]/.test(name)) return { error: 'יש בשם תו שאי אפשר להשתמש בו' };
+  if (BAD_CHARS.test(name)) return { error: 'יש בשם תו שאי אפשר להשתמש בו' };
   if (/^\.+$/.test(name) || /^__.*__$/.test(name)) return { error: 'יש בשם תו שאי אפשר להשתמש בו' };
   return { name, key: name.toLowerCase() };
 }
@@ -67,8 +69,19 @@ async function token() {
   const now = Date.now();
   if (a && a.idToken && a.exp > now + 60000) return a;
   if (a && a.refreshToken) {
-    const r = await postJson(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE.apiKey}`,
-      { grant_type: 'refresh_token', refresh_token: a.refreshToken });
+    let r;
+    try {
+      r = await postJson(`https://securetoken.googleapis.com/v1/token?key=${FIREBASE.apiKey}`,
+        { grant_type: 'refresh_token', refresh_token: a.refreshToken });
+    } catch (e) {
+      // Account deleted or token revoked: forget it and start over with a new nickname.
+      if (e.status === 400 || e.status === 401 || e.status === 403) {
+        writeJson(AUTH_KEY, null);
+        writeJson(PLAYER_KEY, null);
+        e.code = 'RESET';
+      }
+      throw e;
+    }
     a = { uid: r.user_id, idToken: r.id_token, refreshToken: r.refresh_token, exp: now + Number(r.expires_in) * 1000 };
   } else {
     const r = await postJson(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE.apiKey}`,
@@ -106,8 +119,8 @@ async function query(structuredQuery) {
   return rows.filter((r) => r.document).map((r) => ({ id: r.document.name.split('/').pop(), ...decode(r.document.fields) }));
 }
 
-const playerWrite = (uid, name, total) => ({
-  update: { name: docName(`players/${uid}`), fields: { name: str(name), total: int(total) } },
+const playerWrite = (uid, name, key, total) => ({
+  update: { name: docName(`players/${uid}`), fields: { name: str(name), nameKey: str(key), total: int(total) } },
   updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }]
 });
 
@@ -119,6 +132,16 @@ export async function claimName(raw, total) {
   if (checked.error) return checked;
   const a = await token();
   const old = myPlayer();
+  // Look first: overwriting someone else's name is refused by the rules, sometimes as 403 rather than 409.
+  const res = await fetch(`${docsBase()}/names/${encodeURIComponent(checked.key)}`, {
+    headers: { Authorization: `Bearer ${a.idToken}` }, referrerPolicy: 'strict-origin'
+  });
+  if (res.ok) {
+    const doc = await res.json().catch(() => ({}));
+    if (decode(doc.fields).uid !== a.uid) return { error: 'השם הזה כבר תפוס, נסו כינוי אחר' };
+  } else if (res.status !== 404) {
+    throw new Error(`HTTP ${res.status}`);
+  }
   const writes = [];
   if (old && old.key !== checked.key) writes.push({ delete: docName(`names/${old.key}`) });
   if (!old || old.key !== checked.key) {
@@ -127,11 +150,11 @@ export async function claimName(raw, total) {
       currentDocument: { exists: false }
     });
   }
-  writes.push(playerWrite(a.uid, checked.name, total));
+  writes.push(playerWrite(a.uid, checked.name, checked.key, total));
   try {
     await commit(writes);
   } catch (e) {
-    if (e.status === 409 || /exist|precondition/i.test(e.message)) return { error: 'השם הזה כבר תפוס, נסו כינוי אחר' };
+    if (e.status === 409 || e.status === 403 || /exist|precondition/i.test(e.message)) return { error: 'השם הזה כבר תפוס, נסו כינוי אחר' };
     throw e;
   }
   writeJson(PLAYER_KEY, { name: checked.name, key: checked.key });
@@ -142,7 +165,7 @@ export async function syncTotal(total) {
   const me = myPlayer();
   if (!cloudEnabled() || !me) return;
   const a = await token();
-  await commit([playerWrite(a.uid, me.name, total)]);
+  await commit([playerWrite(a.uid, me.name, me.key, total)]);
 }
 
 // One score per person per day; the rules refuse a second one.
@@ -155,7 +178,7 @@ export async function submitDaily(date, score) {
     await commit([{
       update: {
         name: docName(`daily/${date}_${a.uid}`),
-        fields: { uid: str(a.uid), name: str(me.name), date: str(date), score: int(score), expireAt: { timestampValue: expire } }
+        fields: { uid: str(a.uid), name: str(me.name), nameKey: str(me.key), date: str(date), score: int(score), expireAt: { timestampValue: expire } }
       },
       currentDocument: { exists: false },
       updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }]

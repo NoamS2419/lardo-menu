@@ -8,6 +8,15 @@ import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './l
 import { viewTeam } from './team.js';
 import { cloudEnabled } from './cloud.js';
 
+// With large text the tab bar grows; keep the page's bottom padding in step with its real height.
+const tabs = document.querySelector('.tabs');
+if (tabs && 'ResizeObserver' in window) {
+  new ResizeObserver(() => {
+    const h = tabs.getBoundingClientRect().height;
+    if (h) document.body.style.setProperty('--tab-real', `${Math.ceil(h)}px`);
+  }).observe(tabs);
+}
+
 // The team tab only shows once the shared board is configured (js/config.js).
 if (!cloudEnabled()) {
   document.querySelector('.tabs a[data-tab="team"]')?.remove();
@@ -23,6 +32,9 @@ document.addEventListener('error', (e) => {
   if (!p) return;
   if (img.classList.contains('quiz-img')) {
     // The ingredients list could contain the name, so use the redacted hint instead.
+    // The hint replaces the image, so drop the screen-reader copy next to it.
+    const sib = img.nextElementSibling;
+    if (sib && sib.classList.contains('sr-only')) sib.remove();
     img.outerHTML = `<div class="clue"><p class="clue-label">התמונה לא נטענה. רמז:</p><p>${esc(hintText(p))}</p></div>`;
   } else {
     img.outerHTML = `<div class="${esc(img.className)} ph" aria-hidden="true">${initial(p.name)}</div>`;

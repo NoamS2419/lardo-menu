@@ -1,11 +1,14 @@
 /* The team page: daily challenge results and the overall board. */
 
-import { esc, setPage, announce } from './core.js';
+import { esc, setPage, announce, focusMain } from './core.js';
 import { progress } from './progress.js';
-import { cloudEnabled, myPlayer, claimName, syncTotal, loadBoard, loadDaily, deleteMe } from './cloud.js';
+import { cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe } from './cloud.js';
 import { jerusalemDate } from './learn.js';
 
-const NOTICE = 'השם יופיע בטבלת הניקוד לכל הצוות. אפשר לכתוב כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. המשחק התנדבותי ונועד בשביל הכיף, לא להערכת עובדים.';
+// After an await the person may have moved on; don't paint over another page.
+const stillHere = () => location.hash === '#/team';
+
+const NOTICE = 'השם יופיע בטבלת הניקוד, שכל מי שיש לו את הקישור לאתר יכול לראות. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. המשחק התנדבותי ונועד בשביל הכיף, לא להערכת עובדים.';
 
 const table = (caption, rows, scoreLabel, scoreOf) => rows.length
   ? `<table class="board">
@@ -39,18 +42,32 @@ function bindNameForm(after) {
     e.preventDefault();
     const err = document.getElementById('nick-err');
     const btn = form.querySelector('button');
-    btn.disabled = true;
+    // aria-disabled, not disabled: a disabled button drops keyboard focus to <body>.
+    if (btn.getAttribute('aria-disabled') === 'true') return;
+    btn.setAttribute('aria-disabled', 'true');
     err.textContent = '';
+    form.nick.removeAttribute('aria-invalid');
+    const fail = (msg) => {
+      err.textContent = msg;
+      form.nick.setAttribute('aria-invalid', 'true');
+      form.nick.focus();
+    };
     try {
       const r = await claimName(form.nick.value, progress.gameXp || 0);
-      if (r.error) { err.textContent = r.error; return; }
-      announce(`נרשמת בשם ${r.name}`);
+      if (r.error) return fail(r.error);
+      // A daily score from before joining goes up now (submitDaily is safe to repeat).
+      const today = jerusalemDate();
+      if (progress.daily[today] != null) submitDaily(today, progress.daily[today]).catch(() => {});
+      if (!stillHere()) return;
       after();
+      focusMain();
+      announce(`נרשמת בשם ${r.name}`);
     } catch (ex) {
-      err.textContent = 'לא הצלחנו להתחבר. בדקו אינטרנט ונסו שוב.';
+      if (ex.code === 'RESET' && stillHere()) { viewTeam(); return; }
+      fail('לא הצלחנו להתחבר. בדקו אינטרנט ונסו שוב.');
       console.error(ex);
     } finally {
-      btn.disabled = false;
+      btn.removeAttribute('aria-disabled');
     }
   });
 }
@@ -101,8 +118,10 @@ export async function viewTeam() {
     const msg = document.getElementById('delete-msg');
     try {
       await deleteMe();
-      msg.textContent = 'הנתונים נמחקו.';
+      if (!stillHere()) return;
       viewTeam();
+      focusMain();
+      announce('הנתונים נמחקו');
     } catch (ex) {
       msg.textContent = 'המחיקה לא הצליחה. נסו שוב בעוד רגע.';
       console.error(ex);
@@ -113,10 +132,13 @@ export async function viewTeam() {
   try {
     await syncTotal(progress.gameXp || 0);
     const [daily, all] = await Promise.all([loadDaily(date), loadBoard()]);
+    if (!stillHere()) return;
     boards.innerHTML = `
       ${table('האתגר של היום', daily, 'תוצאה', (r) => `${r.score}/10`)}
       ${table('הטבלה הכללית', all, 'נקודות', (r) => r.total)}`;
   } catch (ex) {
+    if (!stillHere()) return;
+    if (ex.code === 'RESET') { viewTeam(); return; }
     boards.innerHTML = '<p class="empty">לא הצלחנו לטעון את הטבלה. נסו לרענן.</p>';
     console.error(ex);
   } finally {

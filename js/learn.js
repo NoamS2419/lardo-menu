@@ -1,7 +1,7 @@
 /* Learning: flashcards and games. */
 
 import { db, announce, esc, norm, priceLabel, imgSrc, imgHtml, family, setPage, catIcon, meter, fillMeters, prefersReducedMotion } from './core.js';
-import { progress, saveProgress, markResult, setKnown, knownCount, addXp, levelInfo } from './progress.js';
+import { progress, saveProgress, markResult, setKnown, knownCount, addXp, levelInfo, streak } from './progress.js';
 import { viewNotFound, ring } from './catalog.js';
 import { burst, shower, countUp } from './fx.js';
 import { cloudEnabled, myPlayer, submitDaily, syncTotal } from './cloud.js';
@@ -225,8 +225,8 @@ const GAMES = [
   { id: 'made', name: 'ממה זה עשוי?', desc: 'שם של מוצר, ובוחרים מה יש בו.', ready: true },
   { id: 'price', name: 'כמה זה עולה?', desc: 'רואים מוצר ובוחרים את המחיר הנכון.', ready: true },
   { id: 'who', name: 'מי המוצר?', desc: 'קוראים תיאור ומזהים את המוצר.', ready: true },
-  { id: 'customer', name: 'שאלת לקוח', desc: 'שאלות אמיתיות מהדלפק.', ready: false },
-  { id: 'clock', name: 'נגד השעון', desc: 'כמה שיותר תשובות בדקה.', ready: false }
+  { id: 'customer', name: 'שאלת לקוח', desc: 'שאלות אמיתיות מהדלפק: כשרות, הריון, נסיעה.', ready: true },
+  { id: 'clock', name: 'נגד השעון', desc: 'כמה שיותר תשובות נכונות בדקה.', ready: true }
 ];
 
 export function viewGames() {
@@ -237,7 +237,7 @@ export function viewGames() {
       ? `<li class="rise"><a class="row-link" href="#/game/${g.id}">
            ${gameIcon(g.id)}
            <span class="row-title">${esc(g.name)}</span>
-           ${best ? `<span class="soon">שיא ${Number(best.score)}/${Number(best.of)}</span>` : '<span></span>'}
+           ${best ? `<span class="soon">שיא ${Number(best.score)}${g.id === 'clock' ? '' : `/${Number(best.of)}`}</span>` : '<span></span>'}
            <span class="row-sub full">${esc(g.desc)}</span>
          </a></li>`
       : `<li class="rise"><span class="row-link disabled" aria-disabled="true">
@@ -257,10 +257,45 @@ export function viewGames() {
     </div>
     <h2>בחר/י משחק</h2>
     <ul class="rows">${items}</ul>
+    ${badgesHtml()}
   `);
 }
 
-const PRAISE = ['בול!', 'יש לך עין של קונדיטור', 'נכון!', 'מקצוען/ית', 'בדיוק ככה', 'יפה מאוד!'];
+/* ---------- badges: earned from personal progress, kept on this phone ---------- */
+
+const perfect = (id) => { const b = progress.best[id]; return Boolean(b && b.score >= ROUND && b.of >= ROUND); };
+
+function badges() {
+  const list = [
+    { icon: '🥐', name: 'מלך/ת הקרואסונים', how: 'מכיר/ה את כל המאפים', got: () => (db.byCat.get('pastries') || []).every((p) => progress.known[p.id]) },
+    { icon: '💰', name: 'יודע/ת את כל המחירים', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
+    { icon: '👀', name: 'עין של קונדיטור', how: '10 מתוך 10 ב"מה זה?"', got: () => perfect('what') },
+    { icon: '🧾', name: 'קורא/ת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
+    { icon: '🔎', name: 'בלש/ית', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
+    { icon: '🛎️', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
+    { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות ב"נגד השעון"', got: () => (progress.best.clock || {}).score >= 15 },
+    { icon: '🏅', name: 'אלופ/ת היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
+    { icon: '🔥', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
+    { icon: '🎓', name: 'מכיר/ה את כל הוויטרינה', how: 'מסמנים "מכיר/ה" על כל המוצרים', got: () => db.products.every((p) => progress.known[p.id]) }
+  ];
+  return list.map((b) => ({ ...b, got: b.got() }));
+}
+
+function badgesHtml() {
+  const all = badges();
+  const n = all.filter((b) => b.got).length;
+  return `
+    <h2>תגים <span class="counter">(${n} מתוך ${all.length})</span></h2>
+    <ul class="badges">${all.map((b) => `
+      <li class="badge${b.got ? ' got' : ''}">
+        <span class="badge-icon" aria-hidden="true">${b.icon}</span>
+        <span class="badge-name">${esc(b.name)}</span>
+        <span class="badge-how">${b.got ? '<span class="sr-only">הושג. </span>' : '<span class="sr-only">עוד לא. </span>'}${esc(b.how)}</span>
+      </li>`).join('')}
+    </ul>`;
+}
+
+const PRAISE = ['בול!', 'יש!', 'נכון!', 'בדיוק ככה', 'יפה מאוד!', 'עין של קונדיטור'];
 const STREAK_PRAISE = { 3: 'שלוש ברצף!', 5: 'חמש ברצף! 🔥', 8: 'שמונה ברצף! מי עוצר אותך?' };
 
 const ROUND = 10;
@@ -283,6 +318,7 @@ function questionsWhat(order = weightedOrder) {
     return {
       id: p.id,
       prompt: clueHtml(p),
+      kind: 'מה זה?',
       options,
       correct: options.indexOf(p.name),
       explain: `${p.name}. ${p.description || ''}`
@@ -397,7 +433,82 @@ function questionsWho(order = weightedOrder) {
 export const jerusalemDate = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
 
-// 10 questions, identical for the whole team on a given day: a mix of all four games.
+/* "שאלת לקוח": counter questions built from the staff notes (tags) and the customer FAQ. */
+const KOSHER = { yes: 'כן, כשרות רעננה בלי חלב נוכרי', no: 'לא, זה חלב נוכרי' };
+const PREG = {
+  ok: 'אפשר, הכול מפוסטר',
+  no: 'לא מומלץ',
+  maybe: 'אולי עדיף לוותר (גבינה במים)'
+};
+const hasTag = (p, t) => (p.tags || []).includes(t);
+const pregOf = (p) => hasTag(p, 'לא מומלץ בהריון') ? 'no' : hasTag(p, 'אולי לא מומלץ בהריון') ? 'maybe' : 'ok';
+// Staff notes worth saying at the counter (no data-fix notes, no allergens: the site doesn't cover them).
+const noteOf = (p, skip = '') => (p.notes || []).filter((n) => !/וולט|תוקן|גלוטן/.test(n) && !skip.includes(n)).join('. ');
+
+function questionsCustomer(order = weightedOrder) {
+  const qs = [];
+  // Kosher: every tagged product, balanced with plain sweet products of the same kind.
+  // Anything that mentions gianduja (or has two flavors) stays out of the "plain" side.
+  const textOf = (p) => [p.name, p.description, p.staff_description, ...(p.ingredients || []), ...(p.notes || [])].join(' ');
+  const GIANDUJA = /ג׳?א?נדויה|גנדויה|נוכרי|דולצ׳ה/;
+  const dairy = db.products.filter((p) => hasTag(p, 'חלב נוכרי') && !(p.notes || []).length);
+  const plainSweet = db.products.filter((p) => !hasTag(p, 'חלב נוכרי') && family(p) === 'sweet' && !GIANDUJA.test(textOf(p)));
+  for (const p of [...order(dairy).slice(0, 3), ...order(plainSweet).slice(0, 2)]) {
+    const isDairy = hasTag(p, 'חלב נוכרי');
+    const options = [KOSHER.yes, KOSHER.no];
+    qs.push({
+      id: p.id,
+      prompt: `${clueHtml(p)}<p class="flash-q">לקוח שואל: <strong>${esc(p.name)}</strong>, זה בלי חלב נוכרי?</p>`,
+      options,
+      correct: isDairy ? 1 : 0,
+      explain: isDairy
+        ? `${p.name}: חלב נוכרי. ${noteOf(p) || 'כל מה שעם ג׳אנדויה הוא חלב נוכרי, וגם פאן סוויס.'}`
+        : `${p.name}: כשרות רעננה. חלב נוכרי יש רק בג׳אנדויה ובפאן סוויס.`
+    });
+  }
+  // Pregnancy: tagged products plus a couple of safe ones.
+  const flagged = db.products.filter((p) => pregOf(p) !== 'ok');
+  // "Safe" examples avoid anything the FAQ calls out (cheese in water, meringue), tagged or not.
+  const safe = db.products.filter((p) => pregOf(p) === 'ok' && family(p) === 'savory'
+    && !/בוראטה|סטראצ׳אטלה|פטה|סלק|לימון|גבינה|מרנג/.test(textOf(p)));
+  for (const p of [...order(flagged).slice(0, 3), ...order(safe).slice(0, 2)]) {
+    const k = pregOf(p);
+    const options = [PREG.ok, PREG.no, PREG.maybe];
+    const why = noteOf(p, PREG[k]);
+    qs.push({
+      id: p.id,
+      prompt: `${clueHtml(p)}<p class="flash-q">לקוחה בהריון שואלת על <strong>${esc(p.name)}</strong>. מה עונים?</p>`,
+      options,
+      correct: ['ok', 'no', 'maybe'].indexOf(k),
+      explain: k === 'ok' ? `${p.name}: אפשר. עקרונית הכול מפוסטר.` : `${p.name}: ${PREG[k]}.${why ? ` ${why}.` : ''}`
+    });
+  }
+  // From the FAQ.
+  qs.push({
+    id: 'faq:travel',
+    prompt: '<p class="flash-q">לקוח שואל: "זה יחזיק נסיעה של שעה באוטו?"</p>',
+    options: ['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'],
+    correct: 1,
+    explain: 'מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי.'
+  });
+  qs.push({
+    id: 'faq:freeze',
+    prompt: '<p class="flash-q">לקוחה רוצה לקנות היום לאירוע בעוד כמה ימים. מה ממליצים?</p>',
+    options: ['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'],
+    correct: 0,
+    explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
+  });
+  qs.push({
+    id: 'faq:dolce',
+    prompt: '<p class="flash-q">"מקל קרואסון בטעם דולצ׳ה, זה חלב נוכרי?"</p>',
+    options: ['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'],
+    correct: 0,
+    explain: 'ג׳אנדויה: חלב נוכרי. דולצ׳ה (שוקולד לבן מקורמל): כשרות רעננה בלי חלב נוכרי.'
+  });
+  return shuffle(qs).slice(0, ROUND);
+}
+
+// 10 questions, identical for the whole team on a given day: a mix of four games.
 function questionsDaily() {
   const date = jerusalemDate();
   rand = seeded(`lardo-${date}`);
@@ -421,13 +532,150 @@ function questionsDaily() {
   }
 }
 
+/* ---------- "נגד השעון": as many right answers as possible before time runs out ---------- */
+
+const CLOCK_MODES = [
+  { secs: 60, label: 'דקה' },
+  { secs: 120, label: 'שתי דקות' },
+  { secs: 0, label: 'בלי שעון (תרגול, 20 שאלות)' }
+];
+
+function viewClock() {
+  const best = progress.best.clock;
+  setPage('נגד השעון', `
+    <section class="flash clock-start">
+      <h1>נגד השעון</h1>
+      <p>תמונות, מחירים ותיאורים. כמה שיותר תשובות נכונות לפני שהזמן נגמר.</p>
+      ${best ? `<p class="counter">השיא שלך: <bdi>${Number(best.score)}</bdi> נכונות</p>` : ''}
+      <div class="clock-modes" role="group" aria-label="כמה זמן">
+        ${CLOCK_MODES.map((m, k) => `<button class="btn${k ? ' btn-no' : ''} btn-wide" type="button" data-secs="${m.secs}">${esc(m.label)}</button>`).join('')}
+      </div>
+    </section>`);
+  document.querySelectorAll('[data-secs]').forEach((b) => b.addEventListener('click', () => playClock(Number(b.dataset.secs))));
+}
+
+function playClock(secs) {
+  const PRACTICE = 20;
+  const deadline = secs ? Date.now() + secs * 1000 : 0;
+  let pool = [];
+  let score = 0;
+  let answered = 0;
+  let tick = null;
+  let warned = false;
+  let busy = false;
+  const next = () => {
+    if (!pool.length) pool = shuffle([...questionsWhat(), ...questionsPrice(), ...questionsWho()]);
+    return pool.pop();
+  };
+
+  setPage('נגד השעון', `<h1 class="sr-only">נגד השעון</h1><div id="game"></div>`);
+  document.body.classList.add('in-game');
+  const box = document.getElementById('game');
+  box.innerHTML = `
+    <section class="flash wide">
+      <p class="game-head">
+        <a href="#/games"><span aria-hidden="true">→</span><span class="sr-only">חזרה למשחקים</span></a>
+        <strong>נגד השעון</strong>
+        ${secs ? '<span class="clock" role="timer" aria-live="off"><span aria-hidden="true">⏱</span> <span id="left"></span></span>' : `<span class="clock"><bdi id="left"></bdi></span>`}
+        <span class="game-score"><span class="sr-only">נכונות </span><span id="score">0</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
+      </p>
+      ${secs ? `<div class="meter clock-meter" aria-hidden="true"><span class="meter-fill" id="bar"></span></div>` : ''}
+      <div id="q"></div>
+    </section>`;
+  const left = document.getElementById('left');
+  const bar = document.getElementById('bar');
+
+  function update() {
+    if (!document.body.contains(box)) { clearInterval(tick); return; }
+    if (!secs) { left.textContent = `${answered}/${PRACTICE}`; return; }
+    const ms = Math.max(0, deadline - Date.now());
+    const s = Math.ceil(ms / 1000);
+    left.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    bar.style.setProperty('width', `${(ms / (secs * 1000)) * 100}%`);
+    if (s <= 10 && !warned) { warned = true; announce('נשארו 10 שניות'); box.querySelector('.clock').classList.add('low'); }
+    if (ms <= 0) finish();
+  }
+
+  function ask() {
+    const q = next();
+    busy = false;
+    document.getElementById('q').innerHTML = `
+      <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${answered + 1}${q.kind ? `: ${q.kind}` : ''}</h2>
+      <div class="game-body q-in">
+        <div>${q.prompt}</div>
+        <div class="options" role="group" aria-label="תשובות">
+          ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}"><bdi>${esc(o)}</bdi></button>`).join('')}
+        </div>
+      </div>`;
+    document.querySelectorAll('#q .opt').forEach((b) => b.addEventListener('click', () => choose(q, Number(b.dataset.k), b)));
+    document.getElementById('qh').focus({ preventScroll: true });
+  }
+
+  function choose(q, k, btn) {
+    if (busy) return;
+    busy = true;
+    const ok = k === q.correct;
+    answered += 1;
+    markResult(q.id, ok);
+    document.querySelectorAll('#q .opt').forEach((b) => {
+      b.disabled = true;
+      const n = Number(b.dataset.k);
+      if (n === q.correct) b.classList.add('right'); else if (n === k) b.classList.add('wrong');
+    });
+    if (ok) {
+      score += 1;
+      addXp(10, true);
+      const sc = document.getElementById('score');
+      sc.textContent = String(score);
+      sc.parentElement.classList.remove('bump'); void sc.offsetWidth; sc.parentElement.classList.add('bump');
+      burst(btn, 10);
+    }
+    announce(ok ? 'נכון' : `לא. ${q.options[q.correct]}`);
+    update();
+    setTimeout(() => {
+      if (!document.body.contains(box) || box.dataset.done) return;
+      if (!secs && answered >= PRACTICE) return finish();
+      ask();
+    }, ok ? 450 : 1100);
+  }
+
+  function finish() {
+    if (box.dataset.done) return;
+    box.dataset.done = '1';
+    clearInterval(tick);
+    const prev = progress.best.clock;
+    const record = secs && (!prev || score > prev.score);
+    if (record) { progress.best.clock = { score, of: Math.max(answered, 1) }; saveProgress(); }
+    box.innerHTML = `
+      <section class="flash result q-in">
+        <p class="result-big"><span id="sc">0</span></p>
+        <h2 tabindex="-1" id="res" class="result-line">${secs ? `${score} תשובות נכונות ב${secs === 60 ? 'דקה' : 'שתי דקות'}` : `${score} מתוך ${answered}`}</h2>
+        ${record ? '<p class="new-best">שיא חדש!</p>' : prev && secs ? `<p class="counter">השיא שלך: ${Number(prev.score)}</p>` : ''}
+        <div class="two">
+          <a class="btn btn-no" href="#/games">משחקים</a>
+          <button class="btn btn-yes" type="button" id="again">עוד פעם</button>
+        </div>
+      </section>`;
+    countUp(document.getElementById('sc'), score);
+    if (record && score > 0) setTimeout(shower, 300);
+    document.getElementById('again').addEventListener('click', () => playClock(secs));
+    window.scrollTo(0, 0);
+    document.getElementById('res').focus({ preventScroll: true });
+  }
+
+  ask();
+  update();
+  tick = setInterval(update, 250);
+}
+
 export function viewGame(id) {
+  if (id === 'clock') return viewClock();
   const daily = id === 'daily';
   const game = daily ? { id, name: 'האתגר היומי' } : GAMES.find((g) => g.id === id && g.ready);
   if (!game) return viewNotFound();
   const date = jerusalemDate();
   if (daily && progress.daily[date] != null) return viewDailyDone(date);
-  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho, daily: questionsDaily }[id];
+  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho, customer: questionsCustomer, daily: questionsDaily }[id];
   let qs = make();
   let i = 0;
   let score = 0;
@@ -435,6 +683,14 @@ export function viewGame(id) {
   let missed = [];
   let results = [];
   let timer = null;
+  // Coming back to today's challenge picks up where it stopped; the same questions can't be retried.
+  const resumed = daily && progress.dailyRun && progress.dailyRun.date === date ? progress.dailyRun.results : null;
+  if (resumed) {
+    results = resumed.slice(0, qs.length);
+    i = results.length;
+    score = results.filter(Boolean).length;
+    missed = results.map((r, k) => (r ? null : qs[k].id)).filter(Boolean);
+  }
 
   // Compact header so all four answers fit on a phone screen without scrolling.
   setPage(game.name, `
@@ -457,7 +713,7 @@ export function viewGame(id) {
     const q = qs[i];
     box.innerHTML = `
       <section class="flash${id === 'what' || id === 'price' ? ' wide' : ''} q-in">
-        <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}, ניקוד ${score}${id === 'what' ? ': מה זה?' : ''}</h2>
+        <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}, ניקוד ${score}${q.kind ? `: ${q.kind}` : ''}</h2>
         <p class="game-head">
           <a href="${daily ? '#/' : '#/games'}"><span aria-hidden="true">→</span><span class="sr-only">${daily ? 'לדף הבית' : 'חזרה למשחקים'}</span></a>
           <strong>${esc(game.name)}</strong>
@@ -491,6 +747,7 @@ export function viewGame(id) {
     const q = qs[i];
     const ok = k === q.correct;
     results[i] = ok;
+    if (daily) { progress.dailyRun = { date, results: results.slice(0, i + 1) }; saveProgress(); }
     if (ok) { score += 1; run += 1; addXp(10, true); } else { run = 0; missed.push(q.id); box.querySelector('.chip-streak')?.remove(); }
     markResult(q.id, ok);
     box.querySelectorAll('.opt').forEach((b) => {
@@ -572,6 +829,7 @@ export function viewGame(id) {
 
   function endDaily() {
     progress.daily[date] = score;
+    progress.dailyRun = null;
     saveProgress();
     const pct = Math.round((score / qs.length) * 100);
     const named = cloudEnabled() && myPlayer();
@@ -598,6 +856,7 @@ export function viewGame(id) {
     }
   }
 
+  if (resumed && i < qs.length) announce(`ממשיכים מהשאלה ${i + 1}`);
   ask();
 }
 

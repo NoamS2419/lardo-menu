@@ -4,7 +4,7 @@
 const PROGRESS_KEY = 'lardo.progress.v1';
 
 function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, autoNext: true };
+  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, dailyRun: null, autoNext: false };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
     if (!p || typeof p !== 'object') return fresh;
@@ -20,7 +20,11 @@ function loadProgress() {
       xp: isNum(p.xp) ? Math.floor(p.xp) : 0,
       gameXp: isNum(p.gameXp) ? Math.floor(p.gameXp) : 0,
       daily: clean(p.daily, (v) => Number.isInteger(v) && v >= 0 && v <= 10),
-      autoNext: p.autoNext !== false,
+      // A daily challenge in progress: which answers were given, so leaving can't reset it.
+      dailyRun: p.dailyRun && typeof p.dailyRun.date === 'string' && /^\d{4}-\d\d-\d\d$/.test(p.dailyRun.date)
+        && Array.isArray(p.dailyRun.results) && p.dailyRun.results.length <= 10 && p.dailyRun.results.every((r) => typeof r === 'boolean')
+        ? { date: p.dailyRun.date, results: p.dailyRun.results } : null,
+      autoNext: p.autoNext === true,
       days: Array.isArray(p.days) ? p.days.filter((d) => typeof d === 'string' && /^\d{4}-\d\d-\d\d$/.test(d)) : []
     };
   } catch (e) { /* private mode or corrupt value: start fresh */ }

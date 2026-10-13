@@ -3,16 +3,33 @@ service cloud.firestore {
   match /databases/{db}/documents {
     function signedIn() { return request.auth != null; }
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // 1-20 chars, trimmed, single spaces; no control, zero-width, bidi, line-separator characters, < > or /.
     function validName(n) {
       return n is string && n.size() >= 1 && n.size() <= 20
-        && !n.matches('.*[\\u0000-\\u001F\\u202A-\\u202E\\u2066-\\u2069<>].*');
+        && n == n.trim()
+        && !n.matches('.*\\s\\s.*')
+        && !n.matches('.*[\\x{0000}-\\x{001F}\\x{007F}\\x{00AD}\\x{061C}\\x{200B}-\\x{200F}\\x{2028}-\\x{202E}\\x{2060}-\\x{206F}\\x{FEFF}<>/].*');
+    }
+    // nameKey is the lowercased name, and this user holds its reservation in /names.
+    function holdsName(d) {
+      return validName(d.name) && d.nameKey == d.name.lower()
+        && getAfter(/databases/$(db)/documents/names/$(d.nameKey)).data.uid == request.auth.uid;
+    }
+    // "2026-10-13" as the UTC midnight of that day.
+    function dayStart(s) {
+      let p = s.split('-');
+      return timestamp.date(int(p[0]), int(p[1]), int(p[2]));
     }
 
     match /names/{nameKey} {
       allow read: if signedIn();
-      allow create: if signedIn() && nameKey.size() <= 20
+      // One reservation per user: the user's player doc must point at this name after the same batch.
+      allow create: if signedIn()
+        && validName(nameKey) && nameKey == nameKey.lower()
         && request.resource.data.keys().hasOnly(['uid'])
-        && request.resource.data.uid == request.auth.uid;
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(db)/documents/players/$(request.auth.uid)).data.nameKey == nameKey;
       allow delete: if isOwner(resource.data.uid);
       allow update: if false;
     }
@@ -20,29 +37,37 @@ service cloud.firestore {
     match /players/{uid} {
       allow read: if signedIn();
       allow create, update: if isOwner(uid)
-        && request.resource.data.keys().hasOnly(['name', 'total', 'updatedAt'])
-        && validName(request.resource.data.name)
+        && request.resource.data.keys().hasOnly(['name', 'nameKey', 'total', 'updatedAt'])
+        && holdsName(request.resource.data)
         && request.resource.data.total is int
         && request.resource.data.total >= 0
         && request.resource.data.total <= 1000000
-        && request.resource.data.updatedAt == request.time;
+        && request.resource.data.updatedAt == request.time
+        // Renaming must release the old name in the same batch.
+        && (resource == null || resource.data.nameKey == request.resource.data.nameKey
+            || !existsAfter(/databases/$(db)/documents/names/$(resource.data.nameKey)));
       allow delete: if isOwner(uid);
     }
 
     match /daily/{docId} {
       allow read: if signedIn();
       allow create: if signedIn()
-        && docId == request.resource.data.date + '_' + request.auth.uid
-        && request.resource.data.keys().hasOnly(['uid', 'name', 'date', 'score', 'createdAt', 'expireAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'nameKey', 'date', 'score', 'createdAt', 'expireAt'])
         && request.resource.data.uid == request.auth.uid
-        && validName(request.resource.data.name)
+        && holdsName(request.resource.data)
         && request.resource.data.date is string
         && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && docId == request.resource.data.date + '_' + request.auth.uid
+        // Only today's challenge (Israel is UTC+2/+3), with a few hours' slack.
+        && request.time > dayStart(request.resource.data.date) - duration.value(4, 'h')
+        && request.time < dayStart(request.resource.data.date) + duration.value(30, 'h')
         && request.resource.data.score is int
         && request.resource.data.score >= 0 && request.resource.data.score <= 10
         && request.resource.data.createdAt == request.time
-        && request.resource.data.expireAt is timestamp;
-      allow update: if false;            // תוצאה יומית אחת, אי אפשר לשפר אחרי
+        && request.resource.data.expireAt is timestamp
+        && request.resource.data.expireAt > request.time
+        && request.resource.data.expireAt < request.time + duration.value(90, 'd');
+      allow update: if false;            // one score per day, no retries
       allow delete: if isOwner(resource.data.uid);
     }
 
