@@ -17,6 +17,7 @@ IMAGE_WIDTH = 500
 IMAGE_HOSTS = ("imageproxy.wolt.com", "wolt-menu-images-cdn.wolt.com")
 MIN_KEEP = 0.8  # refuse a snapshot with fewer rows than this share of the previous one
 
+sys.dont_write_bytecode = True  # keep tools/__pycache__ out of the refresh PR
 sys.path.insert(0, str(TOOLS))
 from build import DATA, image_file  # noqa: E402
 FIELDS = ["wolt_category", "id", "name", "price_agorot", "description", "image", "options"]
