@@ -31,11 +31,15 @@ const pick = (arr, n) => shuffle(arr).slice(0, n);
 // Description with the product's own name and aliases blanked out, for screen-reader users
 // who can't see the photo. Empty when there is nothing safe to say.
 export function hintText(p) {
-  let text = [p.staff_description, p.description].find((t) => t) || (p.ingredients || []).join(', ');
-  for (const n of [p.name, ...(p.aliases || [])]) {
-    for (const w of String(n).split(/\s+/).filter((x) => x.length > 2)) text = text.split(w).join('…');
-  }
-  return text.replace(/(…\s*)+/g, '… ').trim();
+  const text = [p.staff_description, p.description].find((t) => t) || (p.ingredients || []).join(', ');
+  const nameWords = [p.name, ...(p.aliases || [])]
+    .flatMap((n) => norm(n).split(' ')).filter((w) => w.length > 2);
+  // Blank whole words that share a stem with the name, keeping punctuation.
+  return text.split(/(\s+)/).map((tok) => {
+    const core = norm(tok.replace(/[.,;:!?()]/g, ''));
+    return core.length > 1 && nameWords.some((w) => core.includes(w) || w.includes(core) && core.length > 3)
+      ? tok.replace(/[^.,;:!?()\s]+/, '…') : tok;
+  }).join('').replace(/(…\s*){2,}/g, '… ').trim();
 }
 
 export function clueHtml(p) {
@@ -197,8 +201,8 @@ const gameIcon = (id) => `<svg class="game-icon" viewBox="0 0 24 24" aria-hidden
 const GAMES = [
   { id: 'what', name: 'מה זה?', desc: 'רואים מוצר ובוחרים את השם הנכון.', ready: true },
   { id: 'made', name: 'ממה זה עשוי?', desc: 'שם של מוצר, ובוחרים מה יש בו.', ready: true },
-  { id: 'price', name: 'כמה זה עולה?', desc: 'ניחוש מחיר.', ready: false },
-  { id: 'who', name: 'מי המוצר?', desc: 'תיאור, ומזהים את המוצר.', ready: false },
+  { id: 'price', name: 'כמה זה עולה?', desc: 'רואים מוצר ובוחרים את המחיר הנכון.', ready: true },
+  { id: 'who', name: 'מי המוצר?', desc: 'קוראים תיאור ומזהים את המוצר.', ready: true },
   { id: 'customer', name: 'שאלת לקוח', desc: 'שאלות אמיתיות מהדלפק.', ready: false },
   { id: 'clock', name: 'נגד השעון', desc: 'כמה שיותר תשובות בדקה.', ready: false }
 ];
@@ -306,10 +310,69 @@ function questionsMade() {
   });
 }
 
+// Distinct names for distractors: same category first, then same family, then anything.
+function nameDistractors(p, n = 3) {
+  const names = new Set([norm(p.name)]);
+  const out = [];
+  const fam = db.products.filter((o) => family(o) === family(p));
+  for (const o of [...shuffle(db.byCat.get(p.category)), ...shuffle(fam), ...shuffle(db.products)]) {
+    if (out.length === n) break;
+    if (names.has(norm(o.name))) continue;
+    names.add(norm(o.name));
+    out.push(o);
+  }
+  return out;
+}
+
+const basePrice = (p) => (typeof p.price === 'number' ? p.price : null);
+
+function questionsPrice() {
+  const eligible = db.products.filter((p) => basePrice(p) != null);
+  const pool = weightedOrder(eligible).slice(0, ROUND);
+  return pool.map((p) => {
+    const right = basePrice(p);
+    // Wrong prices: real prices from the same family that are close, so it takes knowing, not guessing.
+    const near = [...new Set(db.products
+      .filter((o) => family(o) === family(p))
+      .map(basePrice).filter((x) => x != null && x !== right))]
+      .sort((a, b) => Math.abs(a - right) - Math.abs(b - right));
+    const wrong = shuffle(near.slice(0, 5)).slice(0, 3);
+    for (const d of [4, -4, 8, -8, 10, -10]) {
+      if (wrong.length >= 3) break;
+      const x = right + d;
+      if (x > 0 && x !== right && !wrong.includes(x)) wrong.push(x);
+    }
+    const options = shuffle([right, ...wrong]).map((x) => `${x} ₪`);
+    const sizes = (p.sizes || []).length ? ` (${p.sizes[0].label})` : '';
+    return {
+      id: p.id,
+      prompt: `${clueHtml(p)}<p class="flash-q">כמה עולה <strong>${esc(p.name)}</strong>${esc(sizes)}?</p>`,
+      options,
+      correct: options.indexOf(`${right} ₪`),
+      explain: `${p.name}${sizes}: ${right} ₪`
+    };
+  });
+}
+
+function questionsWho() {
+  const eligible = db.products.filter((p) => hintText(p).replace(/[….,\s]/g, '').length >= 12);
+  const pool = weightedOrder(eligible).slice(0, ROUND);
+  return pool.map((p) => {
+    const options = shuffle([p, ...nameDistractors(p)]).map((o) => o.name);
+    return {
+      id: p.id,
+      prompt: `<blockquote class="who-quote">${esc(hintText(p))}</blockquote><p class="flash-q">איזה מוצר זה?</p>`,
+      options,
+      correct: options.indexOf(p.name),
+      explain: `${p.name}. ${p.staff_description || p.description || ''}`
+    };
+  });
+}
+
 export function viewGame(id) {
   const game = GAMES.find((g) => g.id === id && g.ready);
   if (!game) return viewNotFound();
-  const make = id === 'what' ? questionsWhat : questionsMade;
+  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho }[id];
   let qs = make();
   let i = 0;
   let score = 0;
@@ -333,7 +396,7 @@ export function viewGame(id) {
     if (i >= qs.length) return end();
     const q = qs[i];
     box.innerHTML = `
-      <section class="flash${id === 'what' ? ' wide' : ''} q-in">
+      <section class="flash${id === 'what' || id === 'price' ? ' wide' : ''} q-in">
         <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}${id === 'what' ? ': מה זה?' : ''}</h2>
         <p class="game-head">
           <a href="#/games" aria-label="חזרה למשחקים">→</a>
@@ -346,7 +409,7 @@ export function viewGame(id) {
           <div>${q.prompt}</div>
           <div>
             <div class="options" role="group" aria-label="תשובות">
-              ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}">${esc(o)}</button>`).join('')}
+              ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}"><bdi>${esc(o)}</bdi></button>`).join('')}
             </div>
             <div id="feedback"></div>
           </div>
@@ -364,8 +427,8 @@ export function viewGame(id) {
     box.querySelectorAll('.opt').forEach((b) => {
       const n = Number(b.dataset.k);
       b.disabled = true;
-      if (n === q.correct) { b.classList.add('right'); b.textContent = `✓ ${b.textContent}`; }
-      else if (n === k) { b.classList.add('wrong'); b.textContent = `✗ ${b.textContent}`; }
+      if (n === q.correct) { b.classList.add('right'); b.insertAdjacentText('afterbegin', '✓ '); }
+      else if (n === k) { b.classList.add('wrong'); b.insertAdjacentText('afterbegin', '✗ '); }
     });
     box.querySelector('.dots').outerHTML = dots();
     if (ok) {

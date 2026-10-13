@@ -573,3 +573,8 @@ main {
 @media (max-width: 899px) {
   .daily .daily-img, .daily .ph { aspect-ratio: 16 / 9; }
 }
+
+.who-quote {
+  margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--surface-2);
+  font-size: 1.15rem; line-height: 1.6; border-inline-start: 4px solid var(--accent-2);
+}
