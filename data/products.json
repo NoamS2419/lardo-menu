@@ -1,64 +1,2948 @@
 {
   "updated": "2026-10-13",
-  "note": "נתונים זמניים מסיכום העובדת. יוחלפו בשליפה המלאה מוולט.",
+  "source": "https://wolt.com/he/isr/hasharon/restaurant/lart-du-pain-r + staff notes",
   "categories": [
-    { "id": "pastries", "name": "מאפים" },
-    { "id": "patisserie", "name": "פטיסרי" },
-    { "id": "cakes", "name": "עוגות" },
-    { "id": "tarts", "name": "טארטים" },
-    { "id": "sandwiches", "name": "כריכים" },
-    { "id": "cookies", "name": "עוגיות" },
-    { "id": "breads", "name": "לחמים" },
-    { "id": "salads", "name": "סלטים" },
-    { "id": "boxes", "name": "מארזים" },
-    { "id": "drinks", "name": "שתייה" }
+    {
+      "id": "pastries",
+      "name": "מאפים",
+      "count": 28
+    },
+    {
+      "id": "patisserie",
+      "name": "פטיסרי",
+      "count": 16
+    },
+    {
+      "id": "cakes",
+      "name": "עוגות",
+      "count": 9
+    },
+    {
+      "id": "tarts",
+      "name": "טארטים",
+      "count": 7
+    },
+    {
+      "id": "sandwiches",
+      "name": "כריכים",
+      "count": 10
+    },
+    {
+      "id": "cookies",
+      "name": "עוגיות",
+      "count": 2
+    },
+    {
+      "id": "breads",
+      "name": "לחמים",
+      "count": 7
+    },
+    {
+      "id": "salads",
+      "name": "סלטים",
+      "count": 3
+    },
+    {
+      "id": "boxes",
+      "name": "מארזים",
+      "count": 2
+    },
+    {
+      "id": "drinks",
+      "name": "שתייה",
+      "count": 12
+    }
   ],
   "products": [
-    { "id": "butter-croissant", "name": "קרואסון חמאה", "category": "pastries", "description": "קרואסון חמאה קלאסי.", "ingredients": ["חמאה", "בצק עלים"], "price": null, "image": null, "wolt": false },
-    { "id": "pain-chocolat", "name": "פאן שוקולד", "category": "pastries", "description": "קרואסון במילוי שני מקלות שוקולד.", "ingredients": ["בצק קרואסון", "מקלות שוקולד"], "price": null, "image": null, "wolt": false },
-    { "id": "pain-suisse", "name": "פאן סוויס", "category": "pastries", "description": "קרואסון במילוי קרם שקדים אפוי, קרם פטיסייר, שוקולד חלב ומריר.", "ingredients": ["קרם שקדים", "קרם פטיסייר", "שוקולד חלב", "שוקולד מריר"], "price": null, "image": null, "tags": ["חלב נוכרי"], "wolt": true },
-    { "id": "croissant-stick", "name": "מקל קרואסון", "category": "pastries", "description": "בשני טעמים: שוקולד גאנדויה (שוקולד חלב איטלקי) או שוקולד דולצ'ה (שוקולד לבן מקורמל). הגאנדויה בחלב נוכרי.", "ingredients": ["שוקולד גאנדויה", "שוקולד דולצ'ה"], "price": null, "image": null, "tags": ["גאנדויה: חלב נוכרי"], "wolt": false },
-    { "id": "japanese-croissant", "name": "קרואסון יפני", "category": "pastries", "description": "קריספי מבחוץ ואוורירי מבפנים. מילויים: קרם פטיסייר ושבבי שוקולד חלב קורנפלקס / קרם פטיסייר וקולי פירות / קרם שוקולד גאנדויה / קרם פטיסייר וקוקיז / קרם פיסטוק.", "ingredients": ["קרם פטיסייר", "קורנפלקס", "קולי פירות", "גאנדויה", "פיסטוק"], "price": null, "image": null, "wolt": false },
-    { "id": "pistachio-danish", "name": "דניש פיסטוק", "category": "pastries", "description": "קרואסון במילוי קרם פיסטוק.", "ingredients": ["בצק קרואסון", "קרם פיסטוק"], "price": null, "image": null, "wolt": false },
-    { "id": "bread-pudding", "name": "בראד פודינג", "category": "pastries", "description": "תערובת של קרואסון עם שוקולד חלב, שוקולד לבן וקרמל.", "ingredients": ["קרואסון", "שוקולד חלב", "שוקולד לבן", "קרמל"], "price": null, "image": null, "wolt": false },
-    { "id": "cream-croissant", "name": "מאפה קרואסון עם קרם", "category": "pastries", "description": "מילויים: פטיסייר וקולי פירות / קרם פיסטוק / קרם שוקולד דולצ'ה ובייגלה / קרם שוקולד גאנדויה וקוקיז / שנטי וניל ופטל עם שוקולד לבן וחלב / שנטי וניל עם בננות מקורמלות וקרמל.", "ingredients": ["קרם פטיסייר", "פיסטוק", "דולצ'ה", "בייגלה", "שנטי וניל", "בננה מקורמלת"], "price": null, "image": null, "wolt": false },
-    { "id": "spinach-pastry", "name": "מאפה תרד", "category": "pastries", "description": "תערובת של גבינות עם תרד.", "ingredients": ["תרד", "גבינות"], "price": null, "image": null, "wolt": false },
-    { "id": "caprese-pastry", "name": "מאפה קפרזה", "category": "pastries", "description": "קרואסון במילוי מוצרלה פרסקה, עגבנייה, בזיליקום ובלסמי.", "ingredients": ["מוצרלה", "עגבנייה", "בזיליקום", "בלסמי"], "price": null, "image": null, "wolt": true },
-    { "id": "truffle-pastry", "name": "מאפה כמהין", "category": "pastries", "description": "קרואסון במילוי רוקט, גאודה, כמהין, שמנת, פסטו וריבת בצל.", "ingredients": ["רוקט", "גאודה", "כמהין", "שמנת", "פסטו", "ריבת בצל"], "price": null, "image": null, "wolt": true },
-    { "id": "labneh-sumac", "name": "קרואסון בצל סומק", "category": "pastries", "description": "בצל סומק, שמנת בסגנון לבנה, זעתר ושומשום.", "ingredients": ["בצל", "סומק", "לבנה", "זעתר", "שומשום"], "price": null, "image": null, "wolt": true },
-    { "id": "cheddar-pastry", "name": "מאפה צ'דר", "category": "pastries", "description": "קרואסון במילוי גבינת צ'דר ופטה פסטו.", "ingredients": ["צ'דר", "פטה", "פסטו"], "price": null, "image": null, "wolt": false },
-    { "id": "pretzel", "name": "פרעצל", "category": "pastries", "description": "עם צ'דר ופרמזן.", "ingredients": ["צ'דר", "פרמזן"], "price": null, "image": null, "wolt": false },
-    { "id": "burrata-pizza", "name": "פיצה בוראטה", "category": "pastries", "description": "פיצה עם גבינת בוראטה.", "ingredients": ["בוראטה"], "price": null, "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": false },
-
-    { "id": "millefeuille", "name": "מילפיי", "category": "patisserie", "description": "שכבות של בצק עלים, קרם פטיסייר, קרמל, פקאנים מקורמלים ומלח גס אטלנטי.", "ingredients": ["בצק עלים", "קרם פטיסייר", "קרמל", "פקאן", "מלח גס"], "price": null, "image": null, "wolt": true },
-    { "id": "faberge-egg", "name": "ביצת פברז'ה", "category": "patisserie", "description": "מוס יוגורט וקולי מנגו פסיפלורה על ספוג וניל. הביצה עשויה משוקולד דולצ'ה (לבן מקורמל).", "ingredients": ["מוס יוגורט", "מנגו", "פסיפלורה", "ספוג וניל", "דולצ'ה"], "price": null, "image": null, "wolt": true },
-    { "id": "chocolate-flower", "name": "פרח שוקולד", "category": "patisserie", "description": "שכבות של מוסים משוקולד ג'אנדויה ופרלינה של אגוזי לוז.", "ingredients": ["גאנדויה", "פרלינה", "אגוזי לוז"], "price": null, "image": null, "tags": ["חלב נוכרי"], "wolt": false },
-    { "id": "raspberry-mousse", "name": "מוס פטל אישי", "category": "patisserie", "description": "מרנג אפוי עטוף מוס וניל, עם דיסקית שוקולד לבן וקולי פטל. בוולט נקרא \"מוס תותים | אישי\".", "ingredients": ["מרנג", "מוס וניל", "שוקולד לבן", "קולי פטל"], "price": 58, "image": null, "wolt": true },
-    { "id": "vanilla-mousse", "name": "מוס וניל", "category": "patisserie", "description": "פודינג אורז בחלב, שכבות של וניל ופרלינה של אגוזי לוז.", "ingredients": ["פודינג אורז", "וניל", "פרלינה", "אגוזי לוז"], "price": null, "image": null, "wolt": false },
-    { "id": "croissant-mousse", "name": "מוס קרואסון", "category": "patisserie", "description": "יושב על ביסקוויט חמאה חומה, ממולא מוס וניל קרמל וקרעים של קרואסון חמאה.", "ingredients": ["ביסקוויט חמאה חומה", "מוס וניל", "קרמל", "קרואסון"], "price": null, "image": null, "wolt": false },
-    { "id": "peanut-mousse", "name": "מוס בוטנים", "category": "patisserie", "description": "בצק פריך, פטיסייר בוטנים ומוס בוטנים, מצופה שוקולד דולצ'ה.", "ingredients": ["בצק פריך", "פטיסייר בוטנים", "מוס בוטנים", "דולצ'ה"], "price": null, "image": null, "wolt": true },
-    { "id": "dark-chocolate-mousse", "name": "מוס שוקולד מריר", "category": "patisserie", "description": "ביסקוויט טבול באספרסו, קרמו שוקולד מריר, פרלינה שקדים וקפה וגנאש שוקולד מריר.", "ingredients": ["אספרסו", "שוקולד מריר", "פרלינה שקדים", "קפה", "גנאש"], "price": null, "image": null, "wolt": false },
-    { "id": "madeleine", "name": "מדלן", "category": "patisserie", "description": "עוגה צרפתית נימוחה ממולאת בקרם ומצופה בשוקולד. בטעמים: פיסטוק, פטל, קרמל ואגוזי לוז.", "ingredients": ["קרם", "שוקולד", "פיסטוק", "פטל", "קרמל", "אגוזי לוז"], "price": null, "image": null, "wolt": false },
-    { "id": "truffles", "name": "טראפלס", "category": "patisserie", "description": "שלושה סוגים של שוקולד עם קראנץ'.", "ingredients": ["שוקולד", "קראנץ'"], "price": null, "image": null, "wolt": false },
-
-    { "id": "bar-mousse-chocolate", "name": "מוס שוקולד בפס", "category": "cakes", "description": "עוגת מוס שוקולד בפס. כל הפסים באותו מחיר.", "ingredients": ["מוס שוקולד"], "price": 85, "image": null, "wolt": true },
-    { "id": "bar-mousse-raspberry", "name": "מוס פטל בפס", "category": "cakes", "description": "עוגת מוס פטל בפס. שונה מהמוס פטל האישי.", "ingredients": ["מוס פטל"], "price": 85, "image": null, "wolt": true },
-    { "id": "bar-tiramisu", "name": "טירמיסו בפס", "category": "cakes", "description": "טירמיסו בפס. כל הפסים באותו מחיר.", "ingredients": ["מסקרפונה", "קפה"], "price": 85, "image": null, "wolt": false },
-    { "id": "bowl-tiramisu", "name": "קערת טירמיסו", "category": "cakes", "description": "קערה גדולה של טירמיסו.", "ingredients": ["מסקרפונה", "קפה"], "price": 280, "image": null, "wolt": true },
-    { "id": "bowl-chocolate", "name": "קערת שוקולד", "category": "cakes", "description": "קערה גדולה של מוס שוקולד.", "ingredients": ["מוס שוקולד"], "price": 280, "image": null, "wolt": true },
-    { "id": "raspberry-flower", "name": "מוס פרח פטל", "category": "cakes", "description": "עוגת מוס פטל בצורת פרח אדום.", "ingredients": ["מוס פטל"], "price": 250, "image": null, "wolt": true },
-    { "id": "saint-honore", "name": "סנט הונורה", "category": "cakes", "description": "פחזניות מקורמלות ממולאות בקרם פטיסייר עם גנאש וניל מוקצף.", "ingredients": ["פחזניות", "קרמל", "קרם פטיסייר", "גנאש וניל"], "price": 150, "sizes": [ { "label": "גודל 14", "price": 150 }, { "label": "גודל 16", "price": 200 }, { "label": "גודל 18", "price": 250 } ], "image": null, "wolt": true },
-
-    { "id": "tart-chocolate-hazelnut", "name": "טארט שוקולד ואגוזי לוז", "category": "tarts", "description": "פרלינה אגוזי לוז ושנטי שוקולד חלב גאנדויה.", "ingredients": ["פרלינה", "אגוזי לוז", "שנטי", "גאנדויה"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "tags": ["חלב נוכרי"], "wolt": true },
-    { "id": "tart-pecan", "name": "טארט פקאן", "category": "tarts", "description": "פקאן ושוקולד דולצ'ה (לבן מקורמל).", "ingredients": ["פקאן", "דולצ'ה"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": true },
-    { "id": "tart-pistachio", "name": "טארט פיסטוק", "category": "tarts", "description": "טעמי פיסטוק ושוקולד לבן.", "ingredients": ["פיסטוק", "שוקולד לבן"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
-    { "id": "tart-peanut", "name": "טארט בוטנים", "category": "tarts", "description": "קראנץ' בוטנים, פטיסייר בוטנים ומוס בוטנים.", "ingredients": ["קראנץ' בוטנים", "פטיסייר בוטנים", "מוס בוטנים"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
-    { "id": "tart-mango-passion", "name": "טארט מנגו פסיפלורה", "category": "tarts", "description": "טארט מנגו ופסיפלורה.", "ingredients": ["מנגו", "פסיפלורה"], "price": 150, "sizes": [ { "label": "קטן", "price": 150 }, { "label": "גדול", "price": 200 } ], "image": null, "wolt": false },
-    { "id": "tart-lemon", "name": "טארט לימון", "category": "tarts", "description": "בסיס סאבלה שקדים, קרם לימון, קולי לימונענע ומרנג חרוך. מכיל גלוטן.", "ingredients": ["סאבלה שקדים", "קרם לימון", "לימונענע", "מרנג"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": true },
-    { "id": "tart-berries", "name": "טארט פטיסייר ופירות יער", "category": "tarts", "description": "קרם פטיסייר ופירות יער.", "ingredients": ["קרם פטיסייר", "פירות יער"], "price": 150, "sizes": [ { "label": "קוטר 16", "price": 150 }, { "label": "קוטר 18", "price": 200 } ], "image": null, "wolt": false },
-
-    { "id": "beet-sandwich", "name": "כריך סלק", "category": "sandwiches", "description": "כריך סלק עם גבינה במים.", "ingredients": ["סלק", "גבינה"], "price": null, "image": null, "tags": ["הריון: להפנות לאחראי"], "wolt": false },
-
-    { "id": "cookies", "name": "קוקיז", "category": "cookies", "description": "בטעמים: גאנדויה / פטל ושוקולד לבן / פרלינה ואגוזי לוז / פיסטוק ושוקולד לבן.", "ingredients": ["גאנדויה", "פטל", "שוקולד לבן", "פרלינה", "פיסטוק"], "price": null, "image": null, "wolt": false }
+    {
+      "id": "e679f0cb33ecaec1c6438b2a",
+      "category": "pastries",
+      "name": "פאן שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "פאן שוקולד קלאסי",
+      "staff_description": "קרואסון במילוי שני מקלות שוקולד",
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b0fb39e033e41ab6f8a20",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "פאן שוקולד",
+        "description": "פאן שוקולד קלאסי",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "פאן שוקולד קלאסי"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b7b1c852e8ba936fc44e280f",
+      "category": "pastries",
+      "name": "קרואסון חמאה",
+      "unit": null,
+      "aliases": [],
+      "description": "קרואסון קלאסי",
+      "staff_description": "קרואסון חמאה",
+      "price": 20,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b127a9e033e41ab6f8acf",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון חמאה",
+        "description": "קרואסון קלאסי",
+        "price": 20,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "קרואסון קלאסי"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "7b317b450198638e5156a59f",
+      "category": "pastries",
+      "name": "קרואסון שקדים",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a1778a2bf4cafab97b8b4f",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קרואסון שקדים",
+        "description": "",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "220523a6a6db91656b545317",
+      "category": "pastries",
+      "name": "פאן סוויס",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון בכריכה כפולה, במילוי קרם שקדים פטייסר ושבבי שוקולד",
+      "staff_description": "קרואסון במילוי קרם שקדים אפוי, קרם פטיסייר, שוקולד חלב ומריר",
+      "price": 38,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b0fd1c67a5c9ffb5060bc",
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "פאן סוויס",
+        "description": "בצק קרואסון בכריכה כפולה, במילוי קרם שקדים פטייסר ושבבי שוקולד",
+        "price": 38,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון בכריכה כפולה",
+        "במילוי קרם שקדים פטייסר",
+        "שבבי שוקולד"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "4e9fa449314e3747350eacf7",
+      "category": "pastries",
+      "name": "מקל קרואסון",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון בכריכה כפולה, במילוי שוקולד ג'נדויה",
+      "staff_description": "שוקולד ג׳אנדויה (שוקולד חלב איטלקי) או שוקולד דולצ׳ה (שוקולד לבן מקורמל)",
+      "price": 52,
+      "sizes": [],
+      "choices": [
+        "שוקולד ג׳אנדויה",
+        "שוקולד דולצ׳ה לוז"
+      ],
+      "image": "https://imageproxy.wolt.com/assets/689b10269e033e41ab6f8a3e",
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [
+        "בטעם ג׳אנדויה: חלב נוכרי. בטעם דולצ׳ה: כשרות רעננה בלי חלב נוכרי"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מקל קראוסון",
+        "description": "בצק קרואסון בכריכה כפולה, במילוי שוקולד ג'נדויה",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון בכריכה כפולה",
+        "במילוי שוקולד ג'נדויה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "5c568de8081672076e1b4a95",
+      "category": "pastries",
+      "name": "מאפה פירות",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון במילוי קרם פטיסייר, קולי פטל ופירות העונה",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b3203c67a5c9ffb506bc2",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מאפה פירות",
+        "description": "בצק קרואסון במילוי קרם פטיסייר, קולי פטל ופירות העונה",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון במילוי קרם פטיסייר",
+        "קולי פטל",
+        "פירות העונה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "6695e48835275aa4d7da10b7",
+      "category": "pastries",
+      "name": "קרואסון יפני גנדויה",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון באפיה יפנית במילוי קרם שוקולד גנדויה",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b11c69e033e41ab6f8a92",
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון יפני גנדויה",
+        "description": "בצק קרואסון באפיה יפנית במילוי קרם שוקולד גנדויה",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון באפיה יפנית במילוי קרם שוקולד גנדויה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "559c9f1ad38002280eac46e9",
+      "category": "pastries",
+      "name": "קרואסון יפני קורנפלקס",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר קורנפלקס",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689c7e2f80e443e0bc0db8e8",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קרואסון יפני קורנפלקס",
+        "description": "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר קורנפלקס",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר קורנפלקס"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "bc95bc0f1b53c58e07ac357d",
+      "category": "pastries",
+      "name": "קרואסון יפני פטיסייר ופטל",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר וקולי פירות",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a1a02d2bf4cafab97b8ca9",
+      "tags": [],
+      "notes": [
+        "בוולט התיאור הועתק בטעות מהקרואסון היפני קורנפלקס; תוקן לפי העובדת"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון יפני פטיסייר ופטל",
+        "description": "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר קורנפלקס",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון באפיה יפנית במילוי קרם פטיסייר",
+        "קולי פירות"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "71bcd9dde86f6865791ac6b7",
+      "category": "pastries",
+      "name": "קרואסון במילוי קרם שוקולד ג׳נדויה",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a1a212f52a4fe9d4d16511",
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון במילוי קרם שוקולד ג׳נדויה",
+        "description": "",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "17d62d0d916f24652ba6b9b4",
+      "category": "pastries",
+      "name": "קרואסון במילוי קרם פיסטוק",
+      "unit": null,
+      "aliases": [
+        "דניש פיסטוק"
+      ],
+      "description": "",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a1755f3b13bfd3a588ced2",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון במילוי קרם פיסטוק",
+        "description": "",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "176eab31a53dc0686d176e1b",
+      "category": "pastries",
+      "name": "קרואסון במילוי קרם פטיסייר ופטל",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a175a4f52a4fe9d4d163b6",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קרואסון במילוי קרם פטיסייר ופטל",
+        "description": "",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "f1895d4f7c98262e557f764e",
+      "category": "pastries",
+      "name": "קרואסון במילוי קרם פטיסייר וקוקיז",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a176613b13bfd3a588ced5",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קרואסון במילוי קרם פטיסייר וקוקיז",
+        "description": "",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "1c0285a5eaf72ec23ea57ca5",
+      "category": "pastries",
+      "name": "קרואסון במילוי קרם פטיסייר וקורונפלקס",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a17a592bf4cafab97b8b57",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קרואסון במילוי קרם פטיסייר וקורונפלקס",
+        "description": "",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "a4fa88b053097435c2b49bbe",
+      "category": "pastries",
+      "name": "קראפין פיסטוק",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק קרואסון, במילוי פטיסייר פיסטוק",
+      "staff_description": null,
+      "price": 32,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b40709ec96fca3dd608f4",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קראפין פיסטוק",
+        "description": "בצק קרואסון, במילוי פטיסייר פיסטוק",
+        "price": 32,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון",
+        "במילוי פטיסייר פיסטוק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "794f225f9935eacad704ffa7",
+      "category": "pastries",
+      "name": "בראד פודינג שוקולד וטופי קרמל",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": "תערובת של קרואסון עם שוקולד חלב, שוקולד לבן וקרמל",
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/698c8fcaaa0a0db65f31a42e",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "בראד פודינג שוקולד וטופי קרמל",
+        "description": "",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "תערובת של קרואסון עם שוקולד חלב",
+        "שוקולד לבן",
+        "קרמל"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "a9b024c5218b7b4829e9695a",
+      "category": "pastries",
+      "name": "קרואסון קפרזה",
+      "unit": null,
+      "aliases": [
+        "מאפה קפרזה"
+      ],
+      "description": "בצק קרואסון עם עגבניות שרי, מוצרלה פרסקה ובזיליקום",
+      "staff_description": "קרואסון במילוי מוצרלה פרסקה, עגבנייה, בזיליקום ובלסמי",
+      "price": 38,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a8d835f7f2db21b567e1ca2",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קרואסון קפרזה",
+        "description": "בצק קרואסון עם עגבניות שרי, מוצרלה פרסקה ובזיליקום",
+        "price": 38,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון עם עגבניות שרי",
+        "מוצרלה פרסקה",
+        "בזיליקום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b0f41ca6219421f44d05ad62",
+      "category": "pastries",
+      "name": "מאפה מנגולד",
+      "unit": null,
+      "aliases": [
+        "מאפה תרד"
+      ],
+      "description": "בצק קרואסון עם מנגולד, בצל וגבינות | מוגש עם פרמז׳ן מגורד",
+      "staff_description": "תערובת של גבינות עם תרד",
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a8e85ef7b7d76e02823b8d3",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מאפה מנגולד",
+        "description": "בצק קרואסון עם מנגולד, בצל וגבינות | מוגש עם פרמז׳ן מגורד",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון עם מנגולד",
+        "בצל",
+        "גבינות",
+        "מוגש עם פרמז׳ן מגורד"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "848412035072ee45ee93430c",
+      "category": "pastries",
+      "name": "מאפה כמהין",
+      "unit": null,
+      "aliases": [],
+      "description": "שמנת פסטו כמהין, גאודה רוקט ריבת בצל ופרמז׳ן",
+      "staff_description": "קרואסון במילוי רוקט, גאודה כמהין, שמנת פסטו וריבת בצל",
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a8d83617f2db21b567e1ca3",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מאפה כמהין",
+        "description": "שמנת פסטו כמהין, גאודה רוקט ריבת בצל ופרמז׳ן",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "שמנת פסטו כמהין",
+        "גאודה רוקט ריבת בצל",
+        "פרמז׳ן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "e70e8fc885b4ed80c46f04da",
+      "category": "pastries",
+      "name": "מאפה פטה פסטו",
+      "unit": null,
+      "aliases": [],
+      "description": "פטה עיזים עדינה, פסטו, ריבת עגבניות ופרמז׳ן",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a8e85e242667d0b55a9cef1",
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מאפה פטה פסטו",
+        "description": "פטה עיזים עדינה, פסטו, ריבת עגבניות ופרמז׳ן",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "פטה עיזים עדינה",
+        "פסטו",
+        "ריבת עגבניות",
+        "פרמז׳ן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "d00da1c0dbaa52a0478fe6e2",
+      "category": "pastries",
+      "name": "סינבון",
+      "unit": null,
+      "aliases": [],
+      "description": "מאפה סינבון עם טופינג קרם פרש",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/698c9001aa0a0db65f31a444",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "סינבון",
+        "description": "מאפה סינבון עם טופינג קרם פרש",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "מאפה סינבון עם טופינג קרם פרש"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "c5ec3e5da4c2646b80879efe",
+      "category": "pastries",
+      "name": "מאפה שמנת ותותים",
+      "unit": null,
+      "aliases": [],
+      "description": "דניש במילוי קרם עוגת גבינה שמנת חמוצה תותים ומרנג",
+      "staff_description": null,
+      "price": 52,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69a5775b0097d8cf33f4d28c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מאפה שמנת ותותים",
+        "description": "דניש במילוי קרם עוגת גבינה שמנת חמוצה תותים ומרנג",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "דניש במילוי קרם עוגת גבינה שמנת חמוצה תותים",
+        "מרנג"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "bc0459e190e874c1104c9f1b",
+      "category": "pastries",
+      "name": "מאפה פיסטוק",
+      "unit": null,
+      "aliases": [],
+      "description": "דניש ממולא פטיסייר פיסטוק, פרלינה פיסטוק ושנטיי פיסטוק",
+      "staff_description": null,
+      "price": 52,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69a6b2b826716d0c87866f5f",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מאפה פיסטוק",
+        "description": "דניש ממולא פטיסייר פיסטוק, פרלינה פיסטוק ושנטיי פיסטוק",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "דניש ממולא פטיסייר פיסטוק",
+        "פרלינה פיסטוק",
+        "שנטיי פיסטוק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "f95adde52046a88fde712e96",
+      "category": "pastries",
+      "name": "דניש בייגלה מלוח ושוקולד דולצ׳ה",
+      "unit": null,
+      "aliases": [],
+      "description": "פרלינה ופטיסייר בייגלה , שנטיי דולצ׳ה ובייגלה מצופה שוקולד דולצ׳ה",
+      "staff_description": null,
+      "price": 52,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69b90bffea86514058d54928",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "דניש בייגלה מלוח ושוקולד דולצ׳ה",
+        "description": "פרלינה ופטיסייר בייגלה , שנטיי דולצ׳ה ובייגלה מצופה שוקולד דולצ׳ה",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "פרלינה",
+        "פטיסייר בייגלה",
+        "שנטיי דולצ׳ה",
+        "בייגלה מצופה שוקולד דולצ׳ה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "1c761cf57adf05ddc4138c3a",
+      "category": "pastries",
+      "name": "מאפה לאבנה בצל וסומק",
+      "unit": null,
+      "aliases": [
+        "קרואסון בצל סומק"
+      ],
+      "description": "בצל סגול בסומק, כדורי לאבנה מצופים זעתר ושומשום",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a96c7cfd702608a9624af5a",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מאפה לאבנה בצל וסומק",
+        "description": "בצל סגול בסומק, כדורי לאבנה מצופים זעתר ושומשום",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצל סגול בסומק",
+        "כדורי לאבנה מצופים זעתר",
+        "שומשום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "9baedfae4facf48ad3d38085",
+      "category": "pastries",
+      "name": "פרעצל קרואסון",
+      "unit": null,
+      "aliases": [
+        "פרעצל"
+      ],
+      "description": "בצק קרואסון בצורת פרעצל עם גבינת צ׳דר, מוצרלה ופרמז׳ן",
+      "staff_description": "עם צ׳דר ופרמזן",
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a96c7c86d77354c0b2a0765",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "פרעצל קרואסון",
+        "description": "בצק קרואסון בצורת פרעצל עם גבינת צ׳דר, מוצרלה ופרמז׳ן",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "מאפים",
+      "ingredients": [
+        "בצק קרואסון בצורת פרעצל עם גבינת צ׳דר",
+        "מוצרלה",
+        "פרמז׳ן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": null,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים"
+      ],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-burrata-pizza",
+      "category": "pastries",
+      "name": "פיצה בוראטה",
+      "description": "",
+      "category_name": "מאפים",
+      "ingredients": [],
+      "is_wolt": false
+    },
+    {
+      "unit": null,
+      "aliases": [
+        "מאפה צאדר"
+      ],
+      "staff_description": null,
+      "price": null,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-cheddar-pastry",
+      "category": "pastries",
+      "name": "מאפה צ׳דר",
+      "description": "קרואסון במילוי צ׳דר ופטה פסטו",
+      "category_name": "מאפים",
+      "ingredients": [
+        "קרואסון במילוי צ׳דר",
+        "פטה פסטו"
+      ],
+      "is_wolt": false
+    },
+    {
+      "id": "8fb5fe593fcb7a3576b097ed",
+      "category": "patisserie",
+      "name": "מילפיי",
+      "unit": "אישי",
+      "aliases": [],
+      "description": "בצק עלים במילוי קרם פטיסייר, פקאן ומלח גס אטלנטי",
+      "staff_description": "שכבות של בצק עלים, קרם פטיסייר, קרמל, פקאנים מקורמלים ומלח גס אטלנטי",
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b12a3c67a5c9ffb5061c9",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מילפיי | אישי",
+        "description": "בצק עלים במילוי קרם פטיסייר, פקאן ומלח גס אטלנטי",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "בצק עלים במילוי קרם פטיסייר",
+        "פקאן",
+        "מלח גס אטלנטי"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "9f5f80bb3dcb2fa06bb28d0e",
+      "category": "patisserie",
+      "name": "ביצת פברז’ה",
+      "unit": null,
+      "aliases": [
+        "ביצת פברז׳ה"
+      ],
+      "description": "שוקולד דולצ'ה, מוס יוגורט, קראמבל וניל וקולי מנגו פסיפלורה",
+      "staff_description": "מוס יוגורט וקולי מנגו פסיפלורה על ספוג וניל, הביצה עשויה משוקולד דולצ׳ה (לבן מקורמל)",
+      "price": 72,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b3e6ac67a5c9ffb506f81",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "ביצת פברז’ה",
+        "description": "שוקולד דולצ'ה, מוס יוגורט, קראמבל וניל וקולי מנגו פסיפלורה",
+        "price": 72,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "שוקולד דולצ'ה",
+        "מוס יוגורט",
+        "קראמבל וניל",
+        "קולי מנגו פסיפלורה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "3bbe718bba4bce04bb3d6b8d",
+      "category": "patisserie",
+      "name": "100% בוטנים",
+      "unit": null,
+      "aliases": [
+        "מוס בוטנים"
+      ],
+      "description": "בצק פריך, פטיסייר בוטנים, מוס בוטנים, מצופה שוקולד דולצ׳ה",
+      "staff_description": null,
+      "price": 52,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b3eb0c67a5c9ffb506f94",
+      "tags": [],
+      "notes": [
+        "תוקן לפי העובדת: זה מוס בוטנים (בוולט כתוב מוס וניל)"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "100% בוטנים",
+        "description": "בצק פריך, קרם פטיסייר, פרלינה בוטנים, מוס וניל ופייטה בוטנים בציפוי שוקולד דולצ׳ה",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "בצק פריך",
+        "פטיסייר בוטנים",
+        "מוס בוטנים",
+        "מצופה שוקולד דולצ׳ה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "fba4eba20a8e5f2bcfa0fe07",
+      "category": "patisserie",
+      "name": "מוס קרואסון",
+      "unit": null,
+      "aliases": [],
+      "description": "מוס וניל עם צ׳אנקים של קרואסון חמאה, בליווי של חמאה חומה וקרמל רך בציפוי של שוקולד דולצ׳ה",
+      "staff_description": "יושב על ביסקוויט חמאה חומה, ממולא מוס וניל, קרמל וקרעים של קרואסון חמאה",
+      "price": 72,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b4019c67a5c9ffb506fde",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מוס קרואסון",
+        "description": "מוס וניל עם צ׳אנקים של קרואסון חמאה, בליווי של חמאה חומה וקרמל רך בציפוי של שוקולד דולצ׳ה",
+        "price": 72,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "מוס וניל עם צ׳אנקים של קרואסון חמאה",
+        "בליווי של חמאה חומה",
+        "קרמל רך בציפוי של שוקולד דולצ׳ה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "e5b2e57bb8ebf15560ab506b",
+      "category": "patisserie",
+      "name": "מוס שוקולד",
+      "unit": "אישי",
+      "aliases": [],
+      "description": "מוס שוקולד מ- 4 סוגים של שוקולד, קראנץ פרלינה לוז ומלח",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aaa8ccb2598ad7fccb2a9c0",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מוס שוקולד | אישי",
+        "description": "מוס שוקולד מ- 4 סוגים של שוקולד, קראנץ פרלינה לוז ומלח",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "מוס שוקולד מ- 4 סוגים של שוקולד",
+        "קראנץ פרלינה לוז",
+        "מלח"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b30174ad5c3562ded32d2b4e",
+      "category": "patisserie",
+      "name": "מקל וניל",
+      "unit": null,
+      "aliases": [
+        "מוס וניל"
+      ],
+      "description": "מוס וניל, אורז בחלב, פרלינה שקדים פייטה שוקולד לבן ושוקולד חלב",
+      "staff_description": "פודינג אורז בחלב, שכבות של וניל ופרלינה של אגוזי לוז",
+      "price": 62,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a177cc2bf4cafab97b8b51",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מקל וניל",
+        "description": "מוס וניל, אורז בחלב, פרלינה שקדים פייטה שוקולד לבן ושוקולד חלב",
+        "price": 62,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "מוס וניל",
+        "אורז בחלב",
+        "פרלינה שקדים פייטה שוקולד לבן",
+        "שוקולד חלב"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "386e0fd038eb331f36fe4517",
+      "category": "patisserie",
+      "name": "סנט הונורה",
+      "unit": "אישי",
+      "aliases": [],
+      "description": "פחזניות מקורמלות במילוי קרם פטיסייר וניל על בצק עלים מקורמל עם גנאש וניל מוקצף",
+      "staff_description": "פחזניות מקורמלות ממולאות בקרם פטיסייר עם גנאש וניל מוקצף",
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b12d29e033e41ab6f8ade",
+      "tags": [],
+      "notes": [
+        "יש גם עוגה שלמה בדלפק: ראו סנט הונורה (עוגה שלמה)"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "סנט הונורה | אישי",
+        "description": "פחזניות מקורמלות במילוי קרם פטיסייר וניל על בצק עלים מקורמל עם גנאש וניל מוקצף",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "פחזניות מקורמלות במילוי קרם פטיסייר וניל על בצק עלים מקורמל עם גנאש וניל מוקצף"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "35a27ec45f2325773b258ba4",
+      "category": "patisserie",
+      "name": "מוס תותים",
+      "unit": "אישי",
+      "aliases": [
+        "מוס פטל"
+      ],
+      "description": "מוס וניל, דיסקית מרנג, קולי פטל, זילוף שנטי שוקולד לבן",
+      "staff_description": "מרנג אפוי עטוף מוס וניל עם דיסקית שוקולד לבן וקולי פטל",
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aaa8ccb2598ad7fccb2a9c1",
+      "tags": [],
+      "notes": [
+        "נקרא גם \"מוס פטל\". זה המוס האישי, לא מוס הפטל בפס (85 ₪)"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מוס תותים | אישי",
+        "description": "מוס וניל, דיסקית מרנג, קולי פטל, זילוף שנטי שוקולד לבן",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "מוס וניל",
+        "דיסקית מרנג",
+        "קולי פטל",
+        "זילוף שנטי שוקולד לבן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "755289c9ce2cb9450e81926b",
+      "category": "patisserie",
+      "name": "טארט לימון",
+      "unit": "אישי",
+      "aliases": [],
+      "description": "סאבלה שקדים, קרם לימון קולי נענע ומרנג חרוך",
+      "staff_description": null,
+      "price": 52,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b13cb9e033e41ab6f8b02",
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "מכיל מרנג (ביצים)",
+        "יש גלוטן"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט לימון | אישי",
+        "description": "סאבלה שקדים, קרם לימון קולי נענע ומרנג חרוך",
+        "price": 52,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "סאבלה שקדים",
+        "קרם לימון קולי נענע",
+        "מרנג חרוך"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "7a8bf24ca47cf311d2d0397b",
+      "category": "patisserie",
+      "name": "טראפלס",
+      "unit": "אישי",
+      "aliases": [],
+      "description": "",
+      "staff_description": "שלושה סוגים של שוקולד מתומרנים עם קראנץ׳",
+      "price": 12,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b134f9e033e41ab6f8af2",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טראפלס | אישי",
+        "description": "",
+        "price": 12,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "שלושה סוגים של שוקולד מתומרנים עם קראנץ׳"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "8801223c797d36b09720d1b0",
+      "category": "patisserie",
+      "name": "עוגיית מדלן",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": "עוגה צרפתית נימוחה ממולאת בקרם ומצופה בשוקולד",
+      "price": 12,
+      "sizes": [],
+      "choices": [
+        "פטל",
+        "שוקולד אגוזי לוז",
+        "פיסטוק",
+        "קרמל"
+      ],
+      "image": "https://imageproxy.wolt.com/assets/689b13acc67a5c9ffb506222",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "עוגיית מדלן",
+        "description": "",
+        "price": 12,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "עוגה צרפתית נימוחה ממולאת בקרם",
+        "מצופה בשוקולד"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "adbd720d7f7e1e83d993c8c2",
+      "category": "patisserie",
+      "name": "מקרון",
+      "unit": "1 יח׳",
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 9,
+      "sizes": [],
+      "choices": [
+        "פיסטוק",
+        "פטל",
+        "קסיס",
+        "מנגו פסיפלורה"
+      ],
+      "image": "https://imageproxy.wolt.com/assets/689b132ec67a5c9ffb5061f4",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מקרון | 1 יח׳",
+        "description": "",
+        "price": 9,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "cbcacd7ac7f3fe2d7fcb0a0f",
+      "category": "patisserie",
+      "name": "טארט פיסטוק אישי",
+      "unit": null,
+      "aliases": [],
+      "description": "קלתית בצק פריך בציפוי פיסטוקים גרוסים, במילוי קראנץ פיסטוק, קרם פטיסייר פיסטוק וזילוף שנטי פיסטוק",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6a96c72bd702608a9624af20",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "טארט פיסטוק אישי",
+        "description": "קלתית בצק פריך בציפוי פיסטוקים גרוסים, במילוי קראנץ פיסטוק, קרם פטיסייר פיסטוק וזילוף שנטי פיסטוק",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "קלתית בצק פריך בציפוי פיסטוקים גרוסים",
+        "במילוי קראנץ פיסטוק",
+        "קרם פטיסייר פיסטוק",
+        "זילוף שנטי פיסטוק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "df6a97166c9269d43c0d20ba",
+      "category": "patisserie",
+      "name": "פבלובה אישית",
+      "unit": null,
+      "aliases": [],
+      "description": "בסיס מרנג אפוי, במילוי שנטי וניל וקולי תות",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aaa8cca2598ad7fccb2a9bf",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "פבלובה אישית",
+        "description": "בסיס מרנג אפוי, במילוי שנטי וניל וקולי תות",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "בסיס מרנג אפוי",
+        "במילוי שנטי וניל",
+        "קולי תות"
+      ],
+      "is_wolt": true
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": null,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-chocolate-flower",
+      "category": "patisserie",
+      "name": "פרח שוקולד",
+      "description": "שכבות של מוסים של שוקולד ג׳אנדויה ופרלינה של אגוזי לוז",
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "שכבות של מוסים של שוקולד ג׳אנדויה",
+        "פרלינה של אגוזי לוז"
+      ],
+      "is_wolt": false
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": null,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-dark-chocolate-mousse",
+      "category": "patisserie",
+      "name": "מוס שוקולד מריר",
+      "description": "ביסקוויט טבול באספרסו עם קרמו שוקולד מריר, פרלינה שקדים וקפה וגנאש שוקולד מריר",
+      "category_name": "פטיסרי",
+      "ingredients": [
+        "ביסקוויט טבול באספרסו עם קרמו שוקולד מריר",
+        "פרלינה שקדים",
+        "קפה",
+        "גנאש שוקולד מריר"
+      ],
+      "is_wolt": false
+    },
+    {
+      "id": "bb2ef830690fd64525e6c975",
+      "category": "cakes",
+      "name": "מוס פיסטוק",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות מוס, פייטה פיסטוק ושוקולד לבן, דקוואז וניל ופרלינה פיסטוק",
+      "staff_description": null,
+      "price": 85,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689c2f1b39adb1f40a6a9c0c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מוס פיסטוק",
+        "description": "שכבות מוס, פייטה פיסטוק ושוקולד לבן, דקוואז וניל ופרלינה פיסטוק",
+        "price": 85,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות מוס",
+        "פייטה פיסטוק",
+        "שוקולד לבן",
+        "דקוואז וניל",
+        "פרלינה פיסטוק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "5798d6fe98d634f038ed4de7",
+      "category": "cakes",
+      "name": "מוס פטל",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות מוס, פייטה פטל ושוקולד לבן, דקוואז וניל וקולי פטל",
+      "staff_description": null,
+      "price": 85,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689c2f6939adb1f40a6a9c15",
+      "tags": [],
+      "notes": [
+        "מוס פטל בפס. שונה ממוס התותים האישי (שנקרא גם מוס פטל)"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מוס פטל",
+        "description": "שכבות מוס, פייטה פטל ושוקולד לבן, דקוואז וניל וקולי פטל",
+        "price": 85,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות מוס",
+        "פייטה פטל",
+        "שוקולד לבן",
+        "דקוואז וניל",
+        "קולי פטל"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "3723b8da6ac1dc8b7e4b5783",
+      "category": "cakes",
+      "name": "מוס שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות מוס, דקוואז שוקולד פייטה לוז ושוקולד חלב",
+      "staff_description": null,
+      "price": 85,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689c2f9739adb1f40a6a9c1b",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מוס שוקולד",
+        "description": "שכבות מוס, דקוואז שוקולד פייטה לוז ושוקולד חלב",
+        "price": 85,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות מוס",
+        "דקוואז שוקולד פייטה לוז",
+        "שוקולד חלב"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "afa830ee950b92edb14fa0bc",
+      "category": "cakes",
+      "name": "בחושה פרלינה אגוזי לוז",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 55,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/68a178f13b13bfd3a588cee0",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "בחושה פרלינה אגוזי לוז",
+        "description": "",
+        "price": 55,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "f5b9964aced171dfdb79d89c",
+      "category": "cakes",
+      "name": "טירמיסו",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
+      "staff_description": null,
+      "price": 85,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b622f9ec96fca3dd61837",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "טירמיסו",
+        "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
+        "price": 85,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות של גנאש מסקרפונה",
+        "בישקוטים בליווי של קפה",
+        "בעיטור קקאו"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "2f4c4838ca3fb0c03d75dcad",
+      "category": "cakes",
+      "name": "קערת טירמיסו",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
+      "staff_description": null,
+      "price": 280,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264822af77c1f54bcff94",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קערת טירמיסו",
+        "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
+        "price": 280,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות של קרם זביונה",
+        "בישקוטי טבולים באספרסו",
+        "שכבת קקאו"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "7619d91f6849ab6c76bfab38",
+      "category": "cakes",
+      "name": "קערת שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
+      "staff_description": null,
+      "price": 280,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264882af77c1f54bcff95",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קערת שוקולד",
+        "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
+        "price": 280,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "תחתית של בחושת שוקולד",
+        "פרלינה לוז",
+        "קראנץ שוקולד",
+        "גנאש שוקולד מריר",
+        "מוס שוקולד"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "93b2a2a78eae4b4fe73f00c6",
+      "category": "cakes",
+      "name": "מוס פרח פטל",
+      "unit": null,
+      "aliases": [
+        "מוס פרח אדום"
+      ],
+      "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
+      "staff_description": null,
+      "price": 250,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264772af77c1f54bcff8e",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מוס פרח פטל",
+        "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
+        "price": 250,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "תחתית של דקואז שקדים",
+        "קראנץ שקדים",
+        "מרמלדת פטל",
+        "גנאש פטל",
+        "מוס שוקולד לבן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": 150,
+      "sizes": [
+        {
+          "label": "גודל 14",
+          "price": 150
+        },
+        {
+          "label": "גודל 16",
+          "price": 200
+        },
+        {
+          "label": "גודל 18",
+          "price": 250
+        }
+      ],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-st-honore-whole",
+      "category": "cakes",
+      "name": "סנט הונורה (עוגה שלמה)",
+      "description": "פחזניות מקורמלות עם קרם פטיסייר וגנאש וניל מוקצף",
+      "category_name": "עוגות",
+      "ingredients": [
+        "פחזניות מקורמלות עם קרם פטיסייר",
+        "גנאש וניל מוקצף"
+      ],
+      "is_wolt": false
+    },
+    {
+      "id": "c6cc053009d8b31bf827a42f",
+      "category": "tarts",
+      "name": "טארט פיסטוק",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק פריך פיסטוק, פטיסייר פיסטוק, גנאש פיסטוק ושוקולד לבן מוקצף בעיטור פחזניות במילוי פרלינה פיסטוק",
+      "staff_description": "טעמי פיסטוק ושוקולד לבן",
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1d5e9e033e41ab6f8da9",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט פיסטוק",
+        "description": "בצק פריך פיסטוק, פטיסייר פיסטוק, גנאש פיסטוק ושוקולד לבן מוקצף בעיטור פחזניות במילוי פרלינה פיסטוק",
+        "price": 150,
+        "sizes": [
+          {
+            "label": "קוטר 16",
+            "price": 150
+          },
+          {
+            "label": "קוטר 18",
+            "price": 250
+          }
+        ]
+      },
+      "category_name": "טארטים",
+      "ingredients": [
+        "בצק פריך פיסטוק",
+        "פטיסייר פיסטוק",
+        "גנאש פיסטוק",
+        "שוקולד לבן מוקצף בעיטור פחזניות במילוי פרלינה פיסטוק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "6dc756875d590af77d881df6",
+      "category": "tarts",
+      "name": "טארט שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק פריך לוז, פטיסייר ג'אנדויה, גנאש שוקולד מוקצף בעיטור פחזניות במילוי פרלינה אגוזי לוז",
+      "staff_description": "פרלינה אגוזי לוז, שנטי שוקולד חלב ג׳אנדויה",
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1d709ec96fca3dd5fcdf",
+      "tags": [
+        "חלב נוכרי"
+      ],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט שוקולד",
+        "description": "בצק פריך לוז, פטיסייר ג'אנדויה, גנאש שוקולד מוקצף בעיטור פחזניות במילוי פרלינה אגוזי לוז",
+        "price": 150,
+        "sizes": [
+          {
+            "label": "קוטר 16",
+            "price": 150
+          },
+          {
+            "label": "קוטר 18",
+            "price": 250
+          }
+        ]
+      },
+      "category_name": "טארטים",
+      "ingredients": [
+        "בצק פריך לוז",
+        "פטיסייר ג'אנדויה",
+        "גנאש שוקולד מוקצף בעיטור פחזניות במילוי פרלינה אגוזי לוז"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "6997cdba6fae2e6df6ffea84",
+      "category": "tarts",
+      "name": "טארט פקאן",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק פריך פקאן, קראנץ׳ שוקולד דולצ׳ה, פרלינה פקאן, גנאש דולצ׳ה מוקצף, פקאן מקורמל",
+      "staff_description": "פקאן ושוקולד דולצ׳ה (לבן מקורמל)",
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1d8bc67a5c9ffb5065fb",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט פקאן",
+        "description": "בצק פריך פקאן, קראנץ׳ שוקולד דולצ׳ה, פרלינה פקאן, גנאש דולצ׳ה מוקצף, פקאן מקורמל",
+        "price": 150,
+        "sizes": [
+          {
+            "label": "קוטר 16",
+            "price": 150
+          },
+          {
+            "label": "קוטר 18",
+            "price": 250
+          }
+        ]
+      },
+      "category_name": "טארטים",
+      "ingredients": [
+        "בצק פריך פקאן",
+        "קראנץ׳ שוקולד דולצ׳ה",
+        "פרלינה פקאן",
+        "גנאש דולצ׳ה מוקצף",
+        "פקאן מקורמל"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "ed187404469b2ad442a1c0b0",
+      "category": "tarts",
+      "name": "טארט פטל",
+      "unit": null,
+      "aliases": [
+        "טארט פירות יער",
+        "טארט פטיסייר ופירות יער"
+      ],
+      "description": "בצק פריך, קראנץ׳ שוקולד לבן, פטיסיייר וניל, קולי פטל וגנאש וניל מוקצף",
+      "staff_description": null,
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b251ec67a5c9ffb506851",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט פטל",
+        "description": "בצק פריך, קראנץ׳ שוקולד לבן, פטיסיייר וניל, קולי פטל וגנאש וניל מוקצף",
+        "price": 150,
+        "sizes": [
+          {
+            "label": "קוטר 16",
+            "price": 150
+          },
+          {
+            "label": "קוטר 18",
+            "price": 250
+          }
+        ]
+      },
+      "category_name": "טארטים",
+      "ingredients": [
+        "בצק פריך",
+        "קראנץ׳ שוקולד לבן",
+        "פטיסיייר וניל",
+        "קולי פטל",
+        "גנאש וניל מוקצף"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "db377380ea34087de6a16d0d",
+      "category": "tarts",
+      "name": "טארט לימון",
+      "unit": null,
+      "aliases": [],
+      "description": "בצק פריך, קרם לימון, קולי לימונענע ומרנג חרוך",
+      "staff_description": null,
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b3bebc67a5c9ffb506ef5",
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "מכיל מרנג (ביצים)",
+        "יש גלוטן"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "טארט לימון",
+        "description": "בצק פריך, קרם לימון, קולי לימונענע ומרנג חרוך",
+        "price": 150,
+        "sizes": [
+          {
+            "label": "קוטר 16",
+            "price": 150
+          },
+          {
+            "label": "קוטר 18",
+            "price": 250
+          }
+        ]
+      },
+      "category_name": "טארטים",
+      "ingredients": [
+        "בצק פריך",
+        "קרם לימון",
+        "קולי לימונענע",
+        "מרנג חרוך"
+      ],
+      "is_wolt": true
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-tart-peanut",
+      "category": "tarts",
+      "name": "טארט בוטנים",
+      "description": "קראנץ׳ בוטנים, פטיסייר בוטנים, מוס בוטנים",
+      "category_name": "טארטים",
+      "ingredients": [
+        "קראנץ׳ בוטנים",
+        "פטיסייר בוטנים",
+        "מוס בוטנים"
+      ],
+      "is_wolt": false
+    },
+    {
+      "unit": null,
+      "aliases": [],
+      "staff_description": null,
+      "price": 150,
+      "sizes": [
+        {
+          "label": "קוטר 16",
+          "price": 150
+        },
+        {
+          "label": "קוטר 18",
+          "price": 200
+        }
+      ],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "staff",
+      "wolt": null,
+      "id": "staff-tart-mango",
+      "category": "tarts",
+      "name": "טארט מנגו פסיפלורה",
+      "description": "",
+      "category_name": "טארטים",
+      "ingredients": [],
+      "is_wolt": false
+    },
+    {
+      "id": "abfda6b4f19f1ba835f263b5",
+      "category": "sandwiches",
+      "name": "כריך כמהין",
+      "unit": null,
+      "aliases": [],
+      "description": "גאודה כמהין, ריבת בצל, שמנת פסטו, עלי רוקט ובלסמי מצומצם",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b14e69e033e41ab6f8b5c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך כמהין",
+        "description": "גאודה כמהין, ריבת בצל, שמנת פסטו, עלי רוקט ובלסמי מצומצם",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "גאודה כמהין",
+        "ריבת בצל",
+        "שמנת פסטו",
+        "עלי רוקט",
+        "בלסמי מצומצם"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "144a854d9b94b9d923f01968",
+      "category": "sandwiches",
+      "name": "כריך 4 גבינות",
+      "unit": null,
+      "aliases": [],
+      "description": "בגט צרוב עם שמן זית ושום בטאבון במילוי 4 סוגי גבינות, תרד וריבת בצל",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b153d9e033e41ab6f8b81",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך 4 גבינות",
+        "description": "בגט צרוב עם שמן זית ושום בטאבון במילוי 4 סוגי גבינות, תרד וריבת בצל",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "בגט צרוב עם שמן זית",
+        "שום בטאבון במילוי 4 סוגי גבינות",
+        "תרד",
+        "ריבת בצל"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "2decad81def3554720c831fe",
+      "category": "sandwiches",
+      "name": "כריך קפרזה",
+      "unit": null,
+      "aliases": [],
+      "description": "מוצרלה פרסקה, עגבניות, רוקט, שמן זית, בלסמי מצומצם, מלח גס ועלי בזיליקום",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b15089ec96fca3dd5fb0b",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך קפרזה",
+        "description": "מוצרלה פרסקה, עגבניות, רוקט, שמן זית, בלסמי מצומצם, מלח גס ועלי בזיליקום",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "מוצרלה פרסקה",
+        "עגבניות",
+        "רוקט",
+        "שמן זית",
+        "בלסמי מצומצם",
+        "מלח גס",
+        "עלי בזיליקום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "21d8075fc0e6f65e35811943",
+      "category": "sandwiches",
+      "name": "כריך טונה",
+      "unit": null,
+      "aliases": [],
+      "description": "טונה עם מיונז ופסטו, חסה לליק וצנונית",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b15af9e033e41ab6f8ba2",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך טונה",
+        "description": "טונה עם מיונז ופסטו, חסה לליק וצנונית",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "טונה עם מיונז",
+        "פסטו",
+        "חסה לליק",
+        "צנונית"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "0972dd9617e96f886ad3f7ea",
+      "category": "sandwiches",
+      "name": "כריך סלמון",
+      "unit": null,
+      "aliases": [],
+      "description": "סלמון נורווגי מעושן, גבינת שמנת, חסה לליק, ליים, ריבת בצל ופרמז׳ן",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b158f9e033e41ab6f8b9a",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך סלמון",
+        "description": "סלמון נורווגי מעושן, גבינת שמנת, חסה לליק, ליים, ריבת בצל ופרמז׳ן",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "סלמון נורווגי מעושן",
+        "גבינת שמנת",
+        "חסה לליק",
+        "ליים",
+        "ריבת בצל",
+        "פרמז׳ן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b8728b234140de319a00831c",
+      "category": "sandwiches",
+      "name": "כריך פטה פסטו",
+      "unit": null,
+      "aliases": [],
+      "description": "גבינת פטה עיזים פסטו עדינה, ריבת עגבניות שרי, חמאה וחסה לליק",
+      "staff_description": null,
+      "price": 44,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b15e09e033e41ab6f8bac",
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "כריך פטה פסטו",
+        "description": "גבינת פטה עיזים פסטו עדינה, ריבת עגבניות שרי, חמאה וחסה לליק",
+        "price": 44,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "גבינת פטה עיזים פסטו עדינה",
+        "ריבת עגבניות שרי",
+        "חמאה",
+        "חסה לליק"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "bcfa957120ff34bbe138461d",
+      "category": "sandwiches",
+      "name": "כריך סלק",
+      "unit": null,
+      "aliases": [],
+      "description": "סלק בבלסמי ושמן זית, גבינת פטה עיזים עדינה, עלי רוקט וגבינת עיזים",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b15c6c67a5c9ffb506427",
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "כריך סלק",
+        "description": "סלק בבלסמי ושמן זית, גבינת פטה עיזים עדינה, עלי רוקט וגבינת עיזים",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "סלק בבלסמי",
+        "שמן זית",
+        "גבינת פטה עיזים עדינה",
+        "עלי רוקט",
+        "גבינת עיזים"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "cf07661c757dcdce25457f36",
+      "category": "sandwiches",
+      "name": "כריך אנלוטי",
+      "unit": null,
+      "aliases": [],
+      "description": "לחם מחמצת צרוב עם גבינת עיזים, חמאת עגבניות, רוקט עם חמאת עשבי תיבול ועלי בזיליקום",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b15fbc67a5c9ffb50642c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך אנלוטי",
+        "description": "לחם מחמצת צרוב עם גבינת עיזים, חמאת עגבניות, רוקט עם חמאת עשבי תיבול ועלי בזיליקום",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "לחם מחמצת צרוב עם גבינת עיזים",
+        "חמאת עגבניות",
+        "רוקט עם חמאת עשבי תיבול",
+        "עלי בזיליקום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "63bfbdb9b48c3b445488a9a5",
+      "category": "sandwiches",
+      "name": "כריך סלט ביצים",
+      "unit": null,
+      "aliases": [],
+      "description": "בייגל, סלט ביצים, רוקט וצנונית",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69aa759726e70932d7328754",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כריך סלט ביצים",
+        "description": "בייגל, סלט ביצים, רוקט וצנונית",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "בייגל",
+        "סלט ביצים",
+        "רוקט",
+        "צנונית"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "c50696c1f7e3dd694dbe2cc9",
+      "category": "sandwiches",
+      "name": "בייגל גריל צ׳יז",
+      "unit": null,
+      "aliases": [],
+      "description": "רוטב עגבניות, גאודה, מוצרלה, פרמזן וטימין",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69bfa482282473d42b9d2659",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "בייגל גריל צ׳יז",
+        "description": "רוטב עגבניות, גאודה, מוצרלה, פרמזן וטימין",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "כריכים",
+      "ingredients": [
+        "רוטב עגבניות",
+        "גאודה",
+        "מוצרלה",
+        "פרמזן",
+        "טימין"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "1de10fe011a8706414737de8",
+      "category": "cookies",
+      "name": "קוקיז שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "עוגיית שוקולד צ'יפס עם שלושה סוגי שוקולד ומלח אטלנטי",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1417c67a5c9ffb506253",
+      "tags": [],
+      "notes": [
+        "טעמי קוקיז לפי העובדת: ג׳אנדויה, פטל ושוקולד לבן, פרלינה ואגוזי לוז, פיסטוק ושוקולד לבן"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "קוקיז שוקולד",
+        "description": "עוגיית שוקולד צ'יפס עם שלושה סוגי שוקולד ומלח אטלנטי",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "עוגיות",
+      "ingredients": [
+        "עוגיית שוקולד צ'יפס עם שלושה סוגי שוקולד",
+        "מלח אטלנטי"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "abd5685d979bb6cb3ae31765",
+      "category": "cookies",
+      "name": "קוקיז פטל ושוקולד לבן",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6ab0ed3e3faa2f43d8e9834c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קוקיז פטל ושוקולד לבן",
+        "description": "",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "עוגיות",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "db55fb6d31cfabbc66244387",
+      "category": "breads",
+      "name": "בגט מחמצת",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 16,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1e6dc67a5c9ffb506646",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "בגט מחמצת",
+        "description": "",
+        "price": 16,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "26726b1f381210f6fea41838",
+      "category": "breads",
+      "name": "בגט מחמצת דגנים",
+      "unit": null,
+      "aliases": [],
+      "description": "",
+      "staff_description": null,
+      "price": 16,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b3b539e033e41ab6f986f",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "בגט מחמצת דגנים",
+        "description": "",
+        "price": 16,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "5385c6118410603c833a47a0",
+      "category": "breads",
+      "name": "לחם דגנים",
+      "unit": null,
+      "aliases": [],
+      "description": "מחמצת כוסמין ותערובת דגנים",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b35ea9e033e41ab6f95d1",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "לחם דגנים",
+        "description": "מחמצת כוסמין ותערובת דגנים",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [
+        "מחמצת כוסמין",
+        "תערובת דגנים"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "19539b7e849b28cbbca921ff",
+      "category": "breads",
+      "name": "לחם זיתי קלמטה",
+      "unit": null,
+      "aliases": [],
+      "description": "מחמצת שיפון וזיתי קלמטה",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1ece9e033e41ab6f8e10",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "לחם זיתי קלמטה",
+        "description": "מחמצת שיפון וזיתי קלמטה",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [
+        "מחמצת שיפון",
+        "זיתי קלמטה"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "50f41e80c81e217e5167330c",
+      "category": "breads",
+      "name": "לחם אגוזים",
+      "unit": null,
+      "aliases": [],
+      "description": "מחמת שיפון מלא ואגוזים",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1ee79ec96fca3dd5fd55",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "לחם אגוזים",
+        "description": "מחמת שיפון מלא ואגוזים",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [
+        "מחמת שיפון מלא",
+        "אגוזים"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "7fa61b11e988fdf8df8a9c05",
+      "category": "breads",
+      "name": "לחם כוסמין",
+      "unit": null,
+      "aliases": [],
+      "description": "מחמצת כוסמין מלא",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1ece9e033e41ab6f8e10",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "לחם כוסמין",
+        "description": "מחמצת כוסמין מלא",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [
+        "מחמצת כוסמין מלא"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b8af69e63eeb94794c73a22e",
+      "category": "breads",
+      "name": "לחם עגבניות מיובשות",
+      "unit": null,
+      "aliases": [],
+      "description": "מחמצת שיפון מלא ועגבניות מיובשות",
+      "staff_description": null,
+      "price": 28,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b1ece9e033e41ab6f8e10",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "לחם עגבניות מיובשות",
+        "description": "מחמצת שיפון מלא ועגבניות מיובשות",
+        "price": 28,
+        "sizes": []
+      },
+      "category_name": "לחמים",
+      "ingredients": [
+        "מחמצת שיפון מלא",
+        "עגבניות מיובשות"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "664e607f2c7b9b044064b791",
+      "category": "salads",
+      "name": "סלט יווני",
+      "unit": null,
+      "aliases": [],
+      "description": "חסה, מלפפון, עגבניות שרי אדומות, פטה עיזים עדינה, טפנד זיתים, אורגנו טרי וצנונית",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b162c9ec96fca3dd5fb6f",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "סלט יווני",
+        "description": "חסה, מלפפון, עגבניות שרי אדומות, פטה עיזים עדינה, טפנד זיתים, אורגנו טרי וצנונית",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "סלטים",
+      "ingredients": [
+        "חסה",
+        "מלפפון",
+        "עגבניות שרי אדומות",
+        "פטה עיזים עדינה",
+        "טפנד זיתים",
+        "אורגנו טרי",
+        "צנונית"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "2275bdc4852a044c129ea6df",
+      "category": "salads",
+      "name": "סלט קפרזה",
+      "unit": null,
+      "aliases": [],
+      "description": "ארבעה סוגים של שרי, חסה סלנובה, מוצרלה פרסקה ובזיליקום",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b164b9ec96fca3dd5fb74",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "סלט קפרזה",
+        "description": "ארבעה סוגים של שרי, חסה סלנובה, מוצרלה פרסקה ובזיליקום",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "סלטים",
+      "ingredients": [
+        "ארבעה סוגים של שרי",
+        "חסה סלנובה",
+        "מוצרלה פרסקה",
+        "בזיליקום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "998ed9e3f8b79cca4c2ea5c9",
+      "category": "salads",
+      "name": "סלט קיסר",
+      "unit": null,
+      "aliases": [],
+      "description": "חסה קיסר, פרמזן גרנה פדנו, קרוטוני מחמצת ורוטב קיסר",
+      "staff_description": null,
+      "price": 58,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b165f9e033e41ab6f8bfc",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "סלט קיסר",
+        "description": "חסה קיסר, פרמזן גרנה פדנו, קרוטוני מחמצת ורוטב קיסר",
+        "price": 58,
+        "sizes": []
+      },
+      "category_name": "סלטים",
+      "ingredients": [
+        "חסה קיסר",
+        "פרמזן גרנה פדנו",
+        "קרוטוני מחמצת",
+        "רוטב קיסר"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "591f56609f7a8aee4b364be4",
+      "category": "boxes",
+      "name": "מארז מקרונים",
+      "unit": null,
+      "aliases": [],
+      "description": "12 מקרונים",
+      "staff_description": null,
+      "price": 108,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b22029e033e41ab6f8f00",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מארז מקרונים",
+        "description": "12 מקרונים",
+        "price": 108,
+        "sizes": []
+      },
+      "category_name": "מארזים",
+      "ingredients": [
+        "12 מקרונים"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "b835b74d522ddb1b11d74f1a",
+      "category": "boxes",
+      "name": "מארז מדלן",
+      "unit": null,
+      "aliases": [],
+      "description": "8 יח׳ מדלן",
+      "staff_description": null,
+      "price": 96,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b2232c67a5c9ffb506744",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מארז מדלן",
+        "description": "8 יח׳ מדלן",
+        "price": 96,
+        "sizes": []
+      },
+      "category_name": "מארזים",
+      "ingredients": [
+        "8 יח׳ מדלן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "31bbe8cbea3994fd182663d1",
+      "category": "drinks",
+      "name": "מים מינרליים נביעות",
+      "unit": null,
+      "aliases": [],
+      "description": "0,5",
+      "staff_description": null,
+      "price": 14,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/667951628353ae60784df4a5",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מים מינרליים נביעות",
+        "description": "0,5",
+        "price": 14,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "d13f40f48af01a9e3a56872c",
+      "category": "drinks",
+      "name": "קינלי סודה",
+      "unit": null,
+      "aliases": [],
+      "description": "0,25",
+      "staff_description": null,
+      "price": 12,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/products/07290001594230-d0a0ff8b-8d2d-4ffa-874d-d94b5f331b8f.jpg",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קינלי סודה",
+        "description": "0,25",
+        "price": 12,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "7a84c6fdef1c74ce23b968c9",
+      "category": "drinks",
+      "name": "קוקה קולה - בקבוק זכוכית",
+      "unit": null,
+      "aliases": [],
+      "description": "0,33",
+      "staff_description": null,
+      "price": 14,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/products/8fe35660-a66c-49dc-8249-4cb8923ee407.jpg",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קוקה קולה - בקבוק זכוכית",
+        "description": "0,33",
+        "price": 14,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "060e4c669b6db162e7b59276",
+      "category": "drinks",
+      "name": "קולה זירו - בקבוק זכוכית",
+      "unit": null,
+      "aliases": [],
+      "description": "0,33",
+      "staff_description": null,
+      "price": 14,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/products/367cf92d-ad5c-4227-818e-fa62c3422f14.jpg",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קולה זירו - בקבוק זכוכית",
+        "description": "0,33",
+        "price": 14,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "32b297349e720802c303f07a",
+      "category": "drinks",
+      "name": "ספרייט - בקבוק זכוכית",
+      "unit": null,
+      "aliases": [],
+      "description": "0,33",
+      "staff_description": null,
+      "price": 14,
+      "sizes": [],
+      "choices": [],
+      "image": "https://wolt-menu-images-cdn.wolt.com/menu-images/63480b5dbb341bcc8029fff7/1c9e4434-9642-11ed-b1c9-0ec7cfff7570______________.jpeg",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "ספרייט - בקבוק זכוכית",
+        "description": "0,33",
+        "price": 14,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "8b239ab8cb6592e78f63b7e9",
+      "category": "drinks",
+      "name": "ספרייט זירו - בקבוק זכוכית",
+      "unit": null,
+      "aliases": [],
+      "description": "0,33",
+      "staff_description": null,
+      "price": 14,
+      "sizes": [],
+      "choices": [],
+      "image": "https://wolt-menu-images-cdn.wolt.com/menu-images/63480b5dbb341bcc8029fff7/26dcab34-9642-11ed-81ee-f27dbf3d73ec___________________.jpeg",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "ספרייט זירו - בקבוק זכוכית",
+        "description": "0,33",
+        "price": 14,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "16ff02bd53b572a1a5927064",
+      "category": "drinks",
+      "name": "מיץ רימונים",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מיץ רימונים",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "7f3ab30e1429fe34b2645a6a",
+      "category": "drinks",
+      "name": "סלק, תפוח, פיטאיה",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "סלק, תפוח, פיטאיה",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "69e4efaa630591a8465eae34",
+      "category": "drinks",
+      "name": "תפוח, תרד, מאצ׳ה וספרולינה",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "תפוח, תרד, מאצ׳ה וספרולינה",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "e70b6e1f6e5bd123a8fde7c0",
+      "category": "drinks",
+      "name": "תפוח ואוכמניות",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "תפוח ואוכמניות",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "8afd47dca6983abf90d438b7",
+      "category": "drinks",
+      "name": "גזר וכורכום",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "גזר וכורכום",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    },
+    {
+      "id": "92589c40a6f84aac84942e36",
+      "category": "drinks",
+      "name": "תפוזים",
+      "unit": null,
+      "aliases": [],
+      "description": "סחוט",
+      "staff_description": null,
+      "price": 24,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "תפוזים",
+        "description": "סחוט",
+        "price": 24,
+        "sizes": []
+      },
+      "category_name": "שתייה",
+      "ingredients": [],
+      "is_wolt": true
+    }
+  ],
+  "customer_faq": [
+    {
+      "topic": "שמירה והובלה",
+      "text": "הכל קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שרוצים לאכול. מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי."
+    },
+    {
+      "topic": "הריון",
+      "text": "עקרונית הכל מפוסטר, אבל למי שמקפידה במיוחד: לא כריך סלק (גבינה במים), לא טארט לימון קטן או גדול (מרנג, ביצים), לא פיצה בוראטה (גבינה במים). אולי גם הפטה פסטו (גבינה במים)."
+    },
+    {
+      "topic": "כשרות",
+      "text": "כל מה שעם שוקולד ג׳אנדויה הוא חלב נוכרי (למשל מקל קרואסון ג׳אנדויה), וגם פאן סוויס. שוקולד דולצ׳ה (לבן מקורמל) הוא כשרות רעננה בלי חלב נוכרי. כל השאר כשרות רעננה."
+    }
   ]
 }

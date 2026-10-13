@@ -181,3 +181,88 @@ h2 { font-size: 1.15rem; margin: 1.5rem 0 .5rem; }
 }
 .foot p { margin: .25rem 0; }
 .foot a { color: var(--muted); }
+
+/* ---------- learning & games ---------- */
+
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px; }
+.action {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-height: 96px; padding: 12px;
+  background: var(--accent); color: var(--accent-text);
+  border-radius: var(--radius); text-decoration: none; font-weight: 800; font-size: 1.1rem;
+}
+.action-icon { font-size: 1.8rem; line-height: 1; }
+.summary { color: var(--muted); margin: 4px 0 0; }
+
+progress.bar {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 8px; margin-top: 6px; border: 0; border-radius: 999px;
+  background: var(--surface-2); color: var(--accent); overflow: hidden;
+}
+progress.bar::-webkit-progress-bar { background: var(--surface-2); border-radius: 999px; }
+progress.bar::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+progress.bar::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+
+.rows { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.row-link {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 12px;
+  padding: 14px 16px; min-height: 56px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  color: inherit; text-decoration: none; box-shadow: var(--shadow);
+}
+.row-link .bar { grid-column: 1 / -1; }
+.row-link.disabled { opacity: .6; box-shadow: none; }
+.row-title { font-weight: 700; }
+.row-sub { color: var(--muted); font-size: .92rem; }
+.row-link:not(:has(.bar)) .row-sub { grid-column: 1 / -1; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 48px; padding: 10px 20px;
+  font: inherit; font-weight: 700; font-size: 1.05rem;
+  border: 2px solid var(--accent); border-radius: 12px;
+  background: var(--accent); color: var(--accent-text);
+  text-decoration: none; cursor: pointer;
+}
+.btn-wide { width: 100%; }
+.btn-no { background: var(--surface); color: var(--text); border-color: var(--border); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.btn.know { margin-top: 12px; width: 100%; background: var(--surface); color: var(--accent); }
+.btn.know.on { background: var(--accent); color: var(--accent-text); }
+
+.flash {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow); max-width: 560px; margin: 0 auto;
+}
+.counter { color: var(--muted); margin: 0 0 10px; font-size: .92rem; }
+.quiz-img {
+  display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: 12px; background: var(--surface-2); max-height: 50vh;
+}
+.clue { background: var(--surface-2); border-radius: 12px; padding: 12px; }
+.clue-label { margin: 0 0 8px; color: var(--muted); }
+.clue .ingredients { margin: 0; }
+.flash-q { font-size: 1.2rem; font-weight: 800; margin: 14px 0 10px; }
+.flash-name { font-size: 1.4rem; margin: 14px 0 4px; }
+.flash-name:focus, .flash h2:focus { outline: none; }
+
+.options { display: grid; gap: 10px; }
+.opt {
+  min-height: 52px; padding: 10px 14px; text-align: start;
+  font: inherit; font-size: 1.05rem; font-weight: 600;
+  background: var(--surface); color: var(--text);
+  border: 2px solid var(--border); border-radius: 12px; cursor: pointer;
+}
+.opt:disabled { cursor: default; color: var(--text); opacity: 1; }
+.opt.right { border-color: #2e7d32; background: #e3f3e4; color: #133d16; }
+.opt.wrong { border-color: #b3261e; background: var(--warn-bg); color: var(--warn-text); }
+@media (prefers-color-scheme: dark) {
+  .opt.right { background: #1f3b22; color: #d4f5d6; border-color: #6fcf75; }
+}
+.verdict { font-weight: 800; font-size: 1.15rem; margin: 14px 0 4px; }
+.explain { color: var(--muted); margin: 0 0 12px; }
+
+.unit { font-weight: 500; color: var(--muted); font-size: 1rem; }
+.aka { color: var(--muted); margin: -8px 0 10px; }
+.notes { padding-inline-start: 1.2rem; margin: 0 0 1rem; }
+.notes li { margin-bottom: 4px; }

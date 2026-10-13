@@ -34,8 +34,11 @@ const priceLabel = (p) => {
 
 const initial = (name) => esc((name || '?').trim().charAt(0));
 
-const imgHtml = (p, cls) => p.image
-  ? `<img class="${cls}" src="data/${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`
+// Wolt image URLs take a width; local files live under data/.
+const imgSrc = (image, w = 400) => /^https:\/\//.test(image) ? `${image}?w=${w}` : `data/${image}`;
+
+const imgHtml = (p, cls, w) => p.image
+  ? `<img class="${cls}" src="${esc(imgSrc(p.image, w))}" alt="${esc(p.name)}" loading="lazy" decoding="async">`
   : `<div class="${cls} ph" aria-hidden="true">${initial(p.name)}</div>`;
 
 const isWarnTag = (t) => /הריון/.test(t);
@@ -83,9 +86,12 @@ async function loadData() {
   const categories = (raw.categories || []).filter((c) => byCat.has(c.id));
   const byId = new Map(products.map((p) => [p.id, p]));
   for (const p of products) {
-    p._search = norm([p.name, p.description, ...(p.ingredients || []), ...(p.tags || [])].join(' '));
+    p._search = norm([
+      p.name, p.description, p.staff_description,
+      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || [])
+    ].join(' '));
   }
-  return { categories, products, byId, byCat, updated: raw.updated };
+  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated };
 }
 
 /* ---------- views ---------- */
@@ -98,16 +104,22 @@ function viewHome() {
       <li>
         <a class="card" href="#/c/${encodeURIComponent(c.id)}">
           ${cover.image
-            ? `<img class="thumb" src="data/${esc(cover.image)}" alt="" loading="lazy" decoding="async">`
+            ? `<img class="thumb" src="${esc(imgSrc(cover.image))}" alt="" loading="lazy" decoding="async">`
             : `<div class="thumb ph" aria-hidden="true">${initial(c.name)}</div>`}
           <span class="card-body">
             <span class="card-title">${esc(c.name)}</span>
-            <span class="card-sub">${items.length} מוצרים</span>
+            <span class="card-sub">מכיר/ה ${knownCount(items)} מתוך ${items.length}</span>
+            ${progressBar(knownCount(items), items.length, c.name)}
           </span>
         </a>
       </li>`;
   }).join('');
   setPage('', `
+    <div class="actions">
+      <a class="action" href="#/learn"><span class="action-icon" aria-hidden="true">🃏</span>כרטיסיות</a>
+      <a class="action" href="#/games"><span class="action-icon" aria-hidden="true">🎯</span>משחקים</a>
+    </div>
+    <p class="summary">מכיר/ה ${knownCount(db.products)} מתוך ${db.products.length} מוצרים</p>
     <h1>מה יש אצלנו</h1>
     <ul class="grid">${cards}</ul>
   `);
@@ -137,23 +149,46 @@ function viewProduct(id) {
     ? `<h2>מרכיבים עיקריים</h2>
        <ul class="ingredients">${p.ingredients.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`
     : '';
-  const notWolt = p.wolt === false
+  const list = (title, arr) => (arr && arr.length)
+    ? `<h2>${title}</h2><ul class="ingredients">${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`
+    : '';
+  const notes = (p.notes && p.notes.length)
+    ? `<ul class="notes">${p.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>`
+    : '';
+  const notWolt = p.is_wolt === false
     ? '<p class="note">נמכר בדלפק בלבד, לא מופיע בוולט.</p>'
     : '';
+  const known = !!progress.known[p.id];
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}">→ ${esc(cat.name)}</a>` : ''}
     <article class="product">
-      ${imgHtml(p, 'product-hero')}
+      ${imgHtml(p, 'product-hero', 800)}
       <div>
-        <h1>${esc(p.name)}</h1>
+        <h1>${esc(p.name)}${p.unit ? ` <span class="unit">(${esc(p.unit)})</span>` : ''}</h1>
+        ${(p.aliases && p.aliases.length) ? `<p class="aka">נקרא גם: ${p.aliases.map(esc).join(', ')}</p>` : ''}
         ${sizes}
         ${tagsHtml(p.tags)}
         ${p.description ? `<h2>תיאור</h2><p>${esc(p.description)}</p>` : ''}
+        ${p.staff_description && p.staff_description !== p.description
+          ? `<h2>בשפה של הצוות</h2><p>${esc(p.staff_description)}</p>` : ''}
+        ${list('טעמים', p.choices)}
         ${ingredients}
+        ${notes}
         ${notWolt}
+        <button class="btn know${known ? ' on' : ''}" id="know" type="button" aria-pressed="${known}">
+          ${known ? '✓ אני מכיר/ה' : 'סמן/י שאני מכיר/ה'}
+        </button>
       </div>
     </article>
   `);
+  document.getElementById('know').addEventListener('click', () => {
+    setKnown(p.id, !progress.known[p.id]);
+    const b = document.getElementById('know');
+    const on = !!progress.known[p.id];
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+    b.textContent = on ? '✓ אני מכיר/ה' : 'סמן/י שאני מכיר/ה';
+  });
 }
 
 function viewSearch(q = '') {
@@ -190,28 +225,7 @@ function viewFaq() {
       <h1>שאלות של לקוחות</h1>
       <p class="note">כשלקוח שואל על הריון, כשרות או רגישות ואתם לא בטוחים, תפנו אותו לאחראי המשמרת. אל תבטיחו "בטוח" או "כשר" על דעת עצמכם.</p>
 
-      <h2>שמירה והובלה</h2>
-      <ul>
-        <li>העוגות והקינוחים מגיעים קפואים. אפשר לשמור אותם כמה ימים במקפיא.</li>
-        <li>להוציא מהמקפיא בערך שעה לפני שרוצים לאכול.</li>
-        <li>נסיעה של חצי שעה באוטו זה בסדר. שעה זה כבר גבולי.</li>
-      </ul>
-
-      <h2>הריון</h2>
-      <p>עקרונית כל המוצרים מפוסטרים. ללקוחה שמקפידה במיוחד, אלה המוצרים שכדאי להזהיר לגביהם:</p>
-      <ul>
-        <li>כריך סלק (גבינה במים)</li>
-        <li>פיצה בוראטה (גבינה במים)</li>
-        <li>טארט לימון, הקטן והגדול (מרנג, ביצים)</li>
-        <li>אולי מאפים עם פטה פסטו (גבינה במים)</li>
-      </ul>
-
-      <h2>כשרות</h2>
-      <ul>
-        <li>מוצרים עם שוקולד גאנדויה הם בחלב נוכרי, למשל מקל קרואסון גאנדויה ופאן סוויס.</li>
-        <li>שוקולד דולצ'ה (לבן מקורמל) בכשרות רעננה, בלי חלב נוכרי.</li>
-        <li>כל שאר המוצרים בכשרות רעננה.</li>
-      </ul>
+      ${db.faq.map((f) => `<h2>${esc(f.topic)}</h2><p>${esc(f.text)}</p>`).join('')}
     </article>
   `);
 }
@@ -258,6 +272,9 @@ function route() {
     case 'p': viewProduct(parts[1]); break;
     case 'search': viewSearch(params.get('q') || ''); return; // keeps focus in the input
     case 'faq': viewFaq(); break;
+    case 'learn': parts[1] ? viewFlashcards(parts[1]) : viewLearnHub(); break;
+    case 'games': viewGames(); break;
+    case 'game': viewGame(parts[1]); break;
     case 'accessibility': viewAccessibility(); break;
     default: viewNotFound();
   }
