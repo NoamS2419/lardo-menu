@@ -87,6 +87,8 @@ def main():
             opts = []
             for ref in item.get("options", []):
                 opt = options.get(ref.get("option_id") or ref.get("id"), {})
+                if any(v["name"].startswith("לא,") for v in opt.get("values", [])):
+                    continue  # a service yes/no (e.g. slicing bread), not a flavor or size
                 for v in opt.get("values", []):
                     # Price deltas are kept only for size choices ("קוטר", "גודל").
                     if any(w in opt.get("name", "") for w in ("גודל",)) or v["name"].startswith(("קוטר", "גודל")):

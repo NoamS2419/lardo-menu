@@ -12,8 +12,8 @@ TOOLS = pathlib.Path(__file__).resolve().parent
 DATA = TOOLS.parent / "data"
 IMAGES = DATA / "images"
 # Site categories, in display order. Wolt names map to these; anything else is hidden.
-CATEGORIES = ["מאפים", "פטיסרי", "עוגות", "טארטים", "כריכים", "עוגיות", "לחמים", "סלטים", "מארזים", "שתייה"]
-CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוגות": "cakes", "טארטים": "tarts", "כריכים": "sandwiches",
+CATEGORIES = ["מאפים", "פטיסרי", "עוגות", "טארטים", "כריכים", "פיצות", "עוגיות", "לחמים", "סלטים", "מארזים", "שתייה"]
+CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוגות": "cakes", "טארטים": "tarts", "כריכים": "sandwiches", "פיצות": "pizzas",
                 "עוגיות": "cookies", "לחמים": "breads", "סלטים": "salads", "מארזים": "boxes", "שתייה": "drinks"}
 WOLT_TO_SITE = {"שתייה קלה": "שתייה"}
 OVERLAY_KEYS = {"_doc", "_size_note", "move_to_category", "products", "counter_only", "customer_faq"}
