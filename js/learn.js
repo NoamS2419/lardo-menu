@@ -1,55 +1,8 @@
-'use strict';
+/* Learning: flashcards and games. */
 
-/* Learning: personal progress, flashcards and the first two games.
-   Uses the globals from app.js (db, esc, setPage, focusMain, live, ...). */
-
-/* ---------- personal progress (this phone only) ---------- */
-
-const PROGRESS_KEY = 'lardo.progress.v1';
-
-function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {} };
-  try {
-    const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
-    if (!p || typeof p !== 'object') return fresh;
-    // Keep only well-formed entries: true flags and finite numbers.
-    const clean = (obj, ok) => Object.fromEntries(
-      Object.entries(obj && typeof obj === 'object' ? obj : {}).filter(([, v]) => ok(v)));
-    const isNum = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
-    return {
-      known: clean(p.known, (v) => v === true),
-      miss: clean(p.miss, isNum),
-      best: clean(p.best, isNum)
-    };
-  } catch (e) { /* private mode or corrupt value: start fresh */ }
-  return fresh;
-}
-
-const progress = loadProgress();
-
-function saveProgress() {
-  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) { /* not saved, fine */ }
-}
-
-function markResult(id, correct) {
-  if (correct) {
-    progress.miss[id] = Math.max(0, (progress.miss[id] || 0) - 1);
-  } else {
-    progress.miss[id] = (progress.miss[id] || 0) + 1;
-    delete progress.known[id];
-  }
-  saveProgress();
-}
-
-function setKnown(id, known) {
-  if (known) progress.known[id] = true; else delete progress.known[id];
-  saveProgress();
-}
-
-const knownCount = (items) => items.filter((p) => progress.known[p.id]).length;
-
-const progressBar = (done, total, label) =>
-  `<progress class="bar" max="${total}" value="${done}" aria-label="${esc(label)}: ${done} מתוך ${total}"></progress>`;
+import { db, announce, esc, norm, priceLabel, imgSrc, imgHtml, family, setPage } from './core.js';
+import { progress, saveProgress, markResult, setKnown, knownCount, progressBar } from './progress.js';
+import { viewNotFound } from './catalog.js';
 
 /* ---------- random helpers ---------- */
 
@@ -74,9 +27,21 @@ const pick = (arr, n) => shuffle(arr).slice(0, n);
 
 /* ---------- product "clue" when there is no photo yet ---------- */
 
-function clueHtml(p) {
+// Description with the product's own name and aliases blanked out, for screen-reader users
+// who can't see the photo. Empty when there is nothing safe to say.
+export function hintText(p) {
+  let text = [p.staff_description, p.description].find((t) => t) || (p.ingredients || []).join(', ');
+  for (const n of [p.name, ...(p.aliases || [])]) {
+    for (const w of String(n).split(/\s+/).filter((x) => x.length > 2)) text = text.split(w).join('…');
+  }
+  return text.replace(/(…\s*)+/g, '… ').trim();
+}
+
+export function clueHtml(p) {
   if (p.image) {
-    return `<img class="quiz-img" src="${esc(imgSrc(p.image, 600))}" alt="תמונת המוצר" decoding="async">`;
+    const hint = hintText(p);
+    return `<img class="quiz-img" src="${esc(imgSrc(p.image, 600))}" alt="תמונת מוצר" data-pid="${esc(p.id)}" decoding="async">
+      ${hint ? `<p class="sr-only">רמז: ${esc(hint)}</p>` : ''}`;
   }
   const ing = (p.ingredients || []).map((i) => `<li>${esc(i)}</li>`).join('');
   return `
@@ -88,7 +53,7 @@ function clueHtml(p) {
 
 /* ---------- learn hub ---------- */
 
-function viewLearnHub() {
+export function viewLearnHub() {
   const total = db.products.length;
   const done = knownCount(db.products);
   const rows = db.categories.map((c) => {
@@ -104,7 +69,7 @@ function viewLearnHub() {
       </li>`;
   }).join('');
   setPage('כרטיסיות', `
-    <a class="back" href="#/">→ דף הבית</a>
+    <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <h1>כרטיסיות</h1>
     <p>רואים את המוצר, מנסים להיזכר בשם, והופכים. מה שלא ידעת יחזור יותר.</p>
     <p class="summary">את/ה מכיר/ה <strong>${done}</strong> מתוך ${total} מוצרים.</p>
@@ -116,7 +81,7 @@ function viewLearnHub() {
 
 /* ---------- flashcards ---------- */
 
-function viewFlashcards(catId) {
+export function viewFlashcards(catId) {
   const items = catId === 'all' ? db.products : db.byCat.get(catId);
   const cat = db.categories.find((c) => c.id === catId);
   if (!items) return viewNotFound();
@@ -126,7 +91,7 @@ function viewFlashcards(catId) {
   let seen = 0;
 
   setPage(`כרטיסיות: ${title}`, `
-    <a class="back" href="#/learn">→ כרטיסיות</a>
+    <a class="back" href="#/learn"><span aria-hidden="true">→</span> כרטיסיות</a>
     <h1>${esc(title)}</h1>
     <div id="fc"></div>
   `);
@@ -139,7 +104,7 @@ function viewFlashcards(catId) {
       <section class="flash" aria-label="כרטיסייה">
         <p class="counter">כרטיס ${seen + 1}</p>
         ${clueHtml(p)}
-        <p class="flash-q">איך קוראים לזה?</p>
+        <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>
         <button class="btn btn-wide" id="flip" type="button">הפוך</button>
       </section>`;
     document.getElementById('flip').addEventListener('click', back);
@@ -171,7 +136,7 @@ function viewFlashcards(catId) {
     pos += 1;
     seen += 1;
     front();
-    document.querySelector('#fc .btn')?.focus();
+    document.getElementById('fq')?.focus();
   }
 
   function finish() {
@@ -201,18 +166,18 @@ const GAMES = [
   { id: 'clock', name: 'נגד השעון', desc: 'כמה שיותר תשובות בדקה.', ready: false }
 ];
 
-function viewGames() {
+export function viewGames() {
   const items = GAMES.map((g) => g.ready
     ? `<li><a class="row-link" href="#/game/${g.id}">
          <span class="row-title">${esc(g.name)}</span>
-         <span class="row-sub">${esc(g.desc)}${progress.best[g.id] != null ? ` · שיא: ${Number(progress.best[g.id])}/10` : ''}</span>
+         <span class="row-sub">${esc(g.desc)}${progress.best[g.id] ? ` · שיא: ${Number(progress.best[g.id].score)}/${Number(progress.best[g.id].of)}` : ''}</span>
        </a></li>`
     : `<li><span class="row-link disabled" aria-disabled="true">
          <span class="row-title">${esc(g.name)}</span>
          <span class="row-sub">בקרוב</span>
        </span></li>`).join('');
   setPage('משחקים', `
-    <a class="back" href="#/">→ דף הבית</a>
+    <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <h1>משחקים</h1>
     <ul class="rows">${items}</ul>
   `);
@@ -221,17 +186,23 @@ function viewGames() {
 const ROUND = 10;
 
 function questionsWhat() {
-  const showable = db.products.filter((p) => p.image);
+  const showable = db.products.filter((p) => p.image && hintText(p));
   const pool = weightedOrder(showable).slice(0, ROUND);
   return pool.map((p) => {
-    const same = db.products.filter((o) => o.id !== p.id && o.category === p.category);
-    const other = db.products.filter((o) => o.id !== p.id && o.category !== p.category);
-    const wrong = pick(same, 3);
-    if (wrong.length < 3) wrong.push(...pick(other, 3 - wrong.length));
+    // Distractors never share the answer's name (some names repeat across categories).
+    const names = new Set([norm(p.name)]);
+    const wrong = [];
+    const fam = db.products.filter((o) => family(o) === family(p));
+    for (const o of [...shuffle(db.byCat.get(p.category)), ...shuffle(fam), ...shuffle(db.products)]) {
+      if (wrong.length === 3) break;
+      if (names.has(norm(o.name))) continue;
+      names.add(norm(o.name));
+      wrong.push(o);
+    }
     const options = shuffle([p, ...wrong]).map((o) => o.name);
     return {
       id: p.id,
-      prompt: `${clueHtml(p)}<p class="flash-q">מה זה?</p>`,
+      prompt: clueHtml(p),
       options,
       correct: options.indexOf(p.name),
       explain: `${p.name}. ${p.description || ''}`
@@ -239,18 +210,38 @@ function questionsWhat() {
   });
 }
 
+// Basics that might be in almost anything, so they can't be a fair wrong answer.
+const GENERIC = ['מלח', 'עגבני', 'שמן זית', 'חמאה', 'בצל', 'סוכר', 'ביצ', 'קמח', 'חלב', 'שמנת', 'וניל']
+  .map(norm);
+
+// Short phrases make fair answers; long Wolt sentences give the answer away.
+const isShort = (i) => i.length <= 28 && i.split(' ').length <= 4;
+const words = (s) => norm(s).split(' ').filter((w) => w.length > 2);
+
+// Correct answers for "made of": not already in the product's name.
+const madeAnswers = (p) => (p.ingredients || [])
+  .filter(isShort)
+  .filter((i) => !words(i).some((w) => norm(p.name).includes(w)));
+
 function questionsMade() {
-  // Short phrases make fair answers; long Wolt sentences give the answer away.
-  const short = (i) => i.length <= 28 && i.split(' ').length <= 4;
-  const all = [...new Set(db.products.flatMap((p) => (p.ingredients || []).filter(short)))];
-  const eligible = db.products.filter((p) => (p.ingredients || []).filter(short).length >= 2);
+  const eligible = db.products.filter((p) => madeAnswers(p).length >= 1 && (p.ingredients || []).length >= 2);
   const pool = weightedOrder(eligible).slice(0, ROUND);
   return pool.map((p) => {
     const mine = norm([p.name, p.description, p.staff_description, ...(p.ingredients || [])].join(' '));
-    // A wrong answer must not appear anywhere in this product's description.
-    const wrongPool = all.filter((i) => !mine.includes(norm(i)) && !norm(i).split(' ').some((w) => w.length > 3 && mine.includes(w)));
-    const right = pick(p.ingredients.filter(short), 1)[0];
-    const options = shuffle([right, ...pick(wrongPool, 3)]);
+    const fair = (i) => !mine.includes(norm(i))
+      && !words(i).some((w) => w.length > 3 && mine.includes(w))
+      && !GENERIC.some((g) => norm(i).includes(g));
+    // Wrong answers from the same category first, so they look plausible.
+    const sameCat = db.byCat.get(p.category).filter((o) => o.id !== p.id).flatMap((o) => o.ingredients || []);
+    const fam = db.products.filter((o) => family(o) === family(p)).flatMap((o) => o.ingredients || []);
+    const others = db.products.flatMap((o) => o.ingredients || []);
+    const wrong = [];
+    for (const i of [...shuffle(sameCat), ...shuffle(fam), ...shuffle(others)]) {
+      if (wrong.length === 3) break;
+      if (isShort(i) && fair(i) && !wrong.some((w) => norm(w) === norm(i))) wrong.push(i);
+    }
+    const right = pick(madeAnswers(p), 1)[0];
+    const options = shuffle([right, ...wrong]);
     return {
       id: p.id,
       prompt: `<p class="flash-q">מה יש ב<strong>${esc(p.name)}</strong>?</p>`,
@@ -261,17 +252,18 @@ function questionsMade() {
   });
 }
 
-function viewGame(id) {
+export function viewGame(id) {
   const game = GAMES.find((g) => g.id === id && g.ready);
   if (!game) return viewNotFound();
   const make = id === 'what' ? questionsWhat : questionsMade;
   let qs = make();
   let i = 0;
   let score = 0;
+  let missed = [];
 
+  // Compact header so all four answers fit on a phone screen without scrolling.
   setPage(game.name, `
-    <a class="back" href="#/games">→ משחקים</a>
-    <h1>${esc(game.name)}</h1>
+    <h1 class="sr-only">${esc(game.name)}</h1>
     <div id="game"></div>
   `);
   const box = document.getElementById('game');
@@ -281,7 +273,12 @@ function viewGame(id) {
     const q = qs[i];
     box.innerHTML = `
       <section class="flash">
-        <p class="counter">שאלה ${i + 1} מתוך ${qs.length} · ניקוד ${score}</p>
+        <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}${id === 'what' ? ': מה זה?' : ''}</h2>
+        <p class="game-head">
+          <a href="#/games" aria-label="חזרה למשחקים">→</a>
+          <strong>${esc(game.name)}</strong>
+          <span>${i + 1}/${qs.length} · ניקוד ${score}</span>
+        </p>
         ${q.prompt}
         <div class="options" role="group" aria-label="תשובות">
           ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}">${esc(o)}</button>`).join('')}
@@ -294,7 +291,7 @@ function viewGame(id) {
   function choose(k) {
     const q = qs[i];
     const ok = k === q.correct;
-    if (ok) score += 1;
+    if (ok) score += 1; else missed.push(q.id);
     markResult(q.id, ok);
     box.querySelectorAll('.opt').forEach((b) => {
       const n = Number(b.dataset.k);
@@ -304,30 +301,39 @@ function viewGame(id) {
     });
     const fb = document.getElementById('feedback');
     fb.innerHTML = `
-      <p class="verdict ${ok ? 'ok' : 'bad'}">${ok ? '✓ נכון!' : '✗ לא נכון'}</p>
+      <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון!' : '✗ לא נכון'}</p>
       <p class="explain">${esc(q.explain)}</p>
-      <button class="btn btn-wide" id="next" type="button">${i + 1 < qs.length ? 'הבא' : 'לתוצאה'}</button>`;
-    live.textContent = ok ? 'נכון' : `לא נכון. התשובה: ${q.options[q.correct]}`;
+      <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${i + 1 < qs.length ? 'הבא' : 'לתוצאה'}</button>`;
+    announce(ok ? 'נכון' : `לא נכון. התשובה: ${q.options[q.correct]}`);
     const next = document.getElementById('next');
-    next.addEventListener('click', () => { i += 1; ask(); box.querySelector('.opt, .btn')?.focus(); });
+    next.addEventListener('click', () => { i += 1; ask(); document.getElementById('qh')?.focus(); });
     next.focus();
   }
 
   function end() {
     const prev = progress.best[id];
-    const record = prev == null || score > prev;
-    if (record) { progress.best[id] = score; saveProgress(); }
+    const record = !prev || score / qs.length > prev.score / prev.of;
+    if (record) { progress.best[id] = { score, of: qs.length }; saveProgress(); }
+    const newBest = record && prev;
+    const review = missed.length
+      ? `<h3>כדאי לחזור על</h3>
+         <ul class="missed">${[...new Set(missed)].map((pid) => db.byId.get(pid)).filter(Boolean).map((p) => `
+           <li><a href="#/p/${encodeURIComponent(p.id)}">${imgHtml(p, 'mini', 120, '')}<span>${esc(p.name)}</span></a></li>`).join('')}
+         </ul>`
+      : '';
     box.innerHTML = `
-      <section class="flash">
-        <h2 tabindex="-1" id="res">${score} מתוך ${qs.length}</h2>
-        <p>${record && prev != null ? 'שיא חדש! ' : ''}${score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם.' : 'כדאי לעבור על הכרטיסיות ולנסות שוב.'}</p>
+      <section class="flash result">
+        ${newBest ? '<p class="celebrate" aria-hidden="true">🎉</p>' : ''}
+        <h2 tabindex="-1" id="res" class="score"><bdi>${score}/${qs.length}</bdi></h2>
+        <p>${newBest ? 'שיא חדש! ' : ''}${score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, עוד קצת ואת/ה שם.' : 'כדאי לעבור על הכרטיסיות ולנסות שוב.'}</p>
+        ${review}
         <div class="two">
           <a class="btn btn-no" href="#/games">משחקים</a>
           <button class="btn btn-yes" id="again" type="button">עוד סיבוב</button>
         </div>
       </section>`;
     document.getElementById('res').focus();
-    document.getElementById('again').addEventListener('click', () => { qs = make(); i = 0; score = 0; ask(); });
+    document.getElementById('again').addEventListener('click', () => { qs = make(); i = 0; score = 0; missed = []; ask(); });
   }
 
   ask();
