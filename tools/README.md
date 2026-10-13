@@ -1,0 +1,56 @@
+# נתוני המוצרים
+
+`data/products.json` נוצר מכאן. לא לערוך אותו ידנית.
+
+| קובץ | מה זה |
+|---|---|
+| `wolt_snapshot.tsv` | העתק גולמי של וולט, שורה למוצר (נוצר ע"י `fetch_wolt.py`) |
+| `staff_overlay.json` | מה שהעובדות הוסיפו או תיקנו. גובר על וולט. **עורכים ידנית** |
+| `build.py` | ממזג את שניהם ל־`data/products.json` |
+| `fetch_wolt.py` | מושך מוולט מחדש ומריץ את `build.py`. עם `--images` מוריד גם תמונות חסרות ל־`data/images/<id>.webp` (רוחב 500) |
+
+## רענון ("תעדכן")
+
+1. **GitHub:** לשונית Actions ← "Refresh from Wolt" ← Run workflow. נפתח PR עם השינויים ועם אזהרות, אם יש.
+   (פעם אחת צריך לאפשר: Settings ← Actions ← General ← "Allow GitHub Actions to create and approve pull requests".)
+2. **ממחשב:** `pip install pillow && python3 tools/fetch_wolt.py --images`.
+3. **מ־Claude בענן:** wolt.com חסום שם, אבל WebFetch עובד לכל קטגוריה בנפרד:
+   `https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/lart-du-pain-r/assortment/categories/slug/menucategory-<N>?language=he`.
+   מעדכנים את `wolt_snapshot.tsv` ומריצים `python3 tools/build.py`.
+
+## בדיקות ב־build
+
+`build.py` מדפיס `WARNING` על כל רשומה ב־`staff_overlay.json` שכבר לא מתאימה ל־snapshot: מזהה שוולט שינה (ואז תגיות כמו חלב נוכרי או הריון לא מוחלות), קטגוריה לא קיימת או מפתח לא מוכר. עם `--strict` הוא נכשל. מוצר שנעלם או שינה שם מאז ה־build הקודם מודפס כ־`note`.
+כשמוצר מקבל מזהה חדש: מעבירים את הרשומה שלו ב־`staff_overlay.json` למזהה החדש.
+
+`updated` ב־products.json מתעדכן רק כשהתוכן השתנה, כך שאפשר להשתמש בו כגרסת מטמון.
+
+## מבנה `products.json`
+
+```jsonc
+{
+  "updated": "2026-10-13",
+  "categories": [{"id": "pastries", "name": "מאפים", "count": 28}, ...],   // בסדר התצוגה
+  "products": [{
+    "id": "220523a6...",            // מזהה וולט, או "staff-..." למוצרי דלפק
+    "category": "pastries",         // categories[].id
+    "category_name": "מאפים",
+    "name": "פאן סוויס",
+    "unit": null,                    // "אישי" / "1 יח׳" כשבוולט כתוב "שם | אישי"
+    "aliases": [],                   // שמות נוספים שהעובדים משתמשים בהם
+    "description": "...",           // מרכיבים: מוולט, או מתוקן לפי העובדות
+    "staff_description": "...",     // ההסבר של העובדת, או null
+    "ingredients": ["..."],          // פירוק גס של description למשחק "ממה זה עשוי?"
+    "price": 38,                     // ₪. עם גדלים: מחיר הגודל הקטן. null = לא ידוע
+    "sizes": [{"label": "קוטר 16", "price": 150}],
+    "choices": ["פטל", "פיסטוק"],    // טעמים לבחירה
+    "image": "images/<id>.webp" | "https://imageproxy.wolt.com/..." | null,
+    "tags": ["חלב נוכרי"],           // "חלב נוכרי" / "לא מומלץ בהריון" / "אולי לא מומלץ בהריון"
+    "notes": [],
+    "source": "wolt" | "wolt+staff" | "staff",
+    "is_wolt": true,                 // false = נמכר רק בדלפק
+    "wolt": {...} | null             // הנתונים המקוריים מוולט, לעיון
+  }],
+  "customer_faq": [{"topic": "שמירה והובלה", "text": "..."}]
+}
+```
