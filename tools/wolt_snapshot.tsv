@@ -1,4 +1,9 @@
 wolt_category	id	name	price_agorot	description	image	options
+לצאת הצום	b59fd2cdd64bd696ca72d22c	עוגת תפוזים ענן	17000		https://imageproxy.wolt.com/assets/6ab0ee3e452c3934c7c0f695	
+סוכות	2f4c4838ca3fb0c03d75dcad	קערת טירמיסו	28000	שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו	https://imageproxy.wolt.com/assets/6aa264822af77c1f54bcff94	
+סוכות	7619d91f6849ab6c76bfab38	קערת שוקולד	28000	תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד	https://imageproxy.wolt.com/assets/6aa264882af77c1f54bcff95	
+סוכות	93b2a2a78eae4b4fe73f00c6	מוס פרח פטל	25000	תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן	https://imageproxy.wolt.com/assets/6aa264772af77c1f54bcff8e	
+מספר סועדים	2eb65074d199b319f074d76c	"‫סכו״ם חד""פ 🍴"	100	"אנא בחרו פריט זה כמספר הסועדים הזקוקים לסכו""ם חד""פ"	https://imageproxy.wolt.com/assets/66717fd8750bf16648d2aed9	
 מאפים	e679f0cb33ecaec1c6438b2a	פאן שוקולד	2800	פאן שוקולד קלאסי	https://imageproxy.wolt.com/assets/689b0fb39e033e41ab6f8a20	
 מאפים	b7b1c852e8ba936fc44e280f	קרואסון חמאה	2000	קרואסון קלאסי	https://imageproxy.wolt.com/assets/689b127a9e033e41ab6f8acf	
 מאפים	7b317b450198638e5156a59f	קרואסון שקדים	2800		https://imageproxy.wolt.com/assets/68a1778a2bf4cafab97b8b4f	
@@ -51,6 +56,9 @@ wolt_category	id	name	price_agorot	description	image	options
 כריכים	cf07661c757dcdce25457f36	כריך אנלוטי	4200	לחם מחמצת צרוב עם גבינת עיזים, חמאת עגבניות, רוקט עם חמאת עשבי תיבול ועלי בזיליקום	https://imageproxy.wolt.com/assets/689b15fbc67a5c9ffb50642c	
 כריכים	63bfbdb9b48c3b445488a9a5	כריך סלט ביצים	4200	בייגל, סלט ביצים, רוקט וצנונית	https://imageproxy.wolt.com/assets/69aa759726e70932d7328754	
 כריכים	c50696c1f7e3dd694dbe2cc9	בייגל גריל צ׳יז	4200	רוטב עגבניות, גאודה, מוצרלה, פרמזן וטימין	https://imageproxy.wolt.com/assets/69bfa482282473d42b9d2659	
+פיצות	bcb2551b4c00cfa16fb0fe75	מרגריטה	4200	רוטב עגבניות, מוצרלה ובזיליקום	https://imageproxy.wolt.com/assets/69a6c179c149d0659a40042c	
+פיצות	9b8f25f34aabe78d0ab5a134	כמהין וריבת בצל	4800	רוטב עגבניות, מוצרלה, גאודה כמהין, ריבת בצל, בלסמי מצומצם ועלי רוקט		
+פיצות	a2ea1542e09efd5db0d81ab0	פיצה סטראצ׳אטלה	4800	רוטב עגבניות, סטראצ׳אטלה-בוראטה, ומיקו בזיליקום	https://imageproxy.wolt.com/assets/69a80421fcb708d2f1afcd85	
 סלטים	664e607f2c7b9b044064b791	סלט יווני	5800	חסה, מלפפון, עגבניות שרי אדומות, פטה עיזים עדינה, טפנד זיתים, אורגנו טרי וצנונית	https://imageproxy.wolt.com/assets/689b162c9ec96fca3dd5fb6f	
 סלטים	2275bdc4852a044c129ea6df	סלט קפרזה	5800	ארבעה סוגים של שרי, חסה סלנובה, מוצרלה פרסקה ובזיליקום	https://imageproxy.wolt.com/assets/689b164b9ec96fca3dd5fb74	
 סלטים	998ed9e3f8b79cca4c2ea5c9	סלט קיסר	5800	חסה קיסר, פרמזן גרנה פדנו, קרוטוני מחמצת ורוטב קיסר	https://imageproxy.wolt.com/assets/689b165f9e033e41ab6f8bfc	
@@ -59,11 +67,11 @@ wolt_category	id	name	price_agorot	description	image	options
 טארטים	6997cdba6fae2e6df6ffea84	טארט פקאן	15000	בצק פריך פקאן, קראנץ׳ שוקולד דולצ׳ה, פרלינה פקאן, גנאש דולצ׳ה מוקצף, פקאן מקורמל	https://imageproxy.wolt.com/assets/689b1d8bc67a5c9ffb5065fb	קוטר 16:0;קוטר 18:10000
 טארטים	ed187404469b2ad442a1c0b0	טארט פטל	15000	בצק פריך, קראנץ׳ שוקולד לבן, פטיסיייר וניל, קולי פטל וגנאש וניל מוקצף	https://imageproxy.wolt.com/assets/689b251ec67a5c9ffb506851	קוטר 16:0;קוטר 18:10000
 טארטים	db377380ea34087de6a16d0d	טארט לימון	15000	בצק פריך, קרם לימון, קולי לימונענע ומרנג חרוך	https://imageproxy.wolt.com/assets/689b3bebc67a5c9ffb506ef5	קוטר 16:0;קוטר 18:10000
+עוגות	f5b9964aced171dfdb79d89c	טירמיסו	8500	שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו	https://imageproxy.wolt.com/assets/689b622f9ec96fca3dd61837	
 עוגות	bb2ef830690fd64525e6c975	מוס פיסטוק	8500	שכבות מוס, פייטה פיסטוק ושוקולד לבן, דקוואז וניל ופרלינה פיסטוק	https://imageproxy.wolt.com/assets/689c2f1b39adb1f40a6a9c0c	
 עוגות	5798d6fe98d634f038ed4de7	מוס פטל	8500	שכבות מוס, פייטה פטל ושוקולד לבן, דקוואז וניל וקולי פטל	https://imageproxy.wolt.com/assets/689c2f6939adb1f40a6a9c15	
 עוגות	3723b8da6ac1dc8b7e4b5783	מוס שוקולד	8500	שכבות מוס, דקוואז שוקולד פייטה לוז ושוקולד חלב	https://imageproxy.wolt.com/assets/689c2f9739adb1f40a6a9c1b	
 עוגות	afa830ee950b92edb14fa0bc	בחושה פרלינה אגוזי לוז	5500		https://imageproxy.wolt.com/assets/68a178f13b13bfd3a588cee0	
-עוגות	f5b9964aced171dfdb79d89c	טירמיסו	8500	שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו	https://imageproxy.wolt.com/assets/689b622f9ec96fca3dd61837	
 לחמים	db55fb6d31cfabbc66244387	בגט מחמצת	1600		https://imageproxy.wolt.com/assets/689b1e6dc67a5c9ffb506646	
 לחמים	26726b1f381210f6fea41838	בגט מחמצת דגנים	1600		https://imageproxy.wolt.com/assets/689b3b539e033e41ab6f986f	
 לחמים	5385c6118410603c833a47a0	לחם דגנים	2800	מחמצת כוסמין ותערובת דגנים	https://imageproxy.wolt.com/assets/689b35ea9e033e41ab6f95d1	
@@ -85,6 +93,3 @@ wolt_category	id	name	price_agorot	description	image	options
 שתייה קלה	e70b6e1f6e5bd123a8fde7c0	תפוח ואוכמניות	2400	סחוט		
 שתייה קלה	8afd47dca6983abf90d438b7	גזר וכורכום	2400	סחוט		
 שתייה קלה	92589c40a6f84aac84942e36	תפוזים	2400	סחוט		
-סוכות	2f4c4838ca3fb0c03d75dcad	קערת טירמיסו	28000	שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו	https://imageproxy.wolt.com/assets/6aa264822af77c1f54bcff94	
-סוכות	7619d91f6849ab6c76bfab38	קערת שוקולד	28000	תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד	https://imageproxy.wolt.com/assets/6aa264882af77c1f54bcff95	
-סוכות	93b2a2a78eae4b4fe73f00c6	מוס פרח פטל	25000	תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן	https://imageproxy.wolt.com/assets/6aa264772af77c1f54bcff8e	

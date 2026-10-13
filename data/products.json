@@ -5,7 +5,7 @@
     {
       "id": "pastries",
       "name": "מאפים",
-      "count": 28
+      "count": 27
     },
     {
       "id": "patisserie",
@@ -26,6 +26,11 @@
       "id": "sandwiches",
       "name": "כריכים",
       "count": 10
+    },
+    {
+      "id": "pizzas",
+      "name": "פיצות",
+      "count": 3
     },
     {
       "id": "cookies",
@@ -806,30 +811,6 @@
     },
     {
       "unit": null,
-      "aliases": [],
-      "staff_description": null,
-      "price": null,
-      "sizes": [],
-      "choices": [],
-      "image": null,
-      "tags": [
-        "לא מומלץ בהריון"
-      ],
-      "notes": [
-        "גבינה במים"
-      ],
-      "source": "staff",
-      "wolt": null,
-      "id": "staff-burrata-pizza",
-      "category": "pastries",
-      "name": "פיצה בוראטה",
-      "description": "",
-      "category_name": "מאפים",
-      "ingredients": [],
-      "is_wolt": false
-    },
-    {
-      "unit": null,
       "aliases": [
         "מאפה צאדר"
       ],
@@ -1337,6 +1318,128 @@
       "is_wolt": false
     },
     {
+      "id": "2f4c4838ca3fb0c03d75dcad",
+      "category": "cakes",
+      "name": "קערת טירמיסו",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
+      "staff_description": null,
+      "price": 280,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264822af77c1f54bcff94",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קערת טירמיסו",
+        "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
+        "price": 280,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות של קרם זביונה",
+        "בישקוטי טבולים באספרסו",
+        "שכבת קקאו"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "7619d91f6849ab6c76bfab38",
+      "category": "cakes",
+      "name": "קערת שוקולד",
+      "unit": null,
+      "aliases": [],
+      "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
+      "staff_description": null,
+      "price": 280,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264882af77c1f54bcff95",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "קערת שוקולד",
+        "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
+        "price": 280,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "תחתית של בחושת שוקולד",
+        "פרלינה לוז",
+        "קראנץ שוקולד",
+        "גנאש שוקולד מריר",
+        "מוס שוקולד"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "93b2a2a78eae4b4fe73f00c6",
+      "category": "cakes",
+      "name": "מוס פרח פטל",
+      "unit": null,
+      "aliases": [
+        "מוס פרח אדום"
+      ],
+      "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
+      "staff_description": null,
+      "price": 250,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/6aa264772af77c1f54bcff8e",
+      "tags": [],
+      "notes": [],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "מוס פרח פטל",
+        "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
+        "price": 250,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "תחתית של דקואז שקדים",
+        "קראנץ שקדים",
+        "מרמלדת פטל",
+        "גנאש פטל",
+        "מוס שוקולד לבן"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "f5b9964aced171dfdb79d89c",
+      "category": "cakes",
+      "name": "טירמיסו",
+      "unit": null,
+      "aliases": [],
+      "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
+      "staff_description": null,
+      "price": 85,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/689b622f9ec96fca3dd61837",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "טירמיסו",
+        "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
+        "price": 85,
+        "sizes": []
+      },
+      "category_name": "עוגות",
+      "ingredients": [
+        "שכבות של גנאש מסקרפונה",
+        "בישקוטים בליווי של קפה",
+        "בעיטור קקאו"
+      ],
+      "is_wolt": true
+    },
+    {
       "id": "bb2ef830690fd64525e6c975",
       "category": "cakes",
       "name": "מוס פיסטוק",
@@ -1452,128 +1555,6 @@
       },
       "category_name": "עוגות",
       "ingredients": [],
-      "is_wolt": true
-    },
-    {
-      "id": "f5b9964aced171dfdb79d89c",
-      "category": "cakes",
-      "name": "טירמיסו",
-      "unit": null,
-      "aliases": [],
-      "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
-      "staff_description": null,
-      "price": 85,
-      "sizes": [],
-      "choices": [],
-      "image": "https://imageproxy.wolt.com/assets/689b622f9ec96fca3dd61837",
-      "tags": [],
-      "notes": [],
-      "source": "wolt",
-      "wolt": {
-        "name": "טירמיסו",
-        "description": "שכבות של גנאש מסקרפונה, בישקוטים בליווי של קפה, בעיטור קקאו",
-        "price": 85,
-        "sizes": []
-      },
-      "category_name": "עוגות",
-      "ingredients": [
-        "שכבות של גנאש מסקרפונה",
-        "בישקוטים בליווי של קפה",
-        "בעיטור קקאו"
-      ],
-      "is_wolt": true
-    },
-    {
-      "id": "2f4c4838ca3fb0c03d75dcad",
-      "category": "cakes",
-      "name": "קערת טירמיסו",
-      "unit": null,
-      "aliases": [],
-      "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
-      "staff_description": null,
-      "price": 280,
-      "sizes": [],
-      "choices": [],
-      "image": "https://imageproxy.wolt.com/assets/6aa264822af77c1f54bcff94",
-      "tags": [],
-      "notes": [],
-      "source": "wolt",
-      "wolt": {
-        "name": "קערת טירמיסו",
-        "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
-        "price": 280,
-        "sizes": []
-      },
-      "category_name": "עוגות",
-      "ingredients": [
-        "שכבות של קרם זביונה",
-        "בישקוטי טבולים באספרסו",
-        "שכבת קקאו"
-      ],
-      "is_wolt": true
-    },
-    {
-      "id": "7619d91f6849ab6c76bfab38",
-      "category": "cakes",
-      "name": "קערת שוקולד",
-      "unit": null,
-      "aliases": [],
-      "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
-      "staff_description": null,
-      "price": 280,
-      "sizes": [],
-      "choices": [],
-      "image": "https://imageproxy.wolt.com/assets/6aa264882af77c1f54bcff95",
-      "tags": [],
-      "notes": [],
-      "source": "wolt",
-      "wolt": {
-        "name": "קערת שוקולד",
-        "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
-        "price": 280,
-        "sizes": []
-      },
-      "category_name": "עוגות",
-      "ingredients": [
-        "תחתית של בחושת שוקולד",
-        "פרלינה לוז",
-        "קראנץ שוקולד",
-        "גנאש שוקולד מריר",
-        "מוס שוקולד"
-      ],
-      "is_wolt": true
-    },
-    {
-      "id": "93b2a2a78eae4b4fe73f00c6",
-      "category": "cakes",
-      "name": "מוס פרח פטל",
-      "unit": null,
-      "aliases": [
-        "מוס פרח אדום"
-      ],
-      "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
-      "staff_description": null,
-      "price": 250,
-      "sizes": [],
-      "choices": [],
-      "image": "https://imageproxy.wolt.com/assets/6aa264772af77c1f54bcff8e",
-      "tags": [],
-      "notes": [],
-      "source": "wolt+staff",
-      "wolt": {
-        "name": "מוס פרח פטל",
-        "description": "תחתית של דקואז שקדים , קראנץ שקדים, מרמלדת פטל, גנאש פטל, מוס שוקולד לבן",
-        "price": 250,
-        "sizes": []
-      },
-      "category_name": "עוגות",
-      "ingredients": [
-        "תחתית של דקואז שקדים",
-        "קראנץ שקדים",
-        "מרמלדת פטל",
-        "גנאש פטל",
-        "מוס שוקולד לבן"
-      ],
       "is_wolt": true
     },
     {
@@ -2238,6 +2219,102 @@
         "מוצרלה",
         "פרמזן",
         "טימין"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "bcb2551b4c00cfa16fb0fe75",
+      "category": "pizzas",
+      "name": "מרגריטה",
+      "unit": null,
+      "aliases": [],
+      "description": "רוטב עגבניות, מוצרלה ובזיליקום",
+      "staff_description": null,
+      "price": 42,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69a6c179c149d0659a40042c",
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "מרגריטה",
+        "description": "רוטב עגבניות, מוצרלה ובזיליקום",
+        "price": 42,
+        "sizes": []
+      },
+      "category_name": "פיצות",
+      "ingredients": [
+        "רוטב עגבניות",
+        "מוצרלה",
+        "בזיליקום"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "9b8f25f34aabe78d0ab5a134",
+      "category": "pizzas",
+      "name": "כמהין וריבת בצל",
+      "unit": null,
+      "aliases": [],
+      "description": "רוטב עגבניות, מוצרלה, גאודה כמהין, ריבת בצל, בלסמי מצומצם ועלי רוקט",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": null,
+      "tags": [],
+      "notes": [],
+      "source": "wolt",
+      "wolt": {
+        "name": "כמהין וריבת בצל",
+        "description": "רוטב עגבניות, מוצרלה, גאודה כמהין, ריבת בצל, בלסמי מצומצם ועלי רוקט",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "פיצות",
+      "ingredients": [
+        "רוטב עגבניות",
+        "מוצרלה",
+        "גאודה כמהין",
+        "ריבת בצל",
+        "בלסמי מצומצם",
+        "עלי רוקט"
+      ],
+      "is_wolt": true
+    },
+    {
+      "id": "a2ea1542e09efd5db0d81ab0",
+      "category": "pizzas",
+      "name": "פיצה סטראצ׳אטלה",
+      "unit": null,
+      "aliases": [
+        "פיצה בוראטה"
+      ],
+      "description": "רוטב עגבניות, סטראצ׳אטלה-בוראטה, ומיקו בזיליקום",
+      "staff_description": null,
+      "price": 48,
+      "sizes": [],
+      "choices": [],
+      "image": "https://imageproxy.wolt.com/assets/69a80421fcb708d2f1afcd85",
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים"
+      ],
+      "source": "wolt+staff",
+      "wolt": {
+        "name": "פיצה סטראצ׳אטלה",
+        "description": "רוטב עגבניות, סטראצ׳אטלה-בוראטה, ומיקו בזיליקום",
+        "price": 48,
+        "sizes": []
+      },
+      "category_name": "פיצות",
+      "ingredients": [
+        "רוטב עגבניות",
+        "סטראצ׳אטלה-בוראטה",
+        "מיקו בזיליקום"
       ],
       "is_wolt": true
     },

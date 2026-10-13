@@ -6,14 +6,14 @@ Prints a warning for every overlay entry that no longer matches the snapshot
 (e.g. Wolt changed a product id), so staff tags never drop silently.
 --strict exits non-zero when there are warnings.
 """
-import csv, json, re, sys, datetime, pathlib
+import csv, json, re, sys, datetime, hashlib, pathlib
 
 TOOLS = pathlib.Path(__file__).resolve().parent
 DATA = TOOLS.parent / "data"
 IMAGES = DATA / "images"
 # Site categories, in display order. Wolt names map to these; anything else is hidden.
-CATEGORIES = ["מאפים", "פטיסרי", "עוגות", "טארטים", "כריכים", "עוגיות", "לחמים", "סלטים", "מארזים", "שתייה"]
-CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוגות": "cakes", "טארטים": "tarts", "כריכים": "sandwiches",
+CATEGORIES = ["מאפים", "פטיסרי", "עוגות", "טארטים", "כריכים", "פיצות", "עוגיות", "לחמים", "סלטים", "מארזים", "שתייה"]
+CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוגות": "cakes", "טארטים": "tarts", "כריכים": "sandwiches", "פיצות": "pizzas",
                 "עוגיות": "cookies", "לחמים": "breads", "סלטים": "salads", "מארזים": "boxes", "שתייה": "drinks"}
 WOLT_TO_SITE = {"שתייה קלה": "שתייה"}
 OVERLAY_KEYS = {"_doc", "_size_note", "move_to_category", "products", "counter_only", "customer_faq"}
@@ -36,9 +36,15 @@ def ingredients(text):
     return out
 
 
-def local_image(pid):
-    """Path relative to data/ when the photo was downloaded (fetch_wolt.py --images)."""
-    return f"images/{pid}.webp" if (IMAGES / f"{pid}.webp").exists() else None
+def image_file(pid, url):
+    """Local photo path relative to data/. Keyed by the Wolt URL too, so a replaced photo gets a new file."""
+    return f"images/{pid}-{hashlib.sha1(url.encode()).hexdigest()[:8]}.webp"
+
+
+def local_image(pid, url):
+    """The downloaded photo (fetch_wolt.py --images), if there is one."""
+    path = image_file(pid, url) if url else None
+    return path if path and (DATA / path).exists() else None
 
 
 def clean_name(name):
@@ -106,7 +112,7 @@ def main():
             "price": shekel(int(row["price_agorot"])),
             "sizes": [],
             "choices": choices,
-            "image": local_image(row["id"]) or row["image"] or None,
+            "image": local_image(row["id"], row["image"]) or row["image"] or None,
             "tags": [],
             "notes": [],
             "source": "wolt",
