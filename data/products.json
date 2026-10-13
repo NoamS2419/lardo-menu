@@ -540,13 +540,15 @@
         "מאפה תרד"
       ],
       "description": "בצק קרואסון עם מנגולד, בצל וגבינות | מוגש עם פרמז׳ן מגורד",
-      "staff_description": "תערובת של גבינות עם תרד",
+      "staff_description": "תערובת של גבינות עם מנגולד",
       "price": 48,
       "sizes": [],
       "choices": [],
       "image": "https://imageproxy.wolt.com/assets/6a8e85ef7b7d76e02823b8d3",
       "tags": [],
-      "notes": [],
+      "notes": [
+        "העובדים קוראים לו לפעמים \"מאפה תרד\", אבל זה מנגולד"
+      ],
       "source": "wolt+staff",
       "wolt": {
         "name": "מאפה מנגולד",
