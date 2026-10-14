@@ -546,6 +546,29 @@ function questionsCustomer(order = weightedOrder) {
     ...choices(['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'], 0),
     explain: 'ג׳אנדויה: חלב נוכרי. דולצ׳ה (שוקולד לבן מקורמל): כשרות רעננה בלי חלב נוכרי.'
   });
+  // Customer situations from the sales tips, once the team has approved them (drafts aren't quizzed).
+  const sit = db.situations;
+  if (sit && !sit.draft) {
+    // Only "not sweet" has answers that are clearly wrong (anything sweet); the others overlap too much to quiz.
+    for (const t of sit.items.filter((x) => x.id === 'not-sweet')) {
+      const fits = (t.products || []).map((x) => db.byId.get(x.id)).filter(Boolean);
+      if (!fits.length) continue;
+      const ids = new Set(fits.map((x) => x.id));
+      // Only situations that clearly lean one way (e.g. "not sweet"), so the wrong answers are really wrong.
+      const fams = fits.map(family);
+      const main = ['sweet', 'savory', 'drink'].find((f) => fams.filter((x) => x === f).length >= fams.length * 0.8);
+      if (!main) continue;
+      const right = pick(fits.filter((x) => family(x) === main), 1)[0];
+      const wrong = shuffle(db.products.filter((o) => !ids.has(o.id) && family(o) !== main && norm(o.name) !== norm(right.name))).slice(0, 3);
+      if (wrong.length < 3) continue;
+      qs.push({
+        id: right.id,
+        prompt: bubble(`${esc(t.title)}. מה יש לכם?`, 'לקוח מבקש'),
+        ...choices([right.name, ...wrong.map((o) => o.name)], 0),
+        explain: t.tip
+      });
+    }
+  }
   return shuffle(qs).slice(0, ROUND);
 }
 

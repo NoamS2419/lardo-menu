@@ -28,7 +28,8 @@ export async function loadData() {
       ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || [])
     ].join(' '));
   }
-  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated };
+  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
+    situations: raw.sales_situations && Array.isArray(raw.sales_situations.items) ? raw.sales_situations : { draft: true, items: [] } };
 }
 
 /* ---------- views ---------- */
@@ -178,6 +179,7 @@ export function viewProduct(id) {
         ${p.description && sameAsDesc ? `<h2>מה יש בפנים</h2><p>${esc(p.description)}</p>` : ''}
         ${sameAsDesc ? '' : chips('מה יש בפנים', p.ingredients)}
         ${chips('טעמים', p.choices)}
+        ${salesHtml(p)}
         ${notes}
         ${notWolt}
         <button class="btn know${known ? ' on' : ''}" id="know" type="button" aria-pressed="${known}">${knowLabel(known)}</button>
@@ -220,6 +222,43 @@ export function viewSearch(q = '') {
   input.addEventListener('input', run);
   run();
   input.focus();
+}
+
+/* ---------- selling: a pitch line and what to offer alongside (staff-editable, may still be a draft) ---------- */
+
+const draftNote = '<p class="draft-note">טיוטה: עוד לא אושר על ידי הצוות.</p>';
+const productLinks = (list) => `<ul class="chips">${list
+  .filter((x) => db.byId.has(x.id))
+  .map((x) => `<li><a href="#/p/${encodeURIComponent(x.id)}">${esc(db.byId.get(x.id).name)}</a></li>`).join('')}</ul>`;
+
+function salesHtml(p) {
+  const s = p.sales;
+  if (!s || (!s.pitch && !(s.pair_with || []).length)) return '';
+  return `
+    <section class="sell" aria-labelledby="sell-h">
+      <h2 id="sell-h">איך מציעים</h2>
+      ${s.pitch ? `<p class="pitch">${esc(s.pitch)}</p>` : ''}
+      ${(s.pair_with || []).length ? `<h3>מה להציע ליד</h3>${productLinks(s.pair_with)}` : ''}
+      ${s.draft ? draftNote : ''}
+    </section>`;
+}
+
+export function viewSell() {
+  const sit = db.situations;
+  setPage('טיפים למכירה', `
+    <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
+    <article class="prose">
+      <h1>טיפים למכירה</h1>
+      <p>מה מציעים כשלקוח מבקש משהו מסוים. בכל דף מוצר יש גם "איך מציעים" ומה להציע ליד.</p>
+      ${sit.draft ? draftNote : ''}
+      ${sit.items.length ? sit.items.map((t) => `
+        <section class="situation">
+          <h2>${esc(t.title)}</h2>
+          <p>${esc(t.tip)}</p>
+          ${(t.products || []).length ? productLinks(t.products) : ''}
+        </section>`).join('') : '<p class="empty">עוד אין טיפים.</p>'}
+    </article>
+  `);
 }
 
 export function viewFaq() {

@@ -704,3 +704,12 @@ main {
   body { background: #fff; padding: 0; }
   .cert { border: 0; box-shadow: none; }
 }
+
+/* ---------- selling tips ---------- */
+
+.sell { margin: 24px 0; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.sell h2 { margin-top: 0; }
+.sell h3 { font-size: 1rem; margin: 12px 0 8px; }
+.pitch { font-size: 1.05rem; margin: 0; }
+.draft-note { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+.situation { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 16px; }

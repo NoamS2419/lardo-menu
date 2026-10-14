@@ -6,6 +6,7 @@ import {
 } from './catalog.js';
 import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './learn.js';
 import { viewTeam } from './team.js';
+import { viewSell } from './catalog.js';
 import { viewOnboard, viewOnboardDay, viewOnboardFinal, viewOnboardCert } from './onboard.js';
 import { cloudEnabled } from './cloud.js';
 
@@ -67,6 +68,7 @@ function route() {
     case 'game': viewGame(parts[1]); break;
     case 'accessibility': viewAccessibility(); break;
     case 'team': viewTeam(); break;
+    case 'sell': viewSell(); break;
     case 'onboard':
       if (parts[1] === 'day') viewOnboardDay(parts[2], parts[3]);
       else if (parts[1] === 'final') viewOnboardFinal();
