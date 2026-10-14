@@ -44,7 +44,15 @@ export const onboardingDone = () => Boolean(progress.onboard.final && progress.o
 
 /* ---------- the path ---------- */
 
-export function viewOnboard() {
+const quizLen = (d) => Math.min(QUIZ_LEN, d.items.length);
+
+// A locked step opened by direct link: back to the path, with a line saying when it opens.
+function lockedTo(note) {
+  history.replaceState(null, '', '#/onboard');
+  return viewOnboard(note);
+}
+
+export function viewOnboard(note = '') {
   const list = days();
   const doneCount = list.filter((d) => state(d.n).passed).length;
   const current = list.find((d, k) => unlocked(list, k) && !state(d.n).passed);
@@ -66,6 +74,7 @@ export function viewOnboard() {
   const fin = progress.onboard.final;
   const finalOpen = allPassed(list);
   setPage('שבוע ראשון', `
+    ${note ? `<p class="locked-note" role="status">${esc(note)}</p>` : ''}
     <div class="onboard-hero">
       <p class="hello">חדשים בצוות?</p>
       <h1>שבוע ראשון</h1>
@@ -89,7 +98,8 @@ export function viewOnboard() {
 export function viewOnboardDay(n, step) {
   const list = days();
   const k = list.findIndex((d) => d.n === Number(n));
-  if (k < 0 || !unlocked(list, k)) return viewNotFound();
+  if (k < 0) return viewNotFound();
+  if (!unlocked(list, k)) return lockedTo(`יום ${list[k].n} נפתח אחרי יום ${list[k - 1].n}.`);
   const d = list[k];
   const back = `#/onboard/day/${d.n}`;
   if (step === 'cards') {
@@ -105,7 +115,8 @@ export function viewOnboardDay(n, step) {
     return viewGame(`onboard-${d.n}`, {
       name: `מבחן יום ${d.n}`,
       back,
-      make: () => questionsFor(d.items, QUIZ_LEN),
+      xp: !state(d.n).passed, // points only until the day is passed
+      make: () => questionsFor(d.items, quizLen(d)),
       onEnd: ({ score, of, box, review }) => {
         const passed = score >= needed(of, PASS);
         const prev = state(d.n);
@@ -158,8 +169,8 @@ export function viewOnboardDay(n, step) {
         <a class="row-link" href="#/onboard/day/${d.n}/quiz">
           <span class="step-num" aria-hidden="true">2</span>
           <span class="row-title">מבחן קצר</span>
-          <span class="soon${st.passed ? ' ok' : ''}">${st.passed ? `✓ ${st.quiz.score}/${st.quiz.of}` : `${QUIZ_LEN} שאלות`}</span>
-          <span class="row-sub full">עוברים מ־${needed(QUIZ_LEN, PASS)} נכונות. אפשר לנסות שוב כמה שרוצים.</span>
+          <span class="soon${st.passed ? ' ok' : ''}">${st.passed ? `✓ ${st.quiz.score}/${st.quiz.of}` : `${quizLen(d)} שאלות`}</span>
+          <span class="row-sub full">עוברים מ־${needed(quizLen(d), PASS)} נכונות. אפשר לנסות שוב כמה שרוצים.</span>
         </a>
       </li>
     </ol>
@@ -171,10 +182,11 @@ export function viewOnboardDay(n, step) {
 /* ---------- final test and certificate ---------- */
 
 export function viewOnboardFinal() {
-  if (!allPassed(days())) return viewNotFound();
+  if (!allPassed(days())) return lockedTo('המבחן המסכם נפתח אחרי שעוברים את כל שבעת הימים.');
   viewGame('onboard-final', {
     name: 'מבחן מסכם',
     back: '#/onboard',
+    xp: !onboardingDone(),
     make: () => questionsFor(db.products, FINAL_LEN),
     onEnd: ({ score, of, box, review }) => {
       const passed = score >= needed(of, FINAL_PASS);
@@ -205,7 +217,7 @@ export function viewOnboardFinal() {
 
 export function viewOnboardCert() {
   const fin = progress.onboard.final;
-  if (!fin || !fin.passed) return viewNotFound();
+  if (!fin || !fin.passed) return lockedTo('התעודה נפתחת אחרי שעוברים את המבחן המסכם.');
   const player = myPlayer();
   const name = progress.onboard.name || (player && player.name) || '';
   setPage('תעודת הכשרה', `

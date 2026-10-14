@@ -37,11 +37,17 @@ service cloud.firestore {
     match /players/{uid} {
       allow read: if signedIn();
       allow create, update: if isOwner(uid)
-        && request.resource.data.keys().hasOnly(['name', 'nameKey', 'total', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['name', 'nameKey', 'total', 'updatedAt', 'onboarded', 'known'])
         && holdsName(request.resource.data)
         && request.resource.data.total is int
         && request.resource.data.total >= 0
         && request.resource.data.total <= 1000000
+        // Team progress (optional fields): onboarding finished, and % known per category as
+        // "breads:40,pastries:100" (up to 20 categories, lowercase ids, 0-100).
+        && (!('onboarded' in request.resource.data) || request.resource.data.onboarded is bool)
+        && (!('known' in request.resource.data) || (request.resource.data.known is string
+            && request.resource.data.known.size() <= 400
+            && request.resource.data.known.matches('^$|^[a-z]{1,20}:(100|[1-9]?[0-9])(,[a-z]{1,20}:(100|[1-9]?[0-9])){0,19}$')))
         && request.resource.data.updatedAt == request.time
         // Renaming must release the old name in the same batch.
         && (resource == null || resource.data.nameKey == request.resource.data.nameKey
@@ -68,7 +74,9 @@ service cloud.firestore {
         && request.resource.data.expireAt > request.time
         && request.resource.data.expireAt < request.time + duration.value(90, 'd');
       allow update: if false;            // one score per day, no retries
-      allow delete: if isOwner(resource.data.uid);
+      // Expired scores can be cleaned up by any signed-in visitor (stands in for a TTL policy).
+      allow delete: if isOwner(resource.data.uid)
+        || (signedIn() && resource.data.expireAt < request.time);
     }
 
     match /{document=**} { allow read, write: if false; }

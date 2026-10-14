@@ -1,14 +1,16 @@
 /* The team page: daily challenge results and the overall board. */
 
 import { db, esc, setPage, announce, focusMain, meter, fillMeters } from './core.js';
-import { progress } from './progress.js';
-import { teamProgressEnabled, cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe } from './cloud.js';
+import { progress, saveProgress } from './progress.js';
+import { teamProgressEnabled, cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe, cleanupExpired } from './cloud.js';
 import { jerusalemDate } from './learn.js';
 
 // After an await the person may have moved on; don't paint over another page.
 const stillHere = () => location.hash === '#/team';
 
-const NOTICE = 'השם יופיע בטבלת הניקוד, שכל מי שיש לו את הקישור לאתר יכול לראות. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. המשחק התנדבותי ונועד בשביל הכיף, לא להערכת עובדים.';
+const NOTICE_START = () => (teamProgressEnabled() ? 'השם, הניקוד, ואם בחרת גם ההתקדמות שלך, יופיעו בטבלה' : 'השם יופיע בטבלת הניקוד,');
+const NOTICE_REST = ' שכל מי שיש לו את הקישור לאתר יכול לראות. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. המשחק התנדבותי ונועד בשביל הכיף, לא להערכת עובדים.';
+const notice = () => `${NOTICE_START()}${NOTICE_REST}`;
 
 const table = (caption, rows, scoreLabel, scoreOf) => rows.length
   ? `<table class="board">
@@ -53,7 +55,7 @@ function progressHtml(players) {
   return `
     <section aria-labelledby="prog-h">
       <h2 id="prog-h">התקדמות הצוות</h2>
-      <p class="hint">כמה מהוויטרינה כל אחד מכיר, מי סיים את "שבוע ראשון", ומה כדאי לחזק.</p>
+      <p class="hint">כמה מהוויטרינה כל אחד מכיר ומי סיים את "שבוע ראשון". ההתקדמות מוצגת כאן רק בהסכמה. את ההמלצה מה לחזק רואים רק על עצמך.</p>
       <ul class="team-progress">${rows.map((r) => `
         <li class="tp${r.me ? ' me' : ''}">
           <p class="tp-head">
@@ -61,7 +63,7 @@ function progressHtml(players) {
             <span class="soon${r.onboarded ? ' ok' : ''}">${r.onboarded ? '✓ הכשרה הושלמה' : 'בהכשרה'}</span>
           </p>
           ${meter(r.pct, 100, `${r.name}: ${r.pct}% מהמוצרים`)}
-          <p class="tp-sub"><span>ידע: <bdi>${r.pct}%</bdi></span>${r.weakest ? `<span>כדאי לחזק: ${esc(r.weakest.name)}</span>` : ''}</p>
+          <p class="tp-sub"><span>ידע: <bdi>${r.pct}%</bdi></span>${r.me && r.weakest ? `<span>כדאי לחזק: ${esc(r.weakest.name)}</span>` : ''}</p>
           <details>
             <summary>לפי קטגוריה</summary>
             <ul class="tp-cats">${cats.map((c) => `
@@ -79,7 +81,7 @@ function nameForm(current = '') {
       <label for="nick">השם או הכינוי שלך</label>
       <input id="nick" name="nick" type="text" maxlength="20" autocomplete="off" autocapitalize="off"
              placeholder="למשל: נועה מהדלפק" value="${esc(current)}" aria-describedby="nick-notice nick-err">
-      <p id="nick-notice" class="hint">${NOTICE}</p>
+      <p id="nick-notice" class="hint">${notice()}</p>
       <p id="nick-err" class="form-err" role="alert"></p>
       <button class="btn" type="submit">${current ? 'שמירה' : 'להצטרף לטבלה'}</button>
     </form>`;
@@ -155,6 +157,14 @@ export async function viewTeam() {
     <details class="settings">
       <summary>הכינוי שלי והנתונים שלי</summary>
       ${nameForm(me.name)}
+      ${teamProgressEnabled() ? `
+      <h2>ההתקדמות שלי</h2>
+      <label class="toggle-row">
+        <input type="checkbox" id="share"${progress.shareProgress ? ' checked' : ''}>
+        להציג את ההתקדמות שלי לצוות
+      </label>
+      <p class="hint">כבוי: הצוות רואה רק את הכינוי והניקוד. דלוק: גם אחוז המוצרים המוכרים בכל קטגוריה, והאם "שבוע ראשון" הושלם.</p>
+      <p id="share-msg" role="status"></p>` : ''}
       <h2>מחיקת הנתונים</h2>
       <p>מוחק את הכינוי והניקוד מהטבלה ומהטלפון הזה. ההתקדמות האישית שלך בכרטיסיות נשארת בטלפון.</p>
       <button class="btn btn-no" id="delete-me" type="button">מחיקת הנתונים שלי</button>
@@ -162,6 +172,19 @@ export async function viewTeam() {
     </details>
   `);
   bindNameForm(() => viewTeam());
+  document.getElementById('share')?.addEventListener('change', async (e) => {
+    progress.shareProgress = e.target.checked;
+    saveProgress();
+    const msg = document.getElementById('share-msg');
+    try {
+      await syncTotal(progress.gameXp || 0);
+      if (!stillHere()) return;
+      msg.textContent = progress.shareProgress ? 'ההתקדמות שלך מוצגת לצוות.' : 'ההתקדמות שלך הוסרה מהטבלה.';
+    } catch (ex) {
+      msg.textContent = 'לא הצלחנו לעדכן. ננסה שוב בפעם הבאה.';
+      console.error(ex);
+    }
+  });
   document.getElementById('delete-me').addEventListener('click', async () => {
     if (!confirm('למחוק את הכינוי והניקוד שלך מהטבלה?')) return;
     const msg = document.getElementById('delete-msg');
@@ -187,6 +210,7 @@ export async function viewTeam() {
       ${table('הטבלה הכללית', all, 'נקודות', (r) => r.total)}
       ${teamProgressEnabled() ? progressHtml(all) : ''}`;
     fillMeters(boards);
+    cleanupExpired();
   } catch (ex) {
     if (!stillHere()) return;
     if (ex.code === 'RESET') { viewTeam(); return; }

@@ -24,7 +24,7 @@ function cleanOnboard(o) {
 }
 
 function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, dailyRun: null, onboard: { days: {}, final: null, name: '' }, autoNext: false };
+  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, dailyRun: null, onboard: { days: {}, final: null, name: '' }, autoNext: false, shareProgress: false };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
     if (!p || typeof p !== 'object') return fresh;
@@ -46,6 +46,7 @@ function loadProgress() {
         ? { date: p.dailyRun.date, results: p.dailyRun.results } : null,
       onboard: cleanOnboard(p.onboard),
       autoNext: p.autoNext === true,
+      shareProgress: p.shareProgress === true, // opt-in: team-progress fields go to the board only after this
       days: Array.isArray(p.days) ? p.days.filter((d) => typeof d === 'string' && /^\d{4}-\d\d-\d\d$/.test(d)) : []
     };
   } catch (e) { /* private mode or corrupt value: start fresh */ }

@@ -138,3 +138,7 @@ export function focusMain() {
   if (h1) { h1.tabIndex = -1; h1.focus({ preventScroll: true }); } else main.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
+
+// Today's date in Israel (YYYY-MM-DD): the daily challenge and product of the day change at local midnight.
+export const jerusalemDate = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());

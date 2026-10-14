@@ -4,7 +4,7 @@
 
 import { FIREBASE, TEAM_PROGRESS } from './config.js';
 import { db } from './core.js';
-import { teamStats } from './progress.js';
+import { teamStats, progress } from './progress.js';
 
 const AUTH_KEY = 'lardo.auth.v1';
 const PLAYER_KEY = 'lardo.player.v1';
@@ -124,7 +124,7 @@ async function query(structuredQuery) {
 }
 
 const extraFields = () => {
-  if (!TEAM_PROGRESS || !db) return {};
+  if (!TEAM_PROGRESS || !db || !progress.shareProgress) return {}; // the write replaces the doc, so switching off removes them
   const t = teamStats(db.categories, db.byCat);
   return { onboarded: { booleanValue: t.onboarded }, known: str(t.known) };
 };
@@ -218,6 +218,20 @@ export async function loadDaily(date) {
     limit: 200
   });
   return rows.map((r) => ({ ...r, me: r.uid === a.uid })).sort((x, y) => y.score - x.score);
+}
+
+// Stands in for a TTL policy: deletes up to 50 daily scores past their expireAt (the rules allow any signed-in visitor).
+// Runs only for someone who already has a nickname, so a visitor never gets an account just for this. Failures are ignored.
+export async function cleanupExpired() {
+  if (!cloudEnabled() || !myPlayer()) return;
+  try {
+    const old = await query({
+      from: [{ collectionId: 'daily' }],
+      where: { fieldFilter: { field: { fieldPath: 'expireAt' }, op: 'LESS_THAN', value: { timestampValue: new Date().toISOString() } } },
+      limit: 50
+    });
+    if (old.length) await commit(old.map((d) => ({ delete: docName(`daily/${d.id}`) })));
+  } catch (e) { /* best effort */ }
 }
 
 // Removes the nickname, the scores and the anonymous account, then forgets this phone.

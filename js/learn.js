@@ -156,6 +156,7 @@ export function viewFlashcards(catId, opts = null) {
             <h2 class="flash-name" tabindex="-1" id="ans">${esc(p.name)}</h2>
             <p class="price"><bdi>${esc(priceLabel(p))}</bdi></p>
             ${(p.staff_description || p.description) ? `<p>${esc(p.staff_description || p.description)}</p>` : ''}
+            ${p.sales && p.sales.pitch ? `<p class="fc-pitch">${p.sales.draft ? '<span class="draft-badge">טיוטה</span> ' : ''}<b>איך מציעים:</b> ${esc(p.sales.pitch)}</p>` : ''}
             <div class="two">
               <button class="btn btn-no" id="no" type="button">✗ עוד לא</button>
               <button class="btn btn-yes" id="yes" type="button">✓ ידעתי</button>
@@ -486,8 +487,8 @@ function questionsWho(order = weightedOrder) {
 /* ---------- daily challenge ---------- */
 
 // The shop's calendar day, the same on every phone.
-export const jerusalemDate = () =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+export { jerusalemDate } from './core.js';
+import { jerusalemDate } from './core.js';
 
 /* "שאלת לקוח": counter questions built from the staff notes (tags) and the customer FAQ. */
 const KOSHER = { yes: 'כן, כשרות רעננה בלי חלב נוכרי', no: 'לא, זה חלב נוכרי' };
@@ -794,7 +795,7 @@ function playClock(secs) {
   tick = setInterval(update, 250);
 }
 
-// custom (used by the onboarding path): { name, make, back, onEnd({score, of, missed, box}) }
+// custom (used by the onboarding path): { name, make, back, xp (false: no points), onEnd({score, of, missed, box}) }
 export function viewGame(id, custom = null) {
   if (id === 'clock' && !custom) return viewClock();
   const daily = id === 'daily' && !custom;
@@ -867,7 +868,7 @@ export function viewGame(id, custom = null) {
     const ok = k === q.correct;
     results[i] = ok;
     if (daily) { progress.dailyRun = { date, results: results.slice(0, i + 1) }; saveProgress(); }
-    if (ok) { score += 1; run += 1; addXp(10, true); } else { run = 0; missed.push(q.id); box.querySelector('.chip-streak')?.remove(); }
+    if (ok) { score += 1; run += 1; if (!custom || custom.xp !== false) addXp(10, true); } else { run = 0; missed.push(q.id); box.querySelector('.chip-streak')?.remove(); }
     markResult(q.id, ok);
     box.querySelectorAll('.opt').forEach((b) => {
       const n = Number(b.dataset.k);

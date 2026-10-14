@@ -70,7 +70,7 @@ export function viewHome() {
   const ob = progress.onboard;
   const inOnboarding = Object.keys(ob.days).length && !(ob.final && ob.final.passed);
   const primary = inOnboarding ? { href: '#/onboard', label: 'להמשיך את שבוע ראשון' } : { href: '#/learn/all', label: 'להמשיך ללמוד' };
-  const dailyDone = progress.daily[new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())] != null;
+  const dailyDone = progress.daily[jerusalemDate()] != null;
 
   const cats = db.categories.map((c) => {
     const items = db.byCat.get(c.id);
@@ -246,7 +246,7 @@ export function viewSearch(q = '') {
 
 /* ---------- selling: a pitch line and what to offer alongside (staff-editable, may still be a draft) ---------- */
 
-const draftNote = '<p class="draft-note">טיוטה: עוד לא אושר על ידי הצוות.</p>';
+const draftNote = '<p class="draft-note"><span class="draft-badge">טיוטה</span> עוד לא אושר על ידי הצוות.</p>';
 const productLinks = (list) => `<ul class="chips">${list
   .filter((x) => db.byId.has(x.id))
   .map((x) => `<li><a href="#/p/${encodeURIComponent(x.id)}">${esc(db.byId.get(x.id).name)}</a></li>`).join('')}</ul>`;
