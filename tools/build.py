@@ -16,7 +16,7 @@ CATEGORIES = ["מאפים", "פטיסרי", "עוגות", "טארטים", "כר�
 CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוגות": "cakes", "טארטים": "tarts", "כריכים": "sandwiches", "פיצות": "pizzas",
                 "עוגיות": "cookies", "לחמים": "breads", "סלטים": "salads", "מארזים": "boxes", "שתייה": "drinks"}
 WOLT_TO_SITE = {"שתייה קלה": "שתייה"}
-OVERLAY_KEYS = {"_doc", "_size_note", "move_to_category", "products", "counter_only", "customer_faq"}
+OVERLAY_KEYS = {"_doc", "_size_note", "move_to_category", "products", "counter_only", "customer_faq", "sales_tips"}
 PRODUCT_KEYS = {"name", "aliases", "description", "staff_description", "sizes", "tags", "notes"}
 
 
@@ -72,6 +72,35 @@ def check_overlay(overlay, snapshot_ids, warn):
     for c in overlay.get("counter_only", []):
         if c.get("category") not in CATEGORIES:
             warn(f"counter_only: {c.get('id')} has unknown category {c.get('category')!r}")
+
+
+def apply_sales_tips(tips, products, warn):
+    """Per-product "sales" (pairings + pitch line) and the top-level situation tips.
+
+    Every product id in the tips must exist; unknown ids are warned about and dropped.
+    """
+    by_id = {p["id"]: p for p in products}
+    draft = bool(tips.get("draft"))
+
+    def refs(ids, where):
+        out = []
+        for pid in ids:
+            if pid in by_id:
+                out.append({"id": pid, "name": by_id[pid]["name"]})
+            else:
+                warn(f"sales_tips: {where} refers to unknown product id {pid}")
+        return out
+
+    per_product = tips.get("products", {})
+    for pid in per_product.keys() - by_id.keys():
+        warn(f"sales_tips: tip for unknown product id {pid}")
+    for p in products:
+        t = per_product.get(p["id"])
+        p["sales"] = {"pair_with": refs(t.get("pair", []), p["name"]), "pitch": t.get("pitch") or None,
+                      "draft": draft} if t else None
+    return {"draft": draft, "items": [
+        {"id": s["id"], "title": s["title"], "tip": s["tip"], "products": refs(s.get("products", []), s["title"])}
+        for s in tips.get("situations", [])]}
 
 
 def main():
@@ -140,6 +169,7 @@ def main():
         p["is_wolt"] = p["source"] != "staff"
     order = {CATEGORY_IDS[c]: i for i, c in enumerate(CATEGORIES)}
     products.sort(key=lambda p: order[p["category"]])  # stable: keeps Wolt order inside a category
+    situations = apply_sales_tips(overlay.get("sales_tips", {}), products, warn)
 
     out_path = DATA / "products.json"
     previous = json.loads(out_path.read_text(encoding="utf-8")) if out_path.exists() else None
@@ -153,6 +183,7 @@ def main():
         "categories": [{"id": CATEGORY_IDS[c], "name": c, "count": sum(p["category_name"] == c for p in products)} for c in CATEGORIES],
         "products": products,
         "customer_faq": overlay.get("customer_faq", []),
+        "sales_situations": situations,
     }
     # Bump "updated" only when the content changed, so it can serve as a cache version.
     if previous and {**previous, "updated": None} == {**out, "updated": None}:
