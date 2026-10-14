@@ -58,7 +58,7 @@
   "customer_faq": [{"topic": "שמירה והובלה", "text": "..."}],
   "sales_situations": {               // טיפים לפי מצב של לקוח
     "draft": true,                    // טיוטה: עדיין לא אושר ע"י שרון
-    "items": [{"id": "travel", "title": "לנסיעה", "tip": "...", "products": [{"id": "...", "name": "..."}]}]
+    "items": [{"id": "travel", "title": "לנסיעה", "tip": "...", "products": [{"id": "...", "name": "..."}]}]   // not-sweet, travel, hosting, gift, fruity
   }
 }
 ```
