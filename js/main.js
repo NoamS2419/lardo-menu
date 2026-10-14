@@ -6,6 +6,7 @@ import {
 } from './catalog.js';
 import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './learn.js';
 import { viewTeam } from './team.js';
+import { viewOnboard, viewOnboardDay, viewOnboardFinal, viewOnboardCert } from './onboard.js';
 import { cloudEnabled } from './cloud.js';
 
 // With large text the tab bar grows; keep the page's bottom padding in step with its real height.
@@ -66,6 +67,12 @@ function route() {
     case 'game': viewGame(parts[1]); break;
     case 'accessibility': viewAccessibility(); break;
     case 'team': viewTeam(); break;
+    case 'onboard':
+      if (parts[1] === 'day') viewOnboardDay(parts[2], parts[3]);
+      else if (parts[1] === 'final') viewOnboardFinal();
+      else if (parts[1] === 'cert') viewOnboardCert();
+      else viewOnboard();
+      break;
     default: viewNotFound();
   }
   focusMain();
@@ -73,7 +80,7 @@ function route() {
 
 // Highlight the tab for the current section.
 function markTab(section) {
-  const tab = { learn: 'learn', games: 'games', game: 'games', search: 'search', team: 'team' }[section] || 'home';
+  const tab = { learn: 'learn', onboard: 'learn', games: 'games', game: 'games', search: 'search', team: 'team' }[section] || 'home';
   document.querySelectorAll('.tabs a').forEach((a) => {
     if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });

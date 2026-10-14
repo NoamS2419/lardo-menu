@@ -99,6 +99,11 @@ export function viewLearnHub() {
       <span class="level-sub">כל מוצר שסימנת שווה 5 נקודות</span>
       <span><a class="btn" href="#/learn/all">לכל המוצרים</a></span>
     </div>
+    <a class="row-link onboard-cta" href="#/onboard">
+      <span class="row-title">שבוע ראשון</span>
+      <span class="soon">מסלול לעובדים חדשים</span>
+      <span class="row-sub full">יום אחד, קטגוריה אחת: כרטיסיות, מבחן קצר, ובסוף תעודה.</span>
+    </a>
     <h2>לפי קטגוריה</h2>
     <ul class="rows">${rows}</ul>
   `);
@@ -106,18 +111,20 @@ export function viewLearnHub() {
 
 /* ---------- flashcards ---------- */
 
-export function viewFlashcards(catId) {
-  const items = catId === 'all' ? db.products : db.byCat.get(catId);
+// opts (used by the onboarding path): { items, title, back: {href, label}, onFinish, next: {href, label} }
+export function viewFlashcards(catId, opts = null) {
+  const items = opts ? opts.items : catId === 'all' ? db.products : db.byCat.get(catId);
   const cat = db.categories.find((c) => c.id === catId);
-  if (!items) return viewNotFound();
-  const title = cat ? cat.name : 'כל המוצרים';
+  if (!items || !items.length) return viewNotFound();
+  const title = opts ? opts.title : cat ? cat.name : 'כל המוצרים';
+  const back = opts ? opts.back : { href: '#/learn', label: 'כרטיסיות' };
   let deck = weightedOrder(items);
   let pos = 0;
   let seen = 0;
   let knewInRow = 0;
 
   setPage(`כרטיסיות: ${title}`, `
-    <a class="back" href="#/learn"><span aria-hidden="true">→</span> כרטיסיות</a>
+    <a class="back" href="${back.href}"><span aria-hidden="true">→</span> ${esc(back.label)}</a>
     <h1>${esc(title)}</h1>
     <div id="fc"></div>
   `);
@@ -190,13 +197,17 @@ export function viewFlashcards(catId) {
   }
 
   function finish() {
+    if (opts && opts.onFinish) opts.onFinish();
     const k = knownCount(items);
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(Math.round((k / items.length) * 100), 150, 64, `<span id="pct">0</span>%`)}
         <h2 tabindex="-1" id="done">סיימת את החבילה!</h2>
         <p>מוכרים לך ${k} מתוך ${items.length} מוצרים כאן.</p>
-        <p><button class="btn" id="again" type="button">עוד סיבוב</button></p>
+        <div class="two">
+          <button class="btn btn-no" id="again" type="button">עוד סיבוב</button>
+          ${opts && opts.next ? `<a class="btn btn-yes" href="${opts.next.href}">${esc(opts.next.label)}</a>` : ''}
+        </div>
       </section>`;
     fillMeters(box);
     countUp(document.getElementById('pct'), Math.round((k / items.length) * 100));
@@ -734,15 +745,17 @@ function playClock(secs) {
   tick = setInterval(update, 250);
 }
 
-export function viewGame(id) {
-  if (id === 'clock') return viewClock();
-  const daily = id === 'daily';
-  const game = daily ? { id, name: 'האתגר היומי' } : GAMES.find((g) => g.id === id && g.ready);
+// custom (used by the onboarding path): { name, make, back, onEnd({score, of, missed, box}) }
+export function viewGame(id, custom = null) {
+  if (id === 'clock' && !custom) return viewClock();
+  const daily = id === 'daily' && !custom;
+  const game = custom ? { id, name: custom.name } : daily ? { id, name: 'האתגר היומי' } : GAMES.find((g) => g.id === id && g.ready);
   if (!game) return viewNotFound();
   const date = jerusalemDate();
   if (daily && progress.daily[date] != null) return viewDailyDone(date);
-  const make = { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho, customer: questionsCustomer, daily: questionsDaily }[id];
+  const make = custom ? custom.make : { what: questionsWhat, made: questionsMade, price: questionsPrice, who: questionsWho, customer: questionsCustomer, daily: questionsDaily }[id];
   let qs = make();
+  if (!qs.length) return viewNotFound();
   let i = 0;
   let score = 0;
   let run = 0;
@@ -781,7 +794,7 @@ export function viewGame(id) {
       <section class="flash${id === 'what' || id === 'price' ? ' wide' : ''} q-in">
         <h2 class="sr-only" tabindex="-1" id="qh">שאלה ${i + 1} מתוך ${qs.length}, ניקוד ${score}${q.kind ? `: ${q.kind}` : ''}</h2>
         <p class="game-head">
-          <a href="${daily ? '#/' : '#/games'}"><span aria-hidden="true">→</span><span class="sr-only">${daily ? 'לדף הבית' : 'חזרה למשחקים'}</span></a>
+          <a href="${custom ? custom.back : daily ? '#/' : '#/games'}"><span aria-hidden="true">→</span><span class="sr-only">${custom ? 'חזרה' : daily ? 'לדף הבית' : 'חזרה למשחקים'}</span></a>
           <strong>${esc(game.name)}</strong>
           ${run >= 3 ? `<span class="chip-streak"><span aria-hidden="true">🔥</span> ${run} ברצף</span>` : ''}
           <span class="game-score"><span class="sr-only">ניקוד </span><span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
@@ -856,6 +869,13 @@ export function viewGame(id) {
   }
 
   function end() {
+    if (custom) {
+      syncTotal(progress.gameXp || 0).catch(() => {});
+      custom.onEnd({ score, of: qs.length, missed: [...missed], box, review: missedHtml(missed) });
+      window.scrollTo(0, 0);
+      document.getElementById('res')?.focus({ preventScroll: true });
+      return;
+    }
     if (daily) return endDaily();
     syncTotal(progress.gameXp || 0).catch(() => {});
     const prev = progress.best[id];
@@ -932,4 +952,29 @@ function viewDailyDone(date) {
         ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">משחקים</a>'}
       </div>
     </section>`);
+}
+
+/* ---------- question sets for a fixed list of products (onboarding) ---------- */
+
+// A mixed quiz over just these products: photo, ingredients, price and description questions,
+// one per product first, then a second kind of question where the list is short.
+export function questionsFor(items, n) {
+  const ids = new Set(items.map((p) => p.id));
+  const only = (list) => shuffle(list.filter((p) => ids.has(p.id)));
+  const pools = shuffle([questionsWhat(only), questionsMade(only), questionsPrice(only), questionsWho(only)]);
+  const out = [];
+  const used = new Set();
+  for (let pass = 0; pass < 2 && out.length < n; pass++) {
+    for (const pool of pools) {
+      for (const q of pool) {
+        if (out.length >= n) break;
+        const key = pass === 0 ? q.id : `${q.id}|${q.prompt}`;
+        if (used.has(key) || (pass === 0 && out.some((o) => o.id === q.id))) continue;
+        if (pass === 1 && out.some((o) => o.id === q.id && o.prompt === q.prompt)) continue;
+        used.add(key);
+        out.push(q);
+      }
+    }
+  }
+  return shuffle(out);
 }

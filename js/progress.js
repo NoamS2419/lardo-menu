@@ -3,8 +3,28 @@
 
 const PROGRESS_KEY = 'lardo.progress.v1';
 
+// Onboarding ("שבוע ראשון"): per day {cards, quiz:{score,of}, passed}, the final test and the name on the certificate.
+function cleanOnboard(o) {
+  const out = { days: {}, final: null, name: '' };
+  if (!o || typeof o !== 'object') return out;
+  const num = (v) => Number.isInteger(v) && v >= 0 && v <= 100;
+  for (const [k, d] of Object.entries(o.days && typeof o.days === 'object' ? o.days : {})) {
+    if (!/^[1-9]$/.test(k) || !d || typeof d !== 'object') continue;
+    out.days[k] = {
+      cards: d.cards === true,
+      passed: d.passed === true,
+      quiz: d.quiz && num(d.quiz.score) && num(d.quiz.of) ? { score: d.quiz.score, of: d.quiz.of } : null
+    };
+  }
+  if (o.final && num(o.final.score) && num(o.final.of) && typeof o.final.date === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.final.date)) {
+    out.final = { score: o.final.score, of: o.final.of, date: o.final.date, passed: o.final.passed === true };
+  }
+  if (typeof o.name === 'string') out.name = o.name.slice(0, 20);
+  return out;
+}
+
 function loadProgress() {
-  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, dailyRun: null, autoNext: false };
+  const fresh = { known: {}, miss: {}, best: {}, days: [], xp: 0, gameXp: 0, daily: {}, dailyRun: null, onboard: { days: {}, final: null, name: '' }, autoNext: false };
   try {
     const p = JSON.parse(localStorage.getItem(PROGRESS_KEY));
     if (!p || typeof p !== 'object') return fresh;
@@ -24,6 +44,7 @@ function loadProgress() {
       dailyRun: p.dailyRun && typeof p.dailyRun.date === 'string' && /^\d{4}-\d\d-\d\d$/.test(p.dailyRun.date)
         && Array.isArray(p.dailyRun.results) && p.dailyRun.results.length <= 10 && p.dailyRun.results.every((r) => typeof r === 'boolean')
         ? { date: p.dailyRun.date, results: p.dailyRun.results } : null,
+      onboard: cleanOnboard(p.onboard),
       autoNext: p.autoNext === true,
       days: Array.isArray(p.days) ? p.days.filter((d) => typeof d === 'string' && /^\d{4}-\d\d-\d\d$/.test(d)) : []
     };

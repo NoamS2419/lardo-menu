@@ -214,13 +214,17 @@ export async function loadDaily(date) {
 export async function deleteMe() {
   const me = myPlayer();
   const a = await token();
-  const mine = await query({
-    from: [{ collectionId: 'daily' }],
-    where: { fieldFilter: { field: { fieldPath: 'uid' }, op: 'EQUAL', value: str(a.uid) } },
-    limit: 500
-  });
-  const writes = mine.map((d) => ({ delete: docName(`daily/${d.id}`) }));
-  writes.push({ delete: docName(`players/${a.uid}`) });
+  // A commit takes at most 500 writes, so daily scores go in batches until none are left.
+  for (;;) {
+    const mine = await query({
+      from: [{ collectionId: 'daily' }],
+      where: { fieldFilter: { field: { fieldPath: 'uid' }, op: 'EQUAL', value: str(a.uid) } },
+      limit: 400
+    });
+    if (!mine.length) break;
+    await commit(mine.map((d) => ({ delete: docName(`daily/${d.id}`) })));
+  }
+  const writes = [{ delete: docName(`players/${a.uid}`) }];
   if (me) writes.push({ delete: docName(`names/${me.key}`) });
   await commit(writes);
   await postJson(`https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${FIREBASE.apiKey}`, { idToken: a.idToken })
