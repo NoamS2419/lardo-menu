@@ -18,8 +18,7 @@
   <a class="skip" href="#main">דילוג לתוכן</a>
   <header class="top">
     <a class="brand" href="#/">
-      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-6 6-9 9-9s7 3 9 9c-2 1.5-5 2.5-9 2.5S5 16.5 3 15z"/><path d="M8.5 8.5l1.5 8.5M15.5 8.5l-1.5 8.5M12 6.2v11"/></svg>
-      <span>לארדו <em>תפריט</em></span>
+      <span class="brand-word">לארדו</span><span class="brand-sub">תפריט</span>
     </a>
     <nav class="tabs" aria-label="ניווט ראשי">
       <a href="#/" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>בית</span></a>
@@ -31,7 +30,8 @@
   </header>
 
   <main id="main" tabindex="-1">
-    <p class="loading">טוען…</p>
+    <div class="skeleton" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="sr-only" role="status">טוען</p>
   </main>
 
   <footer class="foot">

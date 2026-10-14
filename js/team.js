@@ -151,7 +151,7 @@ export async function viewTeam() {
   setPage('הצוות', `
     <h1>טבלת הצוות</h1>
     ${dailyCta}
-    <div id="boards" aria-busy="true"><p class="loading">טוען את הטבלה…</p></div>
+    <div id="boards" aria-busy="true"><p class="empty">טוען את הטבלה…</p></div>
     <details class="settings">
       <summary>הכינוי שלי והנתונים שלי</summary>
       ${nameForm(me.name)}

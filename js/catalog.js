@@ -65,6 +65,12 @@ export function viewHome() {
   const total = db.products.length;
   const known = knownCount(db.products);
   const daily = productOfDay();
+  // A first visit gets one clear way in instead of empty meters and a 0% ring.
+  const fresh = !known && !progress.xp && !progress.days.length && !Object.keys(progress.onboard.days).length;
+  const ob = progress.onboard;
+  const inOnboarding = Object.keys(ob.days).length && !(ob.final && ob.final.passed);
+  const primary = inOnboarding ? { href: '#/onboard', label: 'להמשיך את שבוע ראשון' } : { href: '#/learn/all', label: 'להמשיך ללמוד' };
+  const dailyDone = progress.daily[new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())] != null;
 
   const cats = db.categories.map((c) => {
     const items = db.byCat.get(c.id);
@@ -77,13 +83,13 @@ export function viewHome() {
             ${cover
               ? `<img class="thumb" src="${esc(imgSrc(cover.image, 500))}" alt="" data-pid="${esc(cover.id)}" loading="lazy" decoding="async">`
               : placeholder(c.id, 'thumb')}
-            <span class="cat-name">${esc(c.name)}</span>
             ${k === items.length ? '<span class="cat-done">✓ הכל</span>' : ''}
           </span>
-          <span class="card-body">
+          <span class="cat-name">${esc(c.name)}</span>
+          ${k ? `<span class="card-body">
             <span class="meter-row"><span>${k} מתוך ${items.length}</span></span>
             ${meter(k, items.length, `${c.name}: ${k} מתוך ${items.length}`)}
-          </span>
+          </span>` : ''}
         </a>
       </li>`;
   }).join('');
@@ -91,14 +97,28 @@ export function viewHome() {
   setPage('', `
     <div class="home">
       <aside class="home-side">
-        <p class="hello">${greeting()}!</p>
+        <p class="hello">${greeting()}</p>
         <h1>מה לומדים היום?</h1>
+        ${fresh ? `
+        <div class="first-run">
+          <h2>מתחילים? 5 דקות ביום.</h2>
+          <p>"שבוע ראשון" עובר על הוויטרינה קטגוריה אחרי קטגוריה: כרטיסיות, מבחן קצר, ובסוף תעודה.</p>
+          <a class="btn btn-wide" href="#/onboard">להתחיל</a>
+        </div>` : `
         <div class="level">
           ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
           <span class="level-name">${esc(lvl.name)}</span>
-          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}<br>מוכרים לך ${known} מתוך ${total} מוצרים</span>
-          ${days > 1 ? `<span class="streak"><span aria-hidden="true">🔥</span> ${days} ימים ברצף</span>` : '<span class="streak">כל יום קצת, וזה נדבק</span>'}
+          <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הדרגה הגבוהה ביותר'}<br>מוכרים לך ${known} מתוך ${total} מוצרים</span>
+          ${days > 1 ? `<span class="streak">${days} ימים ברצף</span>` : ''}
         </div>
+        <a class="btn btn-wide primary-cta" href="${primary.href}">${primary.label}</a>`}
+        <nav aria-label="עוד דרכים ללמוד">
+          <ul class="secondary">
+            <li><a href="#/game/daily">${ICONS.daily}<span>האתגר היומי<small>${dailyDone ? 'עשית היום. מחר יש חדש.' : '10 שאלות, אותן שאלות לכל הצוות'}</small></span></a></li>
+            <li><a href="#/game/what">${ICONS.what}<span>מה זה?<small>רואים תמונה ובוחרים שם</small></span></a></li>
+            ${fresh ? '' : `<li><a href="${primary.href === '#/onboard' ? '#/learn/all' : '#/onboard'}">${ICONS.cards}<span>${primary.href === '#/onboard' ? 'כל הכרטיסיות' : 'שבוע ראשון'}<small>${primary.href === '#/onboard' ? 'כל המוצרים, מה שלא ידעת חוזר יותר' : 'מסלול לעובדים חדשים'}</small></span></a></li>`}
+          </ul>
+        </nav>
         ${daily ? `
         <a class="daily" href="#/p/${encodeURIComponent(daily.id)}">
           <img class="daily-img" src="${esc(imgSrc(daily.image, 700))}" alt="" data-pid="${esc(daily.id)}" decoding="async">
@@ -108,11 +128,6 @@ export function viewHome() {
             <span class="daily-line">${esc(daily.staff_description || daily.description)}</span>
           </span>
         </a>` : ''}
-        <nav class="quick" aria-label="קיצורים">
-          <a class="main-cta" href="#/learn/all"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>להמשיך ללמוד</a>
-          <a href="#/game/what"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>מה זה?</a>
-          <a href="#/game/daily"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>האתגר היומי</a>
-        </nav>
       </aside>
       <section aria-labelledby="cats-h">
         <div class="section-head"><h2 id="cats-h">הוויטרינה</h2></div>
@@ -214,8 +229,13 @@ export function viewSearch(q = '') {
     if (!terms.length) { results.innerHTML = ''; return; }
     const found = db.products.filter((p) => terms.every((t) => p._search.includes(t)));
     results.innerHTML = found.length
-      ? `<ul class="grid">${found.map(productCard).join('')}</ul>`
-      : '<p class="empty">לא נמצאו מוצרים</p>';
+      ? `<ul class="grid">${found.map((p) => productCard(p, Boolean(progress.known[p.id]))).join('')}</ul>`
+      : `<div class="state">
+          ${ICONS.lost}
+          <h2>לא מצאנו את "${esc(input.value.trim())}"</h2>
+          <p>אפשר לחפש לפי שם או מרכיב. למשל:</p>
+          <ul class="chips">${['פיסטוק', 'קרואסון', 'שוקולד', 'טארט', 'כריך'].map((w) => `<li><a href="#/search?q=${encodeURIComponent(w)}">${w}</a></li>`).join('')}</ul>
+        </div>`;
     announce(found.length ? `נמצאו ${found.length} מוצרים` : 'לא נמצאו מוצרים');
   };
   document.getElementById('search-form').addEventListener('submit', (e) => { e.preventDefault(); input.blur(); });
@@ -286,7 +306,7 @@ export function viewAccessibility() {
         <li>ניגודיות צבעים מספקת, גם במצב כהה.</li>
         <li>לכל תמונה יש תיאור, ואפשר לנווט בכל האתר גם במקלדת.</li>
         <li>מידע לא מועבר בצבע בלבד, ואין אנימציות למי שביקש להפחית תנועה.</li>
-        <li>במשחקים אין מעבר אוטומטי לשאלה הבאה אלא אם מפעילים אותו ("מעבר אוטומטי"). רק ב"נגד השעון" יש שעון, ואפשר לבחור בו שתי דקות או בלי שעון בכלל.</li>
+        <li>במשחקים אין מעבר אוטומטי לשאלה הבאה אלא אם מפעילים אותו ב"הגדרות משחק" בעמוד המשחקים. רק ב"נגד השעון" יש שעון, ואפשר לבחור בו שתי דקות או בלי שעון בכלל.</li>
       </ul>
       <h2>מגבלות ידועות</h2>
       <ul>
@@ -302,9 +322,20 @@ export function viewAccessibility() {
   `);
 }
 
+const ICONS = {
+  daily: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>',
+  what: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
+  cards: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
+  lost: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M8.5 8.5l4 4M12.5 8.5l-4 4"/></svg>'
+};
+
 export function viewNotFound() {
   setPage('לא נמצא', `
-    <h1>הדף לא נמצא</h1>
-    <p><a href="#/">חזרה לדף הבית</a></p>
+    <div class="state">
+      ${ICONS.lost}
+      <h1>הדף הזה לא קיים</h1>
+      <p>אולי הקישור ישן, או שהמוצר ירד מהתפריט.</p>
+      <a class="btn" href="#/">לדף הבית</a>
+    </div>
   `);
 }

@@ -202,7 +202,7 @@ export function viewFlashcards(catId, opts = null) {
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(Math.round((k / items.length) * 100), 150, 64, `<span id="pct">0</span>%`)}
-        <h2 tabindex="-1" id="done">סיימת את החבילה!</h2>
+        <h2 tabindex="-1" id="done">סיימת את החבילה</h2>
         <p>מוכרים לך ${k} מתוך ${items.length} מוצרים כאן.</p>
         <div class="two">
           <button class="btn btn-no" id="again" type="button">עוד סיבוב</button>
@@ -264,15 +264,27 @@ export function viewGames() {
   setPage('משחקים', `
     <h1>משחקים</h1>
     <div class="level">
-      ${ring(lvl.pct)}
+      ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
       <span class="level-name">${esc(lvl.name)} · ${lvl.points} נקודות</span>
-      <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הגעת לדרגה הכי גבוהה!'}</span>
+      <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הדרגה הגבוהה ביותר'}</span>
       <span class="level-sub">כל תשובה נכונה: 10 נקודות</span>
     </div>
     <h2>איזה משחק?</h2>
     <ul class="rows">${items}</ul>
     ${badgesHtml()}
+    <details class="settings">
+      <summary>הגדרות משחק</summary>
+      <label class="toggle-row">
+        <input type="checkbox" id="auto"${progress.autoNext ? ' checked' : ''}>
+        מעבר אוטומטי לשאלה הבאה אחרי תשובה נכונה
+      </label>
+    </details>
   `);
+  document.getElementById('auto').addEventListener('change', (e) => {
+    progress.autoNext = e.target.checked;
+    saveProgress();
+    announce(e.target.checked ? 'מעבר אוטומטי פועל' : 'מעבר אוטומטי כבוי');
+  });
 }
 
 /* ---------- badges: earned from personal progress, kept on this phone ---------- */
@@ -281,19 +293,33 @@ const perfect = (id) => { const b = progress.best[id]; return Boolean(b && b.sco
 
 function badges() {
   const list = [
-    { icon: '🥐', name: 'כתר הקרואסונים', how: 'מכירים את כל המאפים', got: () => (db.byCat.get('pastries') || []).every((p) => progress.known[p.id]) },
-    { icon: '💰', name: 'מחירון מהלך', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
-    { icon: '👀', name: 'עין של קונדיטור', how: '10 מתוך 10 ב"מה זה?"', got: () => perfect('what') },
-    { icon: '🧾', name: 'קריאת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
-    { icon: '🔎', name: 'עין של בלש', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
-    { icon: '🛎️', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
-    { icon: '⚡', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
-    { icon: '🏅', name: 'אליפות היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
-    { icon: '🔥', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
-    { icon: '🎓', name: 'כל הוויטרינה בראש', how: 'כל המוצרים מסומנים "מוכר לי"', got: () => db.products.every((p) => progress.known[p.id]) }
+    { icon: 'croissant', name: 'כתר הקרואסונים', how: 'מכירים את כל המאפים', got: () => (db.byCat.get('pastries') || []).every((p) => progress.known[p.id]) },
+    { icon: 'tag', name: 'מחירון מהלך', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
+    { icon: 'eye', name: 'עין של קונדיטור', how: '10 מתוך 10 ב"מה זה?"', got: () => perfect('what') },
+    { icon: 'list', name: 'קריאת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
+    { icon: 'search', name: 'עין של בלש', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
+    { icon: 'bell', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
+    { icon: 'bolt', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
+    { icon: 'medal', name: 'אליפות היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
+    { icon: 'flame', name: 'שבוע ברצף', how: 'לומדים 7 ימים ברצף', got: () => streak() >= 7 },
+    { icon: 'cap', name: 'כל הוויטרינה בראש', how: 'כל המוצרים מסומנים "מוכר לי"', got: () => db.products.every((p) => progress.known[p.id]) }
   ];
   return list.map((b) => ({ ...b, got: b.got() }));
 }
+
+// Line icons from the same family as the navigation.
+const BADGE_ICONS = {
+  croissant: '<path d="M3 15c2-6 6-9 9-9s7 3 9 9c-2 1.5-5 2.5-9 2.5S5 16.5 3 15z"/><path d="M8.5 8.5l1.5 8.5M15.5 8.5l-1.5 8.5M12 6.2v11"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  list: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/>',
+  bell: '<path d="M4 17h16"/><path d="M6 17a6 6 0 0 1 12 0"/><path d="M12 8V6M10 6h4"/>',
+  bolt: '<path d="M13 3 5 14h6l-1 7 8-11h-6z"/>',
+  medal: '<circle cx="12" cy="15" r="5"/><path d="M8 3l2.5 7.5M16 3l-2.5 7.5"/>',
+  flame: '<path d="M12 21c-4 0-6-2.5-6-6 0-4 4-6 4-10 3 2 8 6 8 10 0 3.5-2 6-6 6z"/><path d="M12 21c-1.7 0-2.5-1.2-2.5-2.7 0-1.8 2.5-3.3 2.5-3.3s2.5 1.5 2.5 3.3c0 1.5-.8 2.7-2.5 2.7z"/>',
+  cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>'
+};
 
 function badgesHtml() {
   const all = badges();
@@ -302,7 +328,7 @@ function badgesHtml() {
     <h2>תגים <span class="counter">(${n} מתוך ${all.length})</span></h2>
     <ul class="badges">${all.map((b) => `
       <li class="badge${b.got ? ' got' : ''}">
-        <span class="badge-icon" aria-hidden="true">${b.icon}</span>
+        <span class="badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${BADGE_ICONS[b.icon]}</svg></span>
         <span class="badge-name">${esc(b.name)}</span>
         ${b.got ? '<span class="badge-got">✓ הושג</span>' : ''}
         <span class="badge-how">${b.got ? '' : '<span class="sr-only">עוד לא. </span>'}${esc(b.how)}</span>
@@ -310,8 +336,8 @@ function badgesHtml() {
     </ul>`;
 }
 
-const PRAISE = ['בול!', 'יש!', 'נכון!', 'בדיוק ככה', 'יפה מאוד!', 'עין של קונדיטור'];
-const STREAK_PRAISE = { 3: 'שלוש ברצף!', 5: 'חמש ברצף! 🔥', 8: 'שמונה ברצף! מי עוצר אותך?' };
+const PRAISE = ['בול', 'נכון', 'בדיוק ככה', 'יפה מאוד', 'עין של קונדיטור'];
+const STREAK_PRAISE = { 3: 'שלוש ברצף', 5: 'חמש ברצף', 8: 'שמונה ברצף. מי עוצר אותך?' };
 
 const ROUND = 10;
 
@@ -654,7 +680,7 @@ function playClock(secs) {
         <a href="#/games"><span aria-hidden="true">→</span><span class="sr-only">חזרה למשחקים</span></a>
         <strong>נגד השעון</strong>
         ${secs ? '<span class="clock" role="timer" aria-live="off"><span aria-hidden="true">⏱</span> <span id="left"></span></span>' : `<span class="clock"><bdi id="left"></bdi></span>`}
-        <span class="game-score"><span class="sr-only">נכונות </span><span id="score">0</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
+        <span class="game-score">נכונות <span id="score">0</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
       </p>
       ${secs ? `<div class="meter clock-meter" aria-hidden="true"><span class="meter-fill" id="bar"></span></div>` : ''}
       <div id="q"></div>
@@ -749,7 +775,7 @@ function playClock(secs) {
       <section class="flash result q-in">
         <p class="result-big"><span id="sc">0</span></p>
         <h2 tabindex="-1" id="res" class="result-line">${secs ? `${right} ב${secs === 60 ? 'דקה' : 'שתי דקות'}` : `${score} מתוך ${answered}`}</h2>
-        ${newBest ? '<p class="new-best">שיא חדש!</p>' : prev && secs ? `<p class="counter">השיא שלך: ${Number(prev.score)}</p>` : ''}
+        ${newBest ? '<p class="new-best">שיא חדש</p>' : prev && secs ? `<p class="counter">השיא שלך: ${Number(prev.score)}</p>` : ''}
         ${missedHtml(missed)}
         <div class="two">
           <a class="btn btn-no" href="#/games">משחקים</a>
@@ -820,7 +846,7 @@ export function viewGame(id, custom = null) {
           <a href="${custom ? custom.back : daily ? '#/' : '#/games'}"><span aria-hidden="true">→</span><span class="sr-only">${custom ? 'חזרה' : daily ? 'לדף הבית' : 'חזרה למשחקים'}</span></a>
           <strong>${esc(game.name)}</strong>
           ${run >= 3 ? `<span class="chip-streak"><span aria-hidden="true">🔥</span> ${run} ברצף</span>` : ''}
-          <span class="game-score"><span class="sr-only">ניקוד </span><span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
+          <span class="game-score">ניקוד <span id="score">${score}</span><span class="plus" id="plus" aria-hidden="true">+1</span></span>
         </p>
         ${dots()}
         <div class="game-body">
@@ -830,18 +856,9 @@ export function viewGame(id, custom = null) {
               ${q.options.map((o, k) => `<button class="opt" type="button" data-k="${k}"><bdi>${esc(o)}</bdi></button>`).join('')}
             </div>
             <div id="feedback"></div>
-            <label class="auto-toggle">
-              <input type="checkbox" id="auto"${progress.autoNext ? ' checked' : ''}>
-              מעבר אוטומטי אחרי תשובה נכונה
-            </label>
           </div>
         </div>
       </section>`;
-    document.getElementById('auto').addEventListener('change', (e) => {
-      progress.autoNext = e.target.checked;
-      saveProgress();
-      if (!e.target.checked) clearTimeout(timer);
-    });
     box.querySelectorAll('.opt').forEach((b) => b.addEventListener('click', () => choose(Number(b.dataset.k), b)));
   }
 
@@ -868,7 +885,7 @@ export function viewGame(id, custom = null) {
     }
     const line = ok
       ? (STREAK_PRAISE[run] || PRAISE[Math.floor(Math.random() * PRAISE.length)])
-      : `כמעט! זה ${q.options[q.correct]}`;
+      : `כמעט. זה ${q.options[q.correct]}`;
     const last = i + 1 >= qs.length;
     document.getElementById('feedback').innerHTML = `
       <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓' : '✗'} ${nums(esc(line))}</p>
@@ -907,12 +924,12 @@ export function viewGame(id, custom = null) {
     const newBest = record && prev;
     const pct = Math.round((score / qs.length) * 100);
     const review = missedHtml(missed);
-    const line = score === qs.length ? 'מושלם! שף קונדיטור אמיתי'
-      : score >= 8 ? 'מעולה!' : score >= 5 ? 'יפה, כמעט שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
+    const line = score === qs.length ? 'מושלם. שף קונדיטור אמיתי'
+      : score >= 8 ? 'מעולה' : score >= 5 ? 'יפה, כמעט שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
-        <h2 tabindex="-1" id="res" class="result-line">${newBest ? 'שיא חדש! ' : ''}${esc(line)}</h2>
+        <h2 tabindex="-1" id="res" class="result-line">${newBest ? 'שיא חדש. ' : ''}${esc(line)}</h2>
         <p class="sr-only">${score} מתוך ${qs.length}</p>
         <p><span class="xp-gain">+${score * 10} נקודות</span> · ${esc(levelInfo().name)}</p>
         ${review}
@@ -940,7 +957,7 @@ export function viewGame(id, custom = null) {
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
-        <h2 tabindex="-1" id="res" class="result-line">${score >= 8 ? 'אליפות של היום!' : score >= 5 ? 'יפה מאוד!' : 'מחר יש עוד הזדמנות'}</h2>
+        <h2 tabindex="-1" id="res" class="result-line">${score === 10 ? 'מושלם' : score >= 8 ? 'כמעט מושלם' : score >= 5 ? 'יפה מאוד' : 'מחר יש עוד הזדמנות'}</h2>
         <p class="sr-only">${score} מתוך ${qs.length}</p>
         <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצים להופיע בטבלת הצוות? אפשר לבחור כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
         <div class="two">

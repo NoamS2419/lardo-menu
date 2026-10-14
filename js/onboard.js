@@ -115,7 +115,7 @@ export function viewOnboardDay(n, step) {
         box.innerHTML = `
           <section class="flash result q-in">
             ${ring(Math.round((score / of) * 100), 150, 64, `<span id="sc">0</span>/${of}`)}
-            <h2 tabindex="-1" id="res" class="result-line">${passed ? `עברת את יום ${d.n}!` : 'עוד קצת וזה שם'}</h2>
+            <h2 tabindex="-1" id="res" class="result-line">${passed ? `עברת את יום ${d.n}` : 'עוד קצת וזה שם'}</h2>
             <p>${passed ? (next ? `מחר: ${esc(next.title)}.` : 'עברת את כל הימים. נשאר המבחן המסכם.') : `צריך ${needed(of, PASS)} נכונות כדי לעבור. כדאי לעבור שוב על הכרטיסיות.`}</p>
             ${review}
             <div class="two">
@@ -188,7 +188,7 @@ export function viewOnboardFinal() {
       box.innerHTML = `
         <section class="flash result q-in">
           ${ring(Math.round((score / of) * 100), 150, 64, `<span id="sc">0</span>/${of}`)}
-          <h2 tabindex="-1" id="res" class="result-line">${passed ? 'עברת את ההכשרה!' : 'כמעט'}</h2>
+          <h2 tabindex="-1" id="res" class="result-line">${passed ? 'עברת את ההכשרה' : 'כמעט'}</h2>
           <p>${passed ? 'התעודה שלך מחכה.' : `צריך ${needed(of, FINAL_PASS)} נכונות. כדאי לחזור על המוצרים שברשימה ולנסות שוב.`}</p>
           ${review}
           <div class="two">
