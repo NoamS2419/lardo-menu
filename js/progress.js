@@ -54,6 +54,18 @@ function loadProgress() {
 
 export const progress = loadProgress();
 
+// What the team-progress board shows for this person: onboarding finished, and % known per category.
+export function teamStats(categories, byCat) {
+  const known = categories
+    .filter((c) => /^[a-z]{1,20}$/.test(c.id) && (byCat.get(c.id) || []).length)
+    .slice(0, 20)
+    .map((c) => {
+      const items = byCat.get(c.id);
+      return `${c.id}:${Math.round((items.filter((p) => progress.known[p.id]).length / items.length) * 100)}`;
+    }).join(',');
+  return { onboarded: Boolean(progress.onboard.final && progress.onboard.final.passed), known };
+}
+
 export function saveProgress() {
   try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); } catch (e) { /* not saved, fine */ }
 }

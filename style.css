@@ -713,3 +713,17 @@ main {
 .pitch { font-size: 1.05rem; margin: 0; }
 .draft-note { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
 .situation { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 16px; }
+
+/* ---------- team progress ---------- */
+
+.team-progress { list-style: none; padding: 0; display: grid; gap: 8px; }
+.tp { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; }
+.tp.me { border-color: var(--accent); }
+.tp-head { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.tp-head .soon { margin-inline-start: auto; }
+.tp-name { font-weight: 700; }
+.tp-sub { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .88rem; margin: 6px 0 0; }
+.tp details summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; color: var(--accent); }
+.tp-cats { list-style: none; padding: 0; display: grid; gap: 6px; }
+.tp-cats li { display: grid; grid-template-columns: 8rem 1fr 3rem; gap: 8px; align-items: center; font-size: .88rem; }
+.tp-cats bdi { text-align: end; font-variant-numeric: tabular-nums; }

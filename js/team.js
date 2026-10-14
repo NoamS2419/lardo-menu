@@ -1,8 +1,8 @@
 /* The team page: daily challenge results and the overall board. */
 
-import { esc, setPage, announce, focusMain } from './core.js';
+import { db, esc, setPage, announce, focusMain, meter, fillMeters } from './core.js';
 import { progress } from './progress.js';
-import { cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe } from './cloud.js';
+import { teamProgressEnabled, cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe } from './cloud.js';
 import { jerusalemDate } from './learn.js';
 
 // After an await the person may have moved on; don't paint over another page.
@@ -23,6 +23,55 @@ const table = (caption, rows, scoreLabel, scoreOf) => rows.length
        </tbody>
      </table>`
   : `<p class="empty">${caption}: עוד אין תוצאות.</p>`;
+
+/* ---------- team progress: who finished onboarding, how much of each category they know ---------- */
+
+function parseKnown(s) {
+  const out = new Map();
+  for (const part of String(s || '').split(',')) {
+    const [id, v] = part.split(':');
+    if (id && db.byCat.has(id) && /^\d+$/.test(v || '')) out.set(id, Math.min(100, Number(v)));
+  }
+  return out;
+}
+
+function progressHtml(players) {
+  const cats = db.categories.filter((c) => (db.byCat.get(c.id) || []).length);
+  const rows = players
+    .filter((r) => typeof r.known === 'string' || r.onboarded != null)
+    .map((r) => {
+      const known = parseKnown(r.known);
+      let have = 0;
+      let all = 0;
+      for (const c of cats) { const n = db.byCat.get(c.id).length; all += n; have += ((known.get(c.id) || 0) / 100) * n; }
+      const pct = all ? Math.round((have / all) * 100) : 0;
+      const weakest = cats.slice().sort((a, b) => (known.get(a.id) || 0) - (known.get(b.id) || 0))[0];
+      return { ...r, known, pct, weakest };
+    })
+    .sort((a, b) => b.pct - a.pct);
+  if (!rows.length) return '<p class="empty">התקדמות הצוות: עוד אין נתונים.</p>';
+  return `
+    <section aria-labelledby="prog-h">
+      <h2 id="prog-h">התקדמות הצוות</h2>
+      <p class="hint">כמה מהוויטרינה כל אחד מכיר, מי סיים את "שבוע ראשון", ומה כדאי לחזק.</p>
+      <ul class="team-progress">${rows.map((r) => `
+        <li class="tp${r.me ? ' me' : ''}">
+          <p class="tp-head">
+            <bdi class="tp-name">${esc(r.name)}</bdi>${r.me ? ' <span class="you">(אני)</span>' : ''}
+            <span class="soon${r.onboarded ? ' ok' : ''}">${r.onboarded ? '✓ הכשרה הושלמה' : 'בהכשרה'}</span>
+          </p>
+          ${meter(r.pct, 100, `${r.name}: ${r.pct}% מהמוצרים`)}
+          <p class="tp-sub"><span>ידע: <bdi>${r.pct}%</bdi></span>${r.weakest ? `<span>כדאי לחזק: ${esc(r.weakest.name)}</span>` : ''}</p>
+          <details>
+            <summary>לפי קטגוריה</summary>
+            <ul class="tp-cats">${cats.map((c) => `
+              <li><span>${esc(c.name)}</span>${meter(r.known.get(c.id) || 0, 100, `${c.name}: ${r.known.get(c.id) || 0}%`)}<bdi>${r.known.get(c.id) || 0}%</bdi></li>`).join('')}
+            </ul>
+          </details>
+        </li>`).join('')}
+      </ul>
+    </section>`;
+}
 
 function nameForm(current = '') {
   return `
@@ -135,7 +184,9 @@ export async function viewTeam() {
     if (!stillHere()) return;
     boards.innerHTML = `
       ${table('האתגר של היום', daily, 'תוצאה', (r) => `${r.score}/10`)}
-      ${table('הטבלה הכללית', all, 'נקודות', (r) => r.total)}`;
+      ${table('הטבלה הכללית', all, 'נקודות', (r) => r.total)}
+      ${teamProgressEnabled() ? progressHtml(all) : ''}`;
+    fillMeters(boards);
   } catch (ex) {
     if (!stillHere()) return;
     if (ex.code === 'RESET') { viewTeam(); return; }

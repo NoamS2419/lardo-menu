@@ -2,13 +2,16 @@
    Anonymous sign-in, a nickname, a running total from game answers and one daily-challenge score.
    Rules live in firestore.rules; names are rendered with esc() only. */
 
-import { FIREBASE } from './config.js';
+import { FIREBASE, TEAM_PROGRESS } from './config.js';
+import { db } from './core.js';
+import { teamStats } from './progress.js';
 
 const AUTH_KEY = 'lardo.auth.v1';
 const PLAYER_KEY = 'lardo.player.v1';
 const DAILY_TTL_DAYS = 60;
 
 export const cloudEnabled = () => Boolean(FIREBASE.apiKey && FIREBASE.projectId);
+export const teamProgressEnabled = () => cloudEnabled() && TEAM_PROGRESS;
 
 const docsBase = () =>
   `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
@@ -103,6 +106,7 @@ function decode(fields = {}) {
     out[k] = 'integerValue' in v ? Number(v.integerValue)
       : 'stringValue' in v ? v.stringValue
       : 'timestampValue' in v ? v.timestampValue
+      : 'booleanValue' in v ? v.booleanValue
       : null;
   }
   return out;
@@ -119,8 +123,14 @@ async function query(structuredQuery) {
   return rows.filter((r) => r.document).map((r) => ({ id: r.document.name.split('/').pop(), ...decode(r.document.fields) }));
 }
 
+const extraFields = () => {
+  if (!TEAM_PROGRESS || !db) return {};
+  const t = teamStats(db.categories, db.byCat);
+  return { onboarded: { booleanValue: t.onboarded }, known: str(t.known) };
+};
+
 const playerWrite = (uid, name, key, total) => ({
-  update: { name: docName(`players/${uid}`), fields: { name: str(name), nameKey: str(key), total: int(total) } },
+  update: { name: docName(`players/${uid}`), fields: { name: str(name), nameKey: str(key), total: int(total), ...extraFields() } },
   updateTransforms: [{ fieldPath: 'updatedAt', setToServerValue: 'REQUEST_TIME' }]
 });
 
