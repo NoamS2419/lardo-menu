@@ -896,10 +896,14 @@
       "sizes": [],
       "choices": [],
       "image": "images/e70e8fc885b4ed80c46f04da-3f42a77b.webp",
-      "tags": [],
-      "notes": [],
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים (רלוונטי לשאלות על הריון)"
+      ],
       "ai_image": false,
-      "source": "wolt",
+      "source": "wolt+staff",
       "wolt": {
         "name": "מאפה פטה פסטו",
         "description": "פטה עיזים עדינה, פסטו, ריבת עגבניות ופרמז׳ן",
@@ -1205,7 +1209,9 @@
       "sizes": [],
       "choices": [],
       "image": null,
-      "tags": [],
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
       "notes": [],
       "ai_image": false,
       "source": "staff",
@@ -1615,10 +1621,12 @@
       "sizes": [],
       "choices": [],
       "image": "images/755289c9ce2cb9450e81926b-5939af0f.webp",
-      "tags": [],
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
       "notes": [],
       "ai_image": false,
-      "source": "wolt",
+      "source": "wolt+staff",
       "wolt": {
         "name": "טארט לימון | אישי",
         "description": "סאבלה שקדים, קרם לימון קולי נענע ומרנג חרוך",
@@ -2641,7 +2649,9 @@
       ],
       "choices": [],
       "image": "images/db377380ea34087de6a16d0d-6158514f.webp",
-      "tags": [],
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
       "notes": [],
       "ai_image": false,
       "source": "wolt+staff",
@@ -3018,10 +3028,14 @@
       "sizes": [],
       "choices": [],
       "image": "images/b8728b234140de319a00831c-0a0eeb3d.webp",
-      "tags": [],
-      "notes": [],
+      "tags": [
+        "אולי לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים (רלוונטי לשאלות על הריון)"
+      ],
       "ai_image": false,
-      "source": "wolt",
+      "source": "wolt+staff",
       "wolt": {
         "name": "כריך פטה פסטו",
         "description": "גבינת פטה עיזים פסטו עדינה, ריבת עגבניות שרי, חמאה וחסה לליק",
@@ -3063,10 +3077,14 @@
       "sizes": [],
       "choices": [],
       "image": "images/bcfa957120ff34bbe138461d-208f00ef.webp",
-      "tags": [],
-      "notes": [],
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים (רלוונטי לשאלות על הריון)"
+      ],
       "ai_image": false,
-      "source": "wolt",
+      "source": "wolt+staff",
       "wolt": {
         "name": "כריך סלק",
         "description": "סלק בבלסמי ושמן זית, גבינת פטה עיזים עדינה, עלי רוקט וגבינת עיזים",
@@ -3338,8 +3356,12 @@
       "sizes": [],
       "choices": [],
       "image": "images/a2ea1542e09efd5db0d81ab0-1ab09a57.webp",
-      "tags": [],
-      "notes": [],
+      "tags": [
+        "לא מומלץ בהריון"
+      ],
+      "notes": [
+        "גבינה במים (רלוונטי לשאלות על הריון)"
+      ],
       "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
@@ -4448,6 +4470,10 @@
     {
       "topic": "שמירה והובלה",
       "text": "הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שרוצים לאכול. מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי."
+    },
+    {
+      "topic": "הריון",
+      "text": "עקרונית הכול מפוסטר, אבל למי שמקפידה במיוחד: לא כריך סלק (גבינה במים), לא טארט לימון קטן או גדול (מרנג, ביצים), לא פיצה בוראטה (גבינה במים). אולי גם הפטה פסטו (גבינה במים)."
     }
   ],
   "sales_situations": {
