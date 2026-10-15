@@ -99,3 +99,8 @@ function markTab(section) {
   window.addEventListener('hashchange', route);
   route();
 })();
+
+// Works offline after the first visit (see sw.js).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}

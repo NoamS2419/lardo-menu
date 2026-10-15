@@ -511,25 +511,25 @@ function questionsCustomer(order = weightedOrder) {
   const qs = [
     {
       id: 'faq:travel',
-      prompt: bubble('זה יחזיק נסיעה של שעה באוטו?', 'לקוח שואל'),
+      prompt: bubble('זה יחזיק נסיעה של שעה באוטו?', 'שאלה מהדלפק'),
       ...choices(['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'], 1),
       explain: 'מחזיק נסיעה של חצי שעה באוטו. שעה זה גבולי.'
     },
     {
       id: 'faq:freeze',
-      prompt: bubble('אני קונה היום לאירוע בעוד כמה ימים. איך שומרים?', 'לקוחה שואלת'),
+      prompt: bubble('אני קונה היום לאירוע בעוד כמה ימים. איך שומרים?', 'שאלה מהדלפק'),
       ...choices(['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
       explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
     },
     {
       id: 'faq:pregnant',
-      prompt: bubble('אני בהריון. מה מתאים לי?', 'לקוחה שואלת'),
+      prompt: bubble('אני בהריון. מה מתאים לי?', 'שאלה מהדלפק'),
       ...choices(['אפשר להראות לך את הרכיבים של כל מוצר. לשאלה רפואית כדאי להתייעץ עם רופא.', 'בטח, הכול כאן מפוסטר ובטוח לגמרי, אפשר לבחור כל מה שבא לך', 'רק המאפים המלוחים', 'שום דבר עם גבינה'], 0),
       explain: 'לא נותנים המלצות רפואיות. מראים רכיבים ומפנים לרופא.'
     },
     {
       id: 'faq:allergy',
-      prompt: bubble('יש בזה אגוזים? יש לי אלרגיה.', 'לקוח שואל'),
+      prompt: bubble('יש בזה אגוזים? יש לי אלרגיה.', 'שאלה מהדלפק'),
       ...choices(['אין לנו מידע מלא על אלרגנים. אבדוק עם אחראי המשמרת.', 'לא, אין בזה אגוזים בכלל. אפשר להיות רגועים לגמרי', 'רק בפיסטוק', 'זה בסדר, רק טיפה'], 0),
       explain: 'באתר אין מידע על אלרגנים. על אלרגיה תמיד בודקים עם אחראי המשמרת.'
     }
@@ -543,7 +543,7 @@ function questionsCustomer(order = weightedOrder) {
   if (truffle && madeleine && basePrice(truffle) != null && basePrice(madeleine) != null) {
     qs.push({
       id: 'faq:addon',
-      prompt: bubble('לקחתי קרואסון. יש משהו קטן ליד?', 'לקוח שואל'),
+      prompt: bubble('לקחתי קרואסון. יש משהו קטן ליד?', 'שאלה מהדלפק'),
       ...choices([`${truffle.name} או ${madeleine.name}, ${shek(truffle)}`, 'מארז מקרונים', 'קערת טירמיסו', 'לחם שלם'], 0),
       explain: `משהו קטן ליד הקפה: ${truffle.name} (${shek(truffle)}) או ${madeleine.name} (${shek(madeleine)}).`
     });
@@ -553,14 +553,14 @@ function questionsCustomer(order = weightedOrder) {
   if (mousseOne && mousseBar && basePrice(mousseOne) != null && basePrice(mousseBar) != null) {
     qs.push({
       id: 'faq:mousse',
-      prompt: bubble('ראיתי שני מוס שוקולד. מה ההבדל?', 'לקוחה שואלת'),
+      prompt: bubble('ראיתי שני מוס שוקולד. מה ההבדל?', 'שאלה מהדלפק'),
       ...choices([`אחד אישי (${shek(mousseOne)}), ואחד בפס לשולחן (${shek(mousseBar)})`, 'זה אותו דבר', 'אחד עם שוקולד לבן', 'אחד קפוא ואחד טרי'], 0),
       explain: `מוס שוקולד אישי ${shek(mousseOne)}, מוס שוקולד בפס לשולחן ${shek(mousseBar)}.`
     });
   }
   qs.push({
     id: 'faq:hosting',
-    prompt: bubble('אני מארחת שמונה אנשים מחר בערב. מה כדאי?', 'לקוחה שואלת'),
+    prompt: bubble('אני מארחת שמונה אנשים מחר בערב. מה כדאי?', 'שאלה מהדלפק'),
     ...choices(['עוגה שלמה או קערה. לשמור במקפיא ולהוציא שעה לפני', 'מנה אישית לכל אחד', 'לקנות רק ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
     explain: 'לאירוח: עוגה שלמה או קערה. הכול קפוא, אז שומרים במקפיא ומוציאים שעה לפני.'
   });
@@ -569,7 +569,7 @@ function questionsCustomer(order = weightedOrder) {
   if (egg && macarons) {
     qs.push({
       id: 'faq:gift',
-      prompt: bubble('אני מחפש מתנה קטנה, משהו יפה.', 'לקוח שואל'),
+      prompt: bubble('אני מחפש מתנה קטנה, משהו יפה.', 'שאלה מהדלפק'),
       ...choices([`${egg.name} או ${macarons.name}`, 'כריך כמהין', 'לחם אגוזים', 'מיץ תפוזים'], 0),
       explain: `למתנה: ${egg.name} או ${macarons.name}.`
     });
@@ -578,7 +578,7 @@ function questionsCustomer(order = weightedOrder) {
   for (const q of questionsPrice(order).slice(0, ROUND - qs.length)) {
     const p = db.byId.get(q.id);
     const size = (p.sizes || []).length ? ` (${p.sizes[0].label})` : '';
-    qs.push({ ...q, prompt: bubble(`כמה עולה <strong>${esc(p.name)}</strong>${esc(size)}?`, 'לקוח שואל', p) });
+    qs.push({ ...q, prompt: bubble(`כמה עולה <strong>${esc(p.name)}</strong>${esc(size)}?`, 'שאלה מהדלפק', p) });
   }
   return shuffle(qs).slice(0, ROUND);
 }
