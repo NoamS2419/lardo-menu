@@ -23,18 +23,15 @@ export async function loadData() {
   // Only categories that actually have products are shown.
   const categories = (raw.categories || []).filter((c) => byCat.has(c.id));
   const byId = new Map(products.map((p) => [p.id, p]));
-  // Pregnancy advice isn't the counter's to give (it goes to the shift manager): its tags and FAQ section are dropped here, once.
-  const NOT_SHOWN = /הריון/;
   for (const p of products) {
     // Wolt's AI-made photos don't show the real product: treated as no photo at all (games, daily, covers).
     if (p.ai_image) p.image = null;
-    p.tags = (p.tags || []).filter((t) => !NOT_SHOWN.test(t));
     p._search = norm([
       p.name, p.description, p.staff_description,
-      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...p.tags
+      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || [])
     ].join(' '));
   }
-  return { categories, products, byId, byCat, faq: (raw.customer_faq || []).filter((f) => !NOT_SHOWN.test(f.topic)), updated: raw.updated,
+  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
     situations: raw.sales_situations && Array.isArray(raw.sales_situations.items) ? raw.sales_situations : { draft: true, items: [] } };
 }
 
