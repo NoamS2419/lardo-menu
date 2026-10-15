@@ -3,7 +3,7 @@
    Empty = leaderboard switched off, everything else works. */
 // Team progress fields (onboarded, % known per category) on the board. Only switch on once the
 // matching firestore.rules are published, or every score update would be refused.
-export const TEAM_PROGRESS = false;
+export const TEAM_PROGRESS = true;
 
 export const FIREBASE = {
   apiKey: 'AIzaSyBO0hmmRqyIkskmJbEBhohb5lw4RzEZgg0',

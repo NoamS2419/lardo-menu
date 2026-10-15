@@ -2,7 +2,8 @@
 
 import {
   DATA_URL, db, announce, esc, norm, shekel, priceLabel, imgSrc, imgHtml, tagsHtml, productCard, setPage,
-  catIcon, placeholder, meter
+  catIcon, placeholder, meter,
+  jerusalemDate
 } from './core.js';
 import { progress, setKnown, knownCount, streak, today, levelInfo } from './progress.js';
 import { burst } from './fx.js';
