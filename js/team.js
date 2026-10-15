@@ -160,10 +160,10 @@ export async function viewTeam() {
       ${teamProgressEnabled() ? `
       <h2>ההתקדמות שלי</h2>
       <label class="toggle-row">
-        <input type="checkbox" id="share"${progress.shareProgress ? ' checked' : ''}>
+        <input type="checkbox" id="share" aria-describedby="share-hint"${progress.shareProgress ? ' checked' : ''}>
         להציג את ההתקדמות שלי לצוות
       </label>
-      <p class="hint">כבוי: הצוות רואה רק את הכינוי והניקוד. דלוק: גם אחוז המוצרים המוכרים בכל קטגוריה, והאם "שבוע ראשון" הושלם.</p>
+      <p class="hint" id="share-hint">כבוי: הצוות רואה רק את הכינוי והניקוד. דלוק: גם אחוז המוצרים המוכרים בכל קטגוריה, והאם "שבוע ראשון" הושלם.</p>
       <p id="share-msg" role="status"></p>` : ''}
       <h2>מחיקת הנתונים</h2>
       <p>מוחק את הכינוי והניקוד מהטבלה ומהטלפון הזה. ההתקדמות האישית שלך בכרטיסיות נשארת בטלפון.</p>

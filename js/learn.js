@@ -524,16 +524,56 @@ function questionsCustomer(order = weightedOrder) {
     {
       id: 'faq:pregnant',
       prompt: bubble('אני בהריון. מה מתאים לי?', 'לקוחה שואלת'),
-      ...choices(['אפשר לראות את הרכיבים של כל מוצר. לשאלה רפואית כדאי לבדוק עם הרופא', 'הכול מפוסטר, אפשר הכול', 'רק המאפים המלוחים', 'שום דבר עם גבינה'], 0),
+      ...choices(['אפשר להראות לך את הרכיבים של כל מוצר. לשאלה רפואית כדאי להתייעץ עם רופא.', 'בטח, הכול כאן מפוסטר ובטוח לגמרי, אפשר לבחור כל מה שבא לך', 'רק המאפים המלוחים', 'שום דבר עם גבינה'], 0),
       explain: 'לא נותנים המלצות רפואיות. מראים רכיבים ומפנים לרופא.'
     },
     {
       id: 'faq:allergy',
       prompt: bubble('יש בזה אגוזים? יש לי אלרגיה.', 'לקוח שואל'),
-      ...choices(['אין לי מידע מלא על אלרגנים. בודקים עם אחראי המשמרת', 'לא, אין', 'רק בפיסטוק', 'זה בסדר, רק טיפה'], 0),
+      ...choices(['אין לנו מידע מלא על אלרגנים. אבדוק עם אחראי המשמרת.', 'לא, אין בזה אגוזים בכלל. אפשר להיות רגועים לגמרי', 'רק בפיסטוק', 'זה בסדר, רק טיפה'], 0),
       explain: 'באתר אין מידע על אלרגנים. על אלרגיה תמיד בודקים עם אחראי המשמרת.'
     }
   ];
+  // Counter facts from the sales coach. Names and prices come from the data, so a question drops out
+  // (instead of going stale) when a product leaves the menu.
+  const find = (name, cat) => db.products.find((p) => norm(p.name) === norm(name) && (!cat || p.category === cat));
+  const shek = (p) => `${basePrice(p)} ₪`;
+  const truffle = find('טראפלס');
+  const madeleine = find('עוגיית מדלן');
+  if (truffle && madeleine && basePrice(truffle) != null && basePrice(madeleine) != null) {
+    qs.push({
+      id: 'faq:addon',
+      prompt: bubble('לקחתי קרואסון. יש משהו קטן ליד?', 'לקוח שואל'),
+      ...choices([`${truffle.name} או ${madeleine.name}, ${shek(truffle)}`, 'מארז מקרונים', 'קערת טירמיסו', 'לחם שלם'], 0),
+      explain: `משהו קטן ליד הקפה: ${truffle.name} (${shek(truffle)}) או ${madeleine.name} (${shek(madeleine)}).`
+    });
+  }
+  const mousseOne = find('מוס שוקולד', 'patisserie');
+  const mousseBar = find('מוס שוקולד', 'cakes');
+  if (mousseOne && mousseBar && basePrice(mousseOne) != null && basePrice(mousseBar) != null) {
+    qs.push({
+      id: 'faq:mousse',
+      prompt: bubble('ראיתי שני מוס שוקולד. מה ההבדל?', 'לקוחה שואלת'),
+      ...choices([`אחד אישי (${shek(mousseOne)}), ואחד בפס לשולחן (${shek(mousseBar)})`, 'זה אותו דבר', 'אחד עם שוקולד לבן', 'אחד קפוא ואחד טרי'], 0),
+      explain: `מוס שוקולד אישי ${shek(mousseOne)}, מוס שוקולד בפס לשולחן ${shek(mousseBar)}.`
+    });
+  }
+  qs.push({
+    id: 'faq:hosting',
+    prompt: bubble('אני מארחת שמונה אנשים מחר בערב. מה כדאי?', 'לקוחה שואלת'),
+    ...choices(['עוגה שלמה או קערה. לשמור במקפיא ולהוציא שעה לפני', 'מנה אישית לכל אחד', 'לקנות רק ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
+    explain: 'לאירוח: עוגה שלמה או קערה. הכול קפוא, אז שומרים במקפיא ומוציאים שעה לפני.'
+  });
+  const egg = find('ביצת פברז’ה') || find('ביצת פברז׳ה');
+  const macarons = find('מארז מקרונים');
+  if (egg && macarons) {
+    qs.push({
+      id: 'faq:gift',
+      prompt: bubble('אני מחפש מתנה קטנה, משהו יפה.', 'לקוח שואל'),
+      ...choices([`${egg.name} או ${macarons.name}`, 'כריך כמהין', 'לחם אגוזים', 'מיץ תפוזים'], 0),
+      explain: `למתנה: ${egg.name} או ${macarons.name}.`
+    });
+  }
   // The rest: "how much is it?" at the counter, with the photo as a hint.
   for (const q of questionsPrice(order).slice(0, ROUND - qs.length)) {
     const p = db.byId.get(q.id);
@@ -869,7 +909,7 @@ export function viewGame(id, custom = null) {
     const newBest = record && prev;
     const pct = Math.round((score / qs.length) * 100);
     const review = missedHtml(missed);
-    const line = score === qs.length ? 'מושלם. עשר מתוך עשר'
+    const line = score === qs.length ? 'מושלם. כל התשובות נכונות'
       : score >= 8 ? 'מעולה' : score >= 5 ? 'יפה. עוד קצת תרגול' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `
       <section class="flash result q-in">

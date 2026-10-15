@@ -2,7 +2,7 @@
 
 import { prefersReducedMotion } from './core.js';
 
-const COLORS = ['#8C2F39', '#B8862B', '#E9C46A', '#F6E7C8', '#A0622D', '#D98E4A'];
+const COLORS = ['#B0704F', '#2A211C', '#E2E0DC', '#FFFFFF', '#9A5B3C'];
 
 // Confetti flying out of an element (or the middle of the screen).
 export function burst(from, count = 26) {

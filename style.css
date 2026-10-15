@@ -323,7 +323,7 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .daily-kicker { display: block; font-size: var(--fs-1); font-weight: var(--fw-medium); color: var(--accent); letter-spacing: .12em; }
 .daily-name { display: block; font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-5); margin: var(--sp-1) 0; }
 .daily-line { display: block; font-size: var(--fs-2); color: var(--muted); }
-@media (max-width: 899px) { .daily .daily-img, .daily .ph { aspect-ratio: 16 / 9; } }
+.daily .daily-img, .daily .ph { aspect-ratio: 16 / 9; }
 
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
 .section-head h2 { margin: 0 0 var(--sp-3); }
@@ -374,6 +374,7 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 
 .product-hero { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--r-2); background: var(--photo-well); display: block; }
 .product-hero.ph { aspect-ratio: 4 / 3; }
+.ph-note { color: var(--muted); font-size: var(--fs-2); text-align: center; margin: var(--sp-2) 0 0; }
 @media (min-width: 760px) {
   .product { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
   .product-media { position: sticky; top: 96px; }
@@ -493,7 +494,7 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .game-head strong { color: var(--text); font-weight: var(--fw-bold); font-size: var(--fs-3); }
 .game-score { margin-inline-start: auto; position: relative; color: var(--muted); font-size: var(--fs-2); display: inline-block; }
 .game-score #score { color: var(--text); font-weight: var(--fw-bold); }
-.plus { position: absolute; inset-inline-end: 0; top: -4px; color: var(--ok); font-weight: var(--fw-bold); pointer-events: none; opacity: 0; }
+.plus { position: absolute; inset-inline-end: 0; top: 100%; color: var(--ok); font-weight: var(--fw-bold); pointer-events: none; opacity: 0; }
 .chip-streak { display: inline-flex; align-items: center; gap: var(--sp-1); padding: 2px var(--sp-2); border-radius: var(--r-1); background: var(--surface-2); color: var(--gold-text); font-weight: var(--fw-bold); font-size: var(--fs-1); }
 .dots { display: flex; gap: var(--sp-2); justify-content: center; margin: 0 0 var(--sp-4); padding: 0; list-style: none; }
 .dots li { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
@@ -540,7 +541,7 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 
 .who-quote { margin: 0; padding: var(--sp-4); border-radius: var(--r-2); background: var(--surface-2); font-size: var(--fs-4); line-height: 1.55; }
 .ask-bubble { margin: var(--sp-1) 0 var(--sp-4); padding: var(--sp-4); border-radius: var(--r-2) var(--r-2) var(--r-2) var(--sp-1); background: var(--accent-soft); font-size: var(--fs-4); font-weight: var(--fw-medium); line-height: 1.4; }
-.ask-who { display: block; font-size: var(--fs-1); font-weight: var(--fw-bold); color: var(--accent); margin-bottom: 2px; }
+.ask-who { display: block; font-size: var(--fs-1); font-weight: var(--fw-bold); color: var(--accent-hover); margin-bottom: 2px; }
 .clue-small .quiz-img { width: auto; max-width: 160px; max-height: 18vh; margin: 0 auto; }
 .clue-small .clue { font-size: var(--fs-2); }
 

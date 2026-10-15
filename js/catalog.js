@@ -23,13 +23,18 @@ export async function loadData() {
   // Only categories that actually have products are shown.
   const categories = (raw.categories || []).filter((c) => byCat.has(c.id));
   const byId = new Map(products.map((p) => [p.id, p]));
+  // Pregnancy advice isn't the counter's to give (it goes to the shift manager): its tags and FAQ section are dropped here, once.
+  const NOT_SHOWN = /הריון/;
   for (const p of products) {
+    // Wolt's AI-made photos don't show the real product: treated as no photo at all (games, daily, covers).
+    if (p.ai_image) p.image = null;
+    p.tags = (p.tags || []).filter((t) => !NOT_SHOWN.test(t));
     p._search = norm([
       p.name, p.description, p.staff_description,
-      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || []).filter((t) => !/הריון/.test(t))
+      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...p.tags
     ].join(' '));
   }
-  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
+  return { categories, products, byId, byCat, faq: (raw.customer_faq || []).filter((f) => !NOT_SHOWN.test(f.topic)), updated: raw.updated,
     situations: raw.sales_situations && Array.isArray(raw.sales_situations.items) ? raw.sales_situations : { draft: true, items: [] } };
 }
 
@@ -103,7 +108,7 @@ export function viewHome() {
         ${fresh ? `
         <div class="first-run">
           <h2>מתחילים? 5 דקות ביום.</h2>
-          <p>"שבוע ראשון" עובר על הוויטרינה קטגוריה אחרי קטגוריה: כרטיסיות, מבחן קצר, ובסוף תעודה.</p>
+          <p>שבוע ראשון עובר על הוויטרינה קטגוריה אחרי קטגוריה: כרטיסיות, מבחן קצר, ובסוף תעודה.</p>
           <a class="btn btn-wide" href="#/onboard">להתחיל</a>
         </div>` : `
         <div class="level">
@@ -180,7 +185,7 @@ export function viewProduct(id) {
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}"><span aria-hidden="true">→</span> ${esc(cat.name)}</a>` : ''}
     <article class="product">
-      <div class="product-media">${imgHtml(p, 'product-hero', 900)}</div>
+      <div class="product-media">${imgHtml(p, 'product-hero', 900)}${p.ai_image ? '<p class="ph-note">עוד אין תמונה אמיתית</p>' : ''}</div>
       <div>
         <h1>${esc(p.name)}${p.unit ? ` <span class="unit">(${esc(p.unit)})</span>` : ''}</h1>
         ${(p.aliases && p.aliases.length) ? `<p class="aka">נקרא גם: ${p.aliases.map(esc).join(', ')}</p>` : ''}
@@ -245,7 +250,7 @@ export function viewSearch(q = '') {
 
 const draftNote = '<p class="draft-note"><span class="draft-badge">טיוטה</span> ממתין לאישור.</p>';
 // Two products can share a name (personal and whole lemon tart): the chip then says which one.
-const KIND = { patisserie: 'אישי', tarts: 'שלם', cakes: 'עוגה' };
+const KIND = { patisserie: 'אישי', tarts: 'שלם', cakes: 'בפס' };
 const chipName = (p) => {
   const twin = db.products.some((o) => o.id !== p.id && norm(o.name) === norm(p.name));
   if (!twin) return p.name;
@@ -293,7 +298,7 @@ export function viewFaq() {
       <h1>שאלות של לקוחות</h1>
       <p class="note">כשלקוח שואל על הריון, כשרות או רגישות ואתם לא בטוחים, הפנו אותו לאחראי המשמרת. אל תבטיחו "בטוח" או "כשר" על דעת עצמכם.</p>
 
-      ${db.faq.filter((f) => !/הריון/.test(f.topic)).map((f) => `<h2>${esc(f.topic)}</h2><p>${esc(f.text)}</p>`).join('')}
+      ${db.faq.map((f) => `<h2>${esc(f.topic)}</h2><p>${esc(f.text)}</p>`).join('')}
     </article>
   `);
 }

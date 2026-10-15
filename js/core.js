@@ -69,13 +69,7 @@ export const imgHtml = (p, cls, w, alt = p.name) => p.image
 // Pregnancy tags stand out; the "maybe" one is softer.
 const tagClass = (t) => !/הריון/.test(t) ? '' : /אולי/.test(t) ? ' maybe' : ' warn';
 
-// Pregnancy advice isn't the counter's to give (those questions go to the shift manager), so those tags aren't shown.
-const HIDDEN_TAG = /הריון/;
-export const tagsHtml = (all) => {
-  const tags = (all || []).filter((t) => !HIDDEN_TAG.test(t));
-  return tags.length ? tagsList(tags) : '';
-};
-const tagsList = (tags) => (tags && tags.length)
+export const tagsHtml = (tags) => (tags && tags.length)
   ? `<ul class="tags" aria-label="תגיות">${tags.map((t) =>
       `<li class="tag${tagClass(t)}">${esc(t)}</li>`).join('')}</ul>`
   : '';

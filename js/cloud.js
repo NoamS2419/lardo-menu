@@ -230,7 +230,8 @@ export async function cleanupExpired() {
       where: { fieldFilter: { field: { fieldPath: 'expireAt' }, op: 'LESS_THAN', value: { timestampValue: new Date().toISOString() } } },
       limit: 50
     });
-    if (old.length) await commit(old.map((d) => ({ delete: docName(`daily/${d.id}`) })));
+    // One commit per doc: if another phone already removed one, the rules refuse only that delete, not the rest.
+    await Promise.allSettled(old.map((d) => commit([{ delete: docName(`daily/${d.id}`) }])));
   } catch (e) { /* best effort */ }
 }
 
