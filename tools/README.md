@@ -49,7 +49,8 @@
     "sizes": [{"label": "קוטר 16", "price": 150}],
     "choices": ["פטל", "פיסטוק"],    // טעמים לבחירה
     "image": "images/<id>-<hash>.webp" | "https://imageproxy.wolt.com/..." | null,
-    "tags": ["חלב נוכרי"],           // "חלב נוכרי" / "לא מומלץ בהריון" / "אולי לא מומלץ בהריון"
+    "ai_image": false,               // true = התמונה בוולט נוצרה ב־AI (עם תווית). לא להשתמש בה במשחקים ובשערים
+    "tags": ["חלב נוכרי"],
     "notes": [],
     "source": "wolt" | "wolt+staff" | "staff",
     "is_wolt": true,                 // false = נמכר רק בדלפק
@@ -58,7 +59,7 @@
   "customer_faq": [{"topic": "שמירה והובלה", "text": "..."}],
   "sales_situations": {               // טיפים לפי מצב של לקוח
     "draft": true,                    // טיוטה: עדיין לא אושר ע"י שרון
-    "items": [{"id": "travel", "title": "לנסיעה", "tip": "...", "products": [{"id": "...", "name": "..."}]}]   // not-sweet, travel, hosting, gift, fruity
+    "items": [{"id": "travel", "title": "לנסיעה", "tip": "...", "products": [{"id": "...", "name": "..."}]}]   // not-sweet, small-addon, lunch, travel, hosting, gift, fruity, allergy
   }
 }
 ```

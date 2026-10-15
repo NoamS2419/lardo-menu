@@ -73,6 +73,7 @@
       "image": "images/e679f0cb33ecaec1c6438b2a-4a5f87e3.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "פאן שוקולד",
@@ -114,6 +115,7 @@
       "image": "images/b7b1c852e8ba936fc44e280f-100345af.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון חמאה",
@@ -155,6 +157,7 @@
       "image": "images/7b317b450198638e5156a59f-1e0e326d.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קרואסון שקדים",
@@ -196,6 +199,7 @@
         "חלב נוכרי"
       ],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "פאן סוויס",
@@ -246,6 +250,7 @@
       "notes": [
         "בטעם ג׳אנדויה: חלב נוכרי. בטעם דולצ׳ה: כשרות רעננה בלי חלב נוכרי"
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מקל קראוסון",
@@ -288,6 +293,7 @@
       "image": "images/5c568de8081672076e1b4a95-eebc9de1.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מאפה פירות",
@@ -333,6 +339,7 @@
         "חלב נוכרי"
       ],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון יפני גנדויה",
@@ -374,6 +381,7 @@
       "image": "images/559c9f1ad38002280eac46e9-11cd441e.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קרואסון יפני קורנפלקס",
@@ -417,6 +425,7 @@
       "notes": [
         "בוולט מופיע בטעות התיאור של הקרואסון היפני קורנפלקס. התיאור כאן הוא הנכון."
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון יפני פטיסייר ופטל",
@@ -461,6 +470,7 @@
         "חלב נוכרי"
       ],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון במילוי קרם שוקולד ג׳נדויה",
@@ -502,6 +512,7 @@
       "image": "images/17d62d0d916f24652ba6b9b4-371239bd.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון במילוי קרם פיסטוק",
@@ -541,6 +552,7 @@
       "image": "images/176eab31a53dc0686d176e1b-f8cc3b8f.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קרואסון במילוי קרם פטיסייר ופטל",
@@ -580,6 +592,7 @@
       "image": "images/f1895d4f7c98262e557f764e-37fa3572.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קרואסון במילוי קרם פטיסייר וקוקיז",
@@ -619,6 +632,7 @@
       "image": "images/1c0285a5eaf72ec23ea57ca5-32c291e2.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קרואסון במילוי קרם פטיסייר וקורונפלקס",
@@ -658,6 +672,7 @@
       "image": "images/a4fa88b053097435c2b49bbe-aa9ddc89.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קראפין פיסטוק",
@@ -700,6 +715,7 @@
       "image": "images/794f225f9935eacad704ffa7-65b0a717.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "בראד פודינג שוקולד וטופי קרמל",
@@ -745,6 +761,7 @@
       "image": "images/a9b024c5218b7b4829e9695a-355f1f3e.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קרואסון קפרזה",
@@ -792,6 +809,7 @@
       "notes": [
         "בצוות קוראים לו לפעמים \"מאפה תרד\", אבל זה מנגולד."
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מאפה מנגולד",
@@ -836,6 +854,7 @@
       "image": "images/848412035072ee45ee93430c-330a75bd.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מאפה כמהין",
@@ -879,6 +898,7 @@
       "image": "images/e70e8fc885b4ed80c46f04da-3f42a77b.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מאפה פטה פסטו",
@@ -923,6 +943,7 @@
       "image": "images/d00da1c0dbaa52a0478fe6e2-12e34732.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "סינבון",
@@ -964,6 +985,7 @@
       "image": "images/c5ec3e5da4c2646b80879efe-969bcfad.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מאפה שמנת ותותים",
@@ -1006,6 +1028,7 @@
       "image": "images/bc0459e190e874c1104c9f1b-9801d71c.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מאפה פיסטוק",
@@ -1049,6 +1072,7 @@
       "image": "images/f95adde52046a88fde712e96-5081abff.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "דניש בייגלה מלוח ושוקולד דולצ׳ה",
@@ -1095,6 +1119,7 @@
       "image": "images/1c761cf57adf05ddc4138c3a-f2b82fcc.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מאפה לאבנה בצל וסומק",
@@ -1140,6 +1165,7 @@
       "image": "images/9baedfae4facf48ad3d38085-aade8720.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "פרעצל קרואסון",
@@ -1181,6 +1207,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-cheddar-pastry",
@@ -1222,6 +1249,7 @@
       "image": "images/8fb5fe593fcb7a3576b097ed-44f280a5.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מילפיי | אישי",
@@ -1267,6 +1295,7 @@
       "image": "images/9f5f80bb3dcb2fa06bb28d0e-404a095d.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "ביצת פברז’ה",
@@ -1315,6 +1344,7 @@
       "notes": [
         "זה מוס בוטנים. בוולט כתוב בטעות מוס וניל."
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "100% בוטנים",
@@ -1359,6 +1389,7 @@
       "image": "images/fba4eba20a8e5f2bcfa0fe07-7a8599de.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מוס קרואסון",
@@ -1402,6 +1433,7 @@
       "image": "images/e5b2e57bb8ebf15560ab506b-f4336fdd.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מוס שוקולד | אישי",
@@ -1447,6 +1479,7 @@
       "image": "images/b30174ad5c3562ded32d2b4e-0faab0c1.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מקל וניל",
@@ -1493,6 +1526,7 @@
       "notes": [
         "יש גם עוגה שלמה בדלפק: ראו סנט הונורה (עוגה שלמה)"
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "סנט הונורה | אישי",
@@ -1538,6 +1572,7 @@
       "notes": [
         "נקרא גם \"מוס פטל\". זה המוס האישי, לא מוס הפטל בפס."
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מוס תותים | אישי",
@@ -1582,6 +1617,7 @@
       "image": "images/755289c9ce2cb9450e81926b-5939af0f.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "טארט לימון | אישי",
@@ -1625,6 +1661,7 @@
       "image": "images/7a8bf24ca47cf311d2d0397b-fe690057.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טראפלס | אישי",
@@ -1671,6 +1708,7 @@
       "image": "images/8801223c797d36b09720d1b0-034da58b.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "עוגיית מדלן",
@@ -1718,6 +1756,7 @@
       "image": "images/adbd720d7f7e1e83d993c8c2-09767002.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מקרון | 1 יח׳",
@@ -1757,6 +1796,7 @@
       "image": "images/cbcacd7ac7f3fe2d7fcb0a0f-db54c573.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "טארט פיסטוק אישי",
@@ -1801,6 +1841,7 @@
       "image": "images/df6a97166c9269d43c0d20ba-f4edd316.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "פבלובה אישית",
@@ -1842,6 +1883,7 @@
         "חלב נוכרי"
       ],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-chocolate-flower",
@@ -1879,6 +1921,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-dark-chocolate-mousse",
@@ -1922,7 +1965,8 @@
       "image": "images/2f4c4838ca3fb0c03d75dcad-172d80b4.webp",
       "tags": [],
       "notes": [],
-      "source": "wolt",
+      "ai_image": true,
+      "source": "wolt+staff",
       "wolt": {
         "name": "קערת טירמיסו",
         "description": "שכבות של קרם זביונה, בישקוטי טבולים באספרסו ושכבת קקאו",
@@ -1965,7 +2009,8 @@
       "image": "images/7619d91f6849ab6c76bfab38-56b57d3c.webp",
       "tags": [],
       "notes": [],
-      "source": "wolt",
+      "ai_image": true,
+      "source": "wolt+staff",
       "wolt": {
         "name": "קערת שוקולד",
         "description": "תחתית של בחושת שוקולד, פרלינה לוז, קראנץ שוקולד, גנאש שוקולד מריר ומוס שוקולד",
@@ -2012,6 +2057,7 @@
       "image": "images/93b2a2a78eae4b4fe73f00c6-80d1ffbb.webp",
       "tags": [],
       "notes": [],
+      "ai_image": true,
       "source": "wolt+staff",
       "wolt": {
         "name": "מוס פרח פטל",
@@ -2057,6 +2103,7 @@
       "image": "images/f5b9964aced171dfdb79d89c-6450f5d6.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "טירמיסו",
@@ -2100,6 +2147,7 @@
       "image": "images/bb2ef830690fd64525e6c975-a8d8ae88.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מוס פיסטוק",
@@ -2147,6 +2195,7 @@
       "notes": [
         "מוס פטל בפס. שונה ממוס התותים האישי (שנקרא גם מוס פטל)"
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "מוס פטל",
@@ -2192,6 +2241,7 @@
       "image": "images/3723b8da6ac1dc8b7e4b5783-f2f9d88e.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מוס שוקולד",
@@ -2235,6 +2285,7 @@
       "image": "images/afa830ee950b92edb14fa0bc-b53174e6.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "בחושה פרלינה אגוזי לוז",
@@ -2283,6 +2334,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-st-honore-whole",
@@ -2333,6 +2385,7 @@
       "image": "images/c6cc053009d8b31bf827a42f-de668aa1.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טארט פיסטוק",
@@ -2397,6 +2450,7 @@
         "חלב נוכרי"
       ],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טארט שוקולד",
@@ -2458,6 +2512,7 @@
       "image": "images/6997cdba6fae2e6df6ffea84-c8a83c78.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טארט פקאן",
@@ -2524,6 +2579,7 @@
       "image": "images/ed187404469b2ad442a1c0b0-7d1b43ce.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טארט פטל",
@@ -2587,6 +2643,7 @@
       "image": "images/db377380ea34087de6a16d0d-6158514f.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "טארט לימון",
@@ -2645,6 +2702,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-tart-peanut",
@@ -2692,6 +2750,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "staff",
       "wolt": null,
       "id": "staff-tart-mango",
@@ -2730,6 +2789,7 @@
       "image": "images/abfda6b4f19f1ba835f263b5-b65ae3bd.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך כמהין",
@@ -2775,6 +2835,7 @@
       "image": "images/144a854d9b94b9d923f01968-30fe1712.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך 4 גבינות",
@@ -2819,6 +2880,7 @@
       "image": "images/2decad81def3554720c831fe-1dc789f1.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך קפרזה",
@@ -2866,6 +2928,7 @@
       "image": "images/21d8075fc0e6f65e35811943-0e4afc16.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך טונה",
@@ -2910,6 +2973,7 @@
       "image": "images/0972dd9617e96f886ad3f7ea-28c65cfe.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך סלמון",
@@ -2956,6 +3020,7 @@
       "image": "images/b8728b234140de319a00831c-0a0eeb3d.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך פטה פסטו",
@@ -3000,6 +3065,7 @@
       "image": "images/bcfa957120ff34bbe138461d-208f00ef.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך סלק",
@@ -3045,6 +3111,7 @@
       "image": "images/cf07661c757dcdce25457f36-4661c7ca.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך אנלוטי",
@@ -3089,6 +3156,7 @@
       "image": "images/63bfbdb9b48c3b445488a9a5-21405571.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כריך סלט ביצים",
@@ -3133,6 +3201,7 @@
       "image": "images/c50696c1f7e3dd694dbe2cc9-663cf5b8.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "בייגל גריל צ׳יז",
@@ -3178,6 +3247,7 @@
       "image": "images/bcb2551b4c00cfa16fb0fe75-ed9fe2c9.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מרגריטה",
@@ -3221,6 +3291,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "כמהין וריבת בצל",
@@ -3269,6 +3340,7 @@
       "image": "images/a2ea1542e09efd5db0d81ab0-1ab09a57.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "פיצה סטראצ׳אטלה",
@@ -3314,6 +3386,7 @@
       "notes": [
         "טעמי הקוקיז: ג׳אנדויה, פטל ושוקולד לבן, פרלינה ואגוזי לוז, פיסטוק ושוקולד לבן"
       ],
+      "ai_image": false,
       "source": "wolt+staff",
       "wolt": {
         "name": "קוקיז שוקולד",
@@ -3356,7 +3429,8 @@
       "image": "images/abd5685d979bb6cb3ae31765-c2fb534f.webp",
       "tags": [],
       "notes": [],
-      "source": "wolt",
+      "ai_image": true,
+      "source": "wolt+staff",
       "wolt": {
         "name": "קוקיז פטל ושוקולד לבן",
         "description": "",
@@ -3395,6 +3469,7 @@
       "image": "images/db55fb6d31cfabbc66244387-1061ae2c.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "בגט מחמצת",
@@ -3434,6 +3509,7 @@
       "image": "images/26726b1f381210f6fea41838-956ce2ca.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "בגט מחמצת דגנים",
@@ -3473,6 +3549,7 @@
       "image": "images/5385c6118410603c833a47a0-92d85211.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "לחם דגנים",
@@ -3515,6 +3592,7 @@
       "image": "images/19539b7e849b28cbbca921ff-123aea43.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "לחם זיתי קלמטה",
@@ -3557,6 +3635,7 @@
       "image": "images/50f41e80c81e217e5167330c-c80fd6f6.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "לחם אגוזים",
@@ -3599,6 +3678,7 @@
       "image": "images/7fa61b11e988fdf8df8a9c05-123aea43.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "לחם כוסמין",
@@ -3640,6 +3720,7 @@
       "image": "images/b8af69e63eeb94794c73a22e-123aea43.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "לחם עגבניות מיובשות",
@@ -3682,6 +3763,7 @@
       "image": "images/664e607f2c7b9b044064b791-2ad6b4a6.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "סלט יווני",
@@ -3729,6 +3811,7 @@
       "image": "images/2275bdc4852a044c129ea6df-0d83e0a5.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "סלט קפרזה",
@@ -3773,6 +3856,7 @@
       "image": "images/998ed9e3f8b79cca4c2ea5c9-40ed83dc.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "סלט קיסר",
@@ -3817,6 +3901,7 @@
       "image": "images/591f56609f7a8aee4b364be4-3beed719.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מארז מקרונים",
@@ -3858,6 +3943,7 @@
       "image": "images/b835b74d522ddb1b11d74f1a-c0aedfbd.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מארז מדלן",
@@ -3899,6 +3985,7 @@
       "image": "images/31bbe8cbea3994fd182663d1-50f8d621.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מים מינרליים נביעות",
@@ -3934,6 +4021,7 @@
       "image": "images/d13f40f48af01a9e3a56872c-595d8b01.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קינלי סודה",
@@ -3969,6 +4057,7 @@
       "image": "images/7a84c6fdef1c74ce23b968c9-aa6406ee.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קוקה קולה - בקבוק זכוכית",
@@ -4008,6 +4097,7 @@
       "image": "images/060e4c669b6db162e7b59276-2a1f41c7.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "קולה זירו - בקבוק זכוכית",
@@ -4047,6 +4137,7 @@
       "image": "images/32b297349e720802c303f07a-e5d8701c.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "ספרייט - בקבוק זכוכית",
@@ -4086,6 +4177,7 @@
       "image": "images/8b239ab8cb6592e78f63b7e9-793e8983.webp",
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "ספרייט זירו - בקבוק זכוכית",
@@ -4125,6 +4217,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "מיץ רימונים",
@@ -4164,6 +4257,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "סלק, תפוח, פיטאיה",
@@ -4203,6 +4297,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "תפוח, תרד, מאצ׳ה וספרולינה",
@@ -4242,6 +4337,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "תפוח ואוכמניות",
@@ -4281,6 +4377,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "גזר וכורכום",
@@ -4320,6 +4417,7 @@
       "image": null,
       "tags": [],
       "notes": [],
+      "ai_image": false,
       "source": "wolt",
       "wolt": {
         "name": "תפוזים",

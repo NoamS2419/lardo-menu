@@ -17,7 +17,7 @@ CATEGORY_IDS = {"מאפים": "pastries", "פטיסרי": "patisserie", "עוג�
                 "עוגיות": "cookies", "לחמים": "breads", "סלטים": "salads", "מארזים": "boxes", "שתייה": "drinks"}
 WOLT_TO_SITE = {"שתייה קלה": "שתייה"}
 OVERLAY_KEYS = {"_doc", "_size_note", "move_to_category", "products", "counter_only", "customer_faq", "sales_tips"}
-PRODUCT_KEYS = {"name", "aliases", "description", "staff_description", "sizes", "tags", "notes"}
+PRODUCT_KEYS = {"name", "aliases", "description", "staff_description", "sizes", "tags", "notes", "ai_image"}
 
 
 def shekel(agorot):
@@ -144,6 +144,7 @@ def main():
             "image": local_image(row["id"], row["image"]) or row["image"] or None,
             "tags": [],
             "notes": [],
+            "ai_image": False,  # Wolt photo is AI-generated (badge visible); staff_overlay sets it
             "source": "wolt",
             "wolt": {"name": row["name"], "description": row["description"], "price": shekel(int(row["price_agorot"])), "sizes": wolt_sizes},
         }
@@ -158,7 +159,7 @@ def main():
         products.append(p)
     for c in overlay.get("counter_only", []):
         p = {"unit": None, "aliases": [], "staff_description": None, "price": None, "sizes": [], "choices": [],
-             "image": None, "tags": [], "notes": [], "source": "staff", "wolt": None, **c}
+             "image": None, "tags": [], "notes": [], "ai_image": False, "source": "staff", "wolt": None, **c}
         if p["sizes"] and p["price"] is None:
             p["price"] = p["sizes"][0]["price"]
         products.append(p)
