@@ -31,7 +31,7 @@ export const priceLabel = (p) => {
     const prices = p.sizes.map((s) => s.price).filter((n) => typeof n === 'number');
     if (prices.length) return `מ־${Math.min(...prices)} ₪`;
   }
-  return shekel(p.price) ?? 'מחיר בדלפק';
+  return shekel(p.price) ?? 'המחיר בקופה';
 };
 
 export const initial = (name) => esc((name || '?').trim().charAt(0));
@@ -69,7 +69,13 @@ export const imgHtml = (p, cls, w, alt = p.name) => p.image
 // Pregnancy tags stand out; the "maybe" one is softer.
 const tagClass = (t) => !/הריון/.test(t) ? '' : /אולי/.test(t) ? ' maybe' : ' warn';
 
-export const tagsHtml = (tags) => (tags && tags.length)
+// Pregnancy advice isn't the counter's to give (those questions go to the shift manager), so those tags aren't shown.
+const HIDDEN_TAG = /הריון/;
+export const tagsHtml = (all) => {
+  const tags = (all || []).filter((t) => !HIDDEN_TAG.test(t));
+  return tags.length ? tagsList(tags) : '';
+};
+const tagsList = (tags) => (tags && tags.length)
   ? `<ul class="tags" aria-label="תגיות">${tags.map((t) =>
       `<li class="tag${tagClass(t)}">${esc(t)}</li>`).join('')}</ul>`
   : '';
@@ -142,3 +148,8 @@ export function focusMain() {
 // Today's date in Israel (YYYY-MM-DD): the daily challenge and product of the day change at local midnight.
 export const jerusalemDate = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date());
+
+// The piped rosette from the shop's pastries: a quiet signature, at most once per screen
+// (divider, loading, empty and finished states).
+export const rosette = (cls = '') =>
+  `<svg class="rosette ${cls}" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><circle cx="24" cy="24" r="2.5"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(0 24 24)"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(60 24 24)"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(120 24 24)"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(180 24 24)"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(240 24 24)"/><ellipse cx="24" cy="16.5" rx="2.8" ry="5" transform="rotate(300 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(15 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(45 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(75 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(105 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(135 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(165 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(195 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(225 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(255 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(285 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(315 24 24)"/><ellipse cx="24" cy="7.5" rx="3" ry="5.5" transform="rotate(345 24 24)"/></svg>`;

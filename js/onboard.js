@@ -1,7 +1,7 @@
 /* "שבוע ראשון": a guided path for new staff. One stop a day, in the order the counter needs them:
    cards for the day's products, then a short quiz. A final test at the end, and a certificate. */
 
-import { db, esc, setPage, catIcon, meter, fillMeters, announce, focusMain } from './core.js';
+import { db, esc, setPage, catIcon, meter, fillMeters, announce, focusMain, rosette } from './core.js';
 import { progress, saveProgress, knownCount } from './progress.js';
 import { viewNotFound, ring } from './catalog.js';
 import { viewFlashcards, viewGame, questionsFor, jerusalemDate } from './learn.js';
@@ -78,7 +78,7 @@ export function viewOnboard(note = '') {
     <div class="onboard-hero">
       <p class="hello">חדשים בצוות?</p>
       <h1>שבוע ראשון</h1>
-      <p>שבעה ימים, קטגוריה או שתיים בכל יום: קודם כרטיסיות, אחר כך מבחן קצר. בסוף יש מבחן מסכם ותעודה. מומלץ יום אחד ביום, אבל אפשר גם מהר יותר.</p>
+      <p>שבעה ימים, קטגוריה או שתיים בכל יום: קודם כרטיסיות, אחר כך מבחן קצר. בסוף יש מבחן מסכם ותעודה. הקצב המומלץ הוא יום אחד של המסלול בכל יום עבודה, אבל אפשר גם מהר יותר.</p>
       ${meter(doneCount, list.length, `${doneCount} מתוך ${list.length} ימים`)}
       <p class="counter">${doneCount} מתוך ${list.length} ימים</p>
       ${current ? `<a class="btn" href="#/onboard/day/${current.n}">${doneCount ? 'להמשיך' : 'להתחיל'}: יום ${current.n}</a>` : ''}
@@ -88,7 +88,7 @@ export function viewOnboard(note = '') {
     ${fin && fin.passed
       ? `<p><a class="btn" href="#/onboard/cert">לתעודה</a></p>`
       : finalOpen
-        ? `<p>${FINAL_LEN} שאלות מכל הוויטרינה. עוברים מ־${needed(FINAL_LEN, FINAL_PASS)} נכונות.</p><p><a class="btn" href="#/onboard/final">למבחן המסכם</a></p>`
+        ? `<p>${FINAL_LEN} שאלות מכל הוויטרינה. ציון עובר: ${needed(FINAL_LEN, FINAL_PASS)} תשובות נכונות.</p><p><a class="btn" href="#/onboard/final">למבחן המסכם</a></p>`
         : '<p class="counter">נפתח אחרי שעוברים את כל שבעת הימים.</p>'}
   `);
 }
@@ -126,8 +126,8 @@ export function viewOnboardDay(n, step) {
         box.innerHTML = `
           <section class="flash result q-in">
             ${ring(Math.round((score / of) * 100), 150, 64, `<span id="sc">0</span>/${of}`)}
-            <h2 tabindex="-1" id="res" class="result-line">${passed ? `עברת את יום ${d.n}` : 'עוד קצת וזה שם'}</h2>
-            <p>${passed ? (next ? `מחר: ${esc(next.title)}.` : 'עברת את כל הימים. נשאר המבחן המסכם.') : `צריך ${needed(of, PASS)} נכונות כדי לעבור. כדאי לעבור שוב על הכרטיסיות.`}</p>
+            <h2 tabindex="-1" id="res" class="result-line">${passed ? `עברת את יום ${d.n}` : 'עוד לא. עוד ניסיון אחד'}</h2>
+            <p>${passed ? (next ? `הבא בתור: ${esc(next.title)}.` : 'עברת את כל הימים. נשאר המבחן המסכם.') : `צריך ${needed(of, PASS)} תשובות נכונות כדי לעבור. כדאי לעבור שוב על הכרטיסיות.`}</p>
             ${review}
             <div class="two">
               ${passed
@@ -161,7 +161,7 @@ export function viewOnboardDay(n, step) {
         <a class="row-link" href="#/onboard/day/${d.n}/cards">
           <span class="step-num" aria-hidden="true">1</span>
           <span class="row-title">כרטיסיות</span>
-          <span class="soon${st.cards ? ' ok' : ''}">${st.cards ? '✓ עשית' : 'כמה דקות'}</span>
+          <span class="soon${st.cards ? ' ok' : ''}">${st.cards ? '✓ בוצע' : 'כמה דקות'}</span>
           <span class="row-sub full">עוברים על כל מוצר: תמונה, שם, מחיר ומה אומרים בצוות.</span>
         </a>
       </li>
@@ -170,7 +170,7 @@ export function viewOnboardDay(n, step) {
           <span class="step-num" aria-hidden="true">2</span>
           <span class="row-title">מבחן קצר</span>
           <span class="soon${st.passed ? ' ok' : ''}">${st.passed ? `✓ ${st.quiz.score}/${st.quiz.of}` : `${quizLen(d)} שאלות`}</span>
-          <span class="row-sub full">עוברים מ־${needed(quizLen(d), PASS)} נכונות. אפשר לנסות שוב כמה שרוצים.</span>
+          <span class="row-sub full">ציון עובר: ${needed(quizLen(d), PASS)} תשובות נכונות. אפשר לנסות שוב כמה שרוצים.</span>
         </a>
       </li>
     </ol>
@@ -201,7 +201,7 @@ export function viewOnboardFinal() {
         <section class="flash result q-in">
           ${ring(Math.round((score / of) * 100), 150, 64, `<span id="sc">0</span>/${of}`)}
           <h2 tabindex="-1" id="res" class="result-line">${passed ? 'עברת את ההכשרה' : 'כמעט'}</h2>
-          <p>${passed ? 'התעודה שלך מחכה.' : `צריך ${needed(of, FINAL_PASS)} נכונות. כדאי לחזור על המוצרים שברשימה ולנסות שוב.`}</p>
+          <p>${passed ? 'התעודה שלך מחכה.' : `צריך ${needed(of, FINAL_PASS)} תשובות נכונות. כדאי לחזור על המוצרים שברשימה ולנסות שוב.`}</p>
           ${review}
           <div class="two">
             <a class="btn btn-no" href="#/onboard">למסלול</a>
@@ -222,12 +222,12 @@ export function viewOnboardCert() {
   const name = progress.onboard.name || (player && player.name) || '';
   setPage('תעודת הכשרה', `
     <section class="cert" aria-labelledby="cert-h">
-      <svg class="cert-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2-6 6-9 9-9s7 3 9 9c-2 1.5-5 2.5-9 2.5S5 16.5 3 15z"/><path d="M8.5 8.5l1.5 8.5M15.5 8.5l-1.5 8.5M12 6.2v11"/></svg>
+      ${rosette('cert-mark')}
       <p class="cert-kicker">לארדו · רעננה</p>
       <h1 id="cert-h">תעודת הכשרה</h1>
-      <p class="cert-stamp">עבר הכשרה ✓</p>
+      <p class="cert-stamp">הכשרה הושלמה ✓</p>
       <p class="cert-name">${name ? `<bdi>${esc(name)}</bdi>` : '<span class="counter">כאן יופיע השם</span>'}</p>
-      <p>השלים את "שבוע ראשון": שבעה ימים של לימוד המוצרים ומבחן מסכם.</p>
+      <p>סיום "שבוע ראשון": שבעה ימים של לימוד המוצרים ומבחן מסכם.</p>
       <dl class="cert-meta">
         <div><dt>תאריך</dt><dd>${esc(hebDate(fin.date))}</dd></div>
         <div><dt>מבחן מסכם</dt><dd><bdi>${fin.score}/${fin.of}</bdi></dd></div>

@@ -42,7 +42,7 @@ const BAD_CHARS = /[\u0000-\u001F\u007F\u00AD\u061C\u200B-\u200F\u2028-\u202E\u2
 export function checkName(raw) {
   const name = String(raw || '').replace(/\s+/g, ' ').trim();
   if (!name) return { error: 'צריך לכתוב שם או כינוי' };
-  if (name.length > 20) return { error: 'עד 20 תווים' };
+  if (name.length > 20) return { error: 'אפשר עד 20 תווים.' };
   if (BAD_CHARS.test(name)) return { error: 'יש בשם תו שאי אפשר להשתמש בו' };
   if (/^\.+$/.test(name) || /^__.*__$/.test(name)) return { error: 'יש בשם תו שאי אפשר להשתמש בו' };
   return { name, key: name.toLowerCase() };
@@ -148,7 +148,7 @@ export async function claimName(raw, total) {
   });
   if (res.ok) {
     const doc = await res.json().catch(() => ({}));
-    if (decode(doc.fields).uid !== a.uid) return { error: 'השם הזה כבר תפוס, נסו כינוי אחר' };
+    if (decode(doc.fields).uid !== a.uid) return { error: 'השם הזה כבר תפוס. נסו כינוי אחר.' };
   } else if (res.status !== 404) {
     throw new Error(`HTTP ${res.status}`);
   }
@@ -164,7 +164,7 @@ export async function claimName(raw, total) {
   try {
     await commit(writes);
   } catch (e) {
-    if (e.status === 409 || e.status === 403 || /exist|precondition/i.test(e.message)) return { error: 'השם הזה כבר תפוס, נסו כינוי אחר' };
+    if (e.status === 409 || e.status === 403 || /exist|precondition/i.test(e.message)) return { error: 'השם הזה כבר תפוס. נסו כינוי אחר.' };
     throw e;
   }
   writeJson(PLAYER_KEY, { name: checked.name, key: checked.key });

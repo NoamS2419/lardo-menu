@@ -9,7 +9,7 @@ import { jerusalemDate } from './learn.js';
 const stillHere = () => location.hash === '#/team';
 
 const NOTICE_START = () => (teamProgressEnabled() ? 'השם, הניקוד, ואם בחרת גם ההתקדמות שלך, יופיעו בטבלה' : 'השם יופיע בטבלת הניקוד,');
-const NOTICE_REST = ' שכל מי שיש לו את הקישור לאתר יכול לראות. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. המשחק התנדבותי ונועד בשביל הכיף, לא להערכת עובדים.';
+const NOTICE_REST = ' שפתוחה לצפייה לכל מי שמחזיק בקישור לאתר. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. ההשתתפות בטבלה היא רשות, והיא בשביל הכיף ולא להערכת עובדים.';
 const notice = () => `${NOTICE_START()}${NOTICE_REST}`;
 
 const table = (caption, rows, scoreLabel, scoreOf) => rows.length
@@ -55,7 +55,7 @@ function progressHtml(players) {
   return `
     <section aria-labelledby="prog-h">
       <h2 id="prog-h">התקדמות הצוות</h2>
-      <p class="hint">כמה מהוויטרינה כל אחד מכיר ומי סיים את "שבוע ראשון". ההתקדמות מוצגת כאן רק בהסכמה. את ההמלצה מה לחזק רואים רק על עצמך.</p>
+      <p class="hint">כמה מהוויטרינה מוכר לכל אחד בצוות, ומי השלים את "שבוע ראשון". ההתקדמות מוצגת כאן רק בהסכמה. ההמלצה "כדאי לחזק" מוצגת רק לך.</p>
       <ul class="team-progress">${rows.map((r) => `
         <li class="tp${r.me ? ' me' : ''}">
           <p class="tp-head">
@@ -83,7 +83,7 @@ function nameForm(current = '') {
              placeholder="למשל: נועה מהדלפק" value="${esc(current)}" aria-describedby="nick-notice nick-err">
       <p id="nick-notice" class="hint">${notice()}</p>
       <p id="nick-err" class="form-err" role="alert"></p>
-      <button class="btn" type="submit">${current ? 'שמירה' : 'להצטרף לטבלה'}</button>
+      <button class="btn" type="submit">${current ? 'שמירה' : 'הצטרפות לטבלה'}</button>
     </form>`;
 }
 
@@ -115,7 +115,7 @@ function bindNameForm(after) {
       announce(`נרשמת בשם ${r.name}`);
     } catch (ex) {
       if (ex.code === 'RESET' && stillHere()) { viewTeam(); return; }
-      fail('לא הצלחנו להתחבר. בדקו אינטרנט ונסו שוב.');
+      fail('לא הצלחנו להתחבר. בדקו את החיבור לאינטרנט ונסו שוב.');
       console.error(ex);
     } finally {
       btn.removeAttribute('aria-disabled');
@@ -153,7 +153,7 @@ export async function viewTeam() {
   setPage('הצוות', `
     <h1>טבלת הצוות</h1>
     ${dailyCta}
-    <div id="boards" aria-busy="true"><p class="empty">טוען את הטבלה…</p></div>
+    <div id="boards" aria-busy="true"><p class="empty">הטבלה בטעינה…</p></div>
     <details class="settings">
       <summary>הכינוי שלי והנתונים שלי</summary>
       ${nameForm(me.name)}

@@ -2,7 +2,7 @@
 
 import {
   DATA_URL, db, announce, esc, norm, shekel, priceLabel, imgSrc, imgHtml, tagsHtml, productCard, setPage,
-  catIcon, placeholder, meter,
+  catIcon, placeholder, meter, rosette,
   jerusalemDate
 } from './core.js';
 import { progress, setKnown, knownCount, streak, today, levelInfo } from './progress.js';
@@ -26,7 +26,7 @@ export async function loadData() {
   for (const p of products) {
     p._search = norm([
       p.name, p.description, p.staff_description,
-      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || [])
+      ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || []).filter((t) => !/הריון/.test(t))
     ].join(' '));
   }
   return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
@@ -84,7 +84,7 @@ export function viewHome() {
             ${cover
               ? `<img class="thumb" src="${esc(imgSrc(cover.image, 500))}" alt="" data-pid="${esc(cover.id)}" loading="lazy" decoding="async">`
               : placeholder(c.id, 'thumb')}
-            ${k === items.length ? '<span class="cat-done">✓ הכל</span>' : ''}
+            ${k === items.length ? '<span class="cat-done">✓ הכול</span>' : ''}
           </span>
           <span class="cat-name">${esc(c.name)}</span>
           ${k ? `<span class="card-body">
@@ -110,14 +110,14 @@ export function viewHome() {
           ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
           <span class="level-name">${esc(lvl.name)}</span>
           <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הדרגה הגבוהה ביותר'}<br>מוכרים לך ${known} מתוך ${total} מוצרים</span>
-          ${days > 1 ? `<span class="streak">${days} ימים ברצף</span>` : ''}
+          ${days > 1 ? `<span class="streak">${days === 2 ? 'יומיים' : `${days} ימים`} ברצף</span>` : ''}
         </div>
         <a class="btn btn-wide primary-cta" href="${primary.href}">${primary.label}</a>`}
         <nav aria-label="עוד דרכים ללמוד">
           <ul class="secondary">
-            <li><a href="#/game/daily">${ICONS.daily}<span>האתגר היומי<small>${dailyDone ? 'עשית היום. מחר יש חדש.' : '10 שאלות, אותן שאלות לכל הצוות'}</small></span></a></li>
+            <li><a href="#/game/daily">${ICONS.daily}<span>האתגר היומי<small>${dailyDone ? 'הושלם היום. מחר יש אתגר חדש.' : '10 שאלות, זהות לכל הצוות'}</small></span></a></li>
             <li><a href="#/game/what">${ICONS.what}<span>מה זה?<small>רואים תמונה ובוחרים שם</small></span></a></li>
-            ${fresh ? '' : `<li><a href="${primary.href === '#/onboard' ? '#/learn/all' : '#/onboard'}">${ICONS.cards}<span>${primary.href === '#/onboard' ? 'כל הכרטיסיות' : 'שבוע ראשון'}<small>${primary.href === '#/onboard' ? 'כל המוצרים, מה שלא ידעת חוזר יותר' : 'מסלול לעובדים חדשים'}</small></span></a></li>`}
+            ${fresh ? '' : `<li><a href="${primary.href === '#/onboard' ? '#/learn/all' : '#/onboard'}">${ICONS.cards}<span>${primary.href === '#/onboard' ? 'כל הכרטיסיות' : 'שבוע ראשון'}<small>${primary.href === '#/onboard' ? 'כל המוצרים. מה שעוד לא ידוע חוזר יותר' : 'מסלול הכניסה לצוות'}</small></span></a></li>`}
           </ul>
         </nav>
         ${daily ? `
@@ -131,6 +131,7 @@ export function viewHome() {
         </a>` : ''}
       </aside>
       <section aria-labelledby="cats-h">
+        <div class="divider">${rosette()}</div>
         <div class="section-head"><h2 id="cats-h">הוויטרינה</h2></div>
         <ul class="grid">${cats}</ul>
       </section>
@@ -145,15 +146,10 @@ export function viewCategory(id) {
   const k = knownCount(items);
   setPage(cat.name, `
     <a class="back" href="#/"><span aria-hidden="true">→</span> הוויטרינה</a>
-    <div class="banner tint-${esc(cat.id)}">
-      ${catIcon(cat.id)}
-      <div class="banner-text">
-        <h1>${esc(cat.name)}</h1>
-        <span class="meter-row"><span>מוכרים: ${k} מתוך ${items.length}</span>
-          <a href="#/learn/${encodeURIComponent(cat.id)}">לתרגל את הקטגוריה</a></span>
-        ${meter(k, items.length, `${cat.name}: ${k} מתוך ${items.length}`)}
-      </div>
-    </div>
+    <header class="cat-head">
+      <h1>${esc(cat.name)}</h1>
+      <p class="cat-line">מוכרים ${k} מתוך ${items.length} · <a href="#/learn/${encodeURIComponent(cat.id)}">לתרגל</a></p>
+    </header>
     <ul class="grid">${items.map((p) => productCard(p, !!progress.known[p.id])).join('')}</ul>
   `);
 }
@@ -179,7 +175,7 @@ export function viewProduct(id) {
   const notWolt = p.is_wolt === false
     ? '<p class="note">נמכר בדלפק בלבד, לא מופיע בוולט.</p>'
     : '';
-  const knowLabel = (on) => on ? `${CHECK} מוכר לי` : 'לסמן: מוכר לי';
+  const knowLabel = (on) => on ? `${CHECK} מוכר לי` : 'סימון: מוכר לי';
   const known = !!progress.known[p.id];
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}"><span aria-hidden="true">→</span> ${esc(cat.name)}</a>` : ''}
@@ -232,12 +228,12 @@ export function viewSearch(q = '') {
     results.innerHTML = found.length
       ? `<ul class="grid">${found.map((p) => productCard(p, Boolean(progress.known[p.id]))).join('')}</ul>`
       : `<div class="state">
-          ${ICONS.lost}
-          <h2>לא מצאנו את "${esc(input.value.trim())}"</h2>
+          ${rosette()}
+          <h2>אין תוצאות ל"${esc(input.value.trim())}"</h2>
           <p>אפשר לחפש לפי שם או מרכיב. למשל:</p>
           <ul class="chips">${['פיסטוק', 'קרואסון', 'שוקולד', 'טארט', 'כריך'].map((w) => `<li><a href="#/search?q=${encodeURIComponent(w)}">${w}</a></li>`).join('')}</ul>
         </div>`;
-    announce(found.length ? `נמצאו ${found.length} מוצרים` : 'לא נמצאו מוצרים');
+    announce(found.length ? (found.length === 1 ? 'נמצא מוצר אחד' : `נמצאו ${found.length} מוצרים`) : 'לא נמצאו מוצרים');
   };
   document.getElementById('search-form').addEventListener('submit', (e) => { e.preventDefault(); input.blur(); });
   input.addEventListener('input', run);
@@ -247,10 +243,18 @@ export function viewSearch(q = '') {
 
 /* ---------- selling: a pitch line and what to offer alongside (staff-editable, may still be a draft) ---------- */
 
-const draftNote = '<p class="draft-note"><span class="draft-badge">טיוטה</span> עוד לא אושר על ידי הצוות.</p>';
+const draftNote = '<p class="draft-note"><span class="draft-badge">טיוטה</span> ממתין לאישור.</p>';
+// Two products can share a name (personal and whole lemon tart): the chip then says which one.
+const KIND = { patisserie: 'אישי', tarts: 'שלם', cakes: 'עוגה' };
+const chipName = (p) => {
+  const twin = db.products.some((o) => o.id !== p.id && norm(o.name) === norm(p.name));
+  if (!twin) return p.name;
+  const cat = db.categories.find((c) => c.id === p.category);
+  return `${p.name} (${KIND[p.category] || (cat ? cat.name : '')})`;
+};
 const productLinks = (list) => `<ul class="chips">${list
   .filter((x) => db.byId.has(x.id))
-  .map((x) => `<li><a href="#/p/${encodeURIComponent(x.id)}">${esc(db.byId.get(x.id).name)}</a></li>`).join('')}</ul>`;
+  .map((x) => `<li><a href="#/p/${encodeURIComponent(x.id)}">${esc(chipName(db.byId.get(x.id)))}</a></li>`).join('')}</ul>`;
 
 function salesHtml(p) {
   const s = p.sales;
@@ -287,9 +291,9 @@ export function viewFaq() {
     <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <article class="prose">
       <h1>שאלות של לקוחות</h1>
-      <p class="note">כשלקוח שואל על הריון, כשרות או רגישות ואתם לא בטוחים, תפנו אותו לאחראי המשמרת. אל תבטיחו "בטוח" או "כשר" על דעת עצמכם.</p>
+      <p class="note">כשלקוח שואל על הריון, כשרות או רגישות ואתם לא בטוחים, הפנו אותו לאחראי המשמרת. אל תבטיחו "בטוח" או "כשר" על דעת עצמכם.</p>
 
-      ${db.faq.map((f) => `<h2>${esc(f.topic)}</h2><p>${esc(f.text)}</p>`).join('')}
+      ${db.faq.filter((f) => !/הריון/.test(f.topic)).map((f) => `<h2>${esc(f.topic)}</h2><p>${esc(f.text)}</p>`).join('')}
     </article>
   `);
 }
@@ -299,7 +303,7 @@ export function viewAccessibility() {
     <a class="back" href="#/"><span aria-hidden="true">→</span> דף הבית</a>
     <article class="prose">
       <h1>הצהרת נגישות</h1>
-      <p>לארדו תפריט הוא אתר פנימי ללימוד המוצרים, לעובדי הסניף בלבד. השתדלנו לבנות אותו לפי הנחיות WCAG 2.0 ברמה AA, אבל הוא לא עבר בדיקה של מורשה נגישות.</p>
+      <p>לארדו תפריט הוא אתר פנימי ללימוד המוצרים, לצוות הסניף בלבד. השתדלנו לבנות אותו לפי הנחיות WCAG 2.0 ברמה AA, אבל הוא לא עבר בדיקה של מורשה נגישות.</p>
       <h2>מה עשינו</h2>
       <ul>
         <li>האתר בעברית ומימין לשמאל, ונבנה כך שיעבוד עם קוראי מסך.</li>
@@ -327,13 +331,12 @@ const ICONS = {
   daily: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg>',
   what: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
   cards: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></svg>',
-  lost: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21M8.5 8.5l4 4M12.5 8.5l-4 4"/></svg>'
 };
 
 export function viewNotFound() {
   setPage('לא נמצא', `
     <div class="state">
-      ${ICONS.lost}
+      ${rosette()}
       <h1>הדף הזה לא קיים</h1>
       <p>אולי הקישור ישן, או שהמוצר ירד מהתפריט.</p>
       <a class="btn" href="#/">לדף הבית</a>

@@ -92,7 +92,7 @@ export function viewLearnHub() {
   }).join('');
   setPage('כרטיסיות', `
     <h1>כרטיסיות</h1>
-    <p>רואים את המוצר, נזכרים בשם, והופכים את הכרטיס. מה שלא ידעת יחזור אלייך יותר.</p>
+    <p>רואים את המוצר, נזכרים בשם, והופכים את הכרטיס. מה שעוד לא ידוע חוזר לעתים קרובות יותר.</p>
     <div class="level">
       ${ring(total ? Math.round((done / total) * 100) : 0, 64, 27, `${total ? Math.round((done / total) * 100) : 0}%`)}
       <span class="level-name">מוכרים: ${done} מתוך ${total}</span>
@@ -101,8 +101,8 @@ export function viewLearnHub() {
     </div>
     <a class="row-link onboard-cta" href="#/onboard">
       <span class="row-title">שבוע ראשון</span>
-      <span class="soon">מסלול לעובדים חדשים</span>
-      <span class="row-sub full">יום אחד, קטגוריה אחת: כרטיסיות, מבחן קצר, ובסוף תעודה.</span>
+      <span class="soon">מסלול הכניסה לצוות</span>
+      <span class="row-sub full">קטגוריה או שתיים בכל יום: כרטיסיות, מבחן קצר, ובסוף תעודה.</span>
     </a>
     <h2>לפי קטגוריה</h2>
     <ul class="rows">${rows}</ul>
@@ -149,7 +149,7 @@ export function viewFlashcards(catId, opts = null) {
                  <p class="flash-q" tabindex="-1" id="fq">כמה זה עולה?</p>`
               : `${clue}
                  <p class="flash-q" tabindex="-1" id="fq">איך קוראים לזה?</p>`}
-            <button class="btn btn-wide" id="flip" type="button">הפוך</button>
+            <button class="btn btn-wide" id="flip" type="button">להפוך</button>
           </section>
           <section class="face face-back" aria-label="התשובה" hidden>
             ${imgHtml(p, 'quiz-img', 600, '')}
@@ -203,7 +203,7 @@ export function viewFlashcards(catId, opts = null) {
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(Math.round((k / items.length) * 100), 150, 64, `<span id="pct">0</span>%`)}
-        <h2 tabindex="-1" id="done">סיימת את החבילה</h2>
+        <h2 tabindex="-1" id="done">סיימת את הסבב</h2>
         <p>מוכרים לך ${k} מתוך ${items.length} מוצרים כאן.</p>
         <div class="two">
           <button class="btn btn-no" id="again" type="button">עוד סיבוב</button>
@@ -237,10 +237,10 @@ const gameIcon = (id) => `<svg class="game-icon" viewBox="0 0 24 24" aria-hidden
 
 const GAMES = [
   { id: 'what', name: 'מה זה?', desc: 'רואים מוצר ובוחרים את השם הנכון.', ready: true },
-  { id: 'made', name: 'ממה זה עשוי?', desc: 'שם של מוצר, ובוחרים מה יש בו.', ready: true },
+  { id: 'made', name: 'ממה זה עשוי?', desc: 'רואים שם של מוצר ובוחרים מה יש בו.', ready: true },
   { id: 'price', name: 'כמה זה עולה?', desc: 'רואים מוצר ובוחרים את המחיר הנכון.', ready: true },
-  { id: 'who', name: 'מי המוצר?', desc: 'קוראים תיאור ומזהים את המוצר.', ready: true },
-  { id: 'customer', name: 'שאלת לקוח', desc: 'שאלות אמיתיות מהדלפק: כשרות, הריון, נסיעה.', ready: true },
+  { id: 'who', name: 'איזה מוצר?', desc: 'קוראים תיאור ומזהים את המוצר.', ready: true },
+  { id: 'customer', name: 'שאלת לקוח', desc: 'שאלות אמיתיות מהדלפק: נסיעה, שמירה, אירוח.', ready: true },
   { id: 'clock', name: 'נגד השעון', desc: 'כמה שיותר תשובות נכונות בדקה.', ready: true }
 ];
 
@@ -490,17 +490,8 @@ function questionsWho(order = weightedOrder) {
 export { jerusalemDate } from './core.js';
 import { jerusalemDate } from './core.js';
 
-/* "שאלת לקוח": counter questions built from the staff notes (tags) and the customer FAQ. */
-const KOSHER = { yes: 'כן, כשרות רעננה בלי חלב נוכרי', no: 'לא, זה חלב נוכרי' };
-const PREG = {
-  ok: 'אפשר, הכול מפוסטר',
-  no: 'לא מומלץ',
-  maybe: 'אולי עדיף לוותר (גבינה במים)'
-};
-const hasTag = (p, t) => (p.tags || []).includes(t);
-const pregOf = (p) => hasTag(p, 'לא מומלץ בהריון') ? 'no' : hasTag(p, 'אולי לא מומלץ בהריון') ? 'maybe' : 'ok';
-// Staff notes worth saying at the counter (no data-fix notes, no allergens: the site doesn't cover them).
-const noteOf = (p, skip = '') => (p.notes || []).filter((n) => !/וולט|תוקן|גלוטן/.test(n) && !skip.includes(n)).join('. ');
+/* "שאלת לקוח": counter questions from the customer FAQ, plus prices asked the way a customer asks.
+   No pregnancy or kashrut answers: those go to the shift manager, and the game teaches exactly that. */
 
 // Suez One draws ₪ like "שח"; amounts go in the body font.
 const nums = (html) => html.replace(/(\d+(?:\.\d+)? ₪)/g, '<bdi class="num">$1</bdi>');
@@ -517,84 +508,37 @@ const choices = (opts, right) => {
 };
 
 function questionsCustomer(order = weightedOrder) {
-  const qs = [];
-  // Kosher: every tagged product, balanced with plain sweet products of the same kind.
-  // Anything that mentions gianduja (or has two flavors) stays out of the "plain" side.
-  const textOf = (p) => [p.name, p.description, p.staff_description, ...(p.ingredients || []), ...(p.notes || [])].join(' ');
-  const GIANDUJA = /ג׳?א?נדויה|גנדויה|נוכרי|דולצ׳ה/;
-  const dairy = db.products.filter((p) => hasTag(p, 'חלב נוכרי') && !(p.notes || []).length);
-  const plainSweet = db.products.filter((p) => !hasTag(p, 'חלב נוכרי') && family(p) === 'sweet' && !GIANDUJA.test(textOf(p)));
-  for (const p of [...order(dairy).slice(0, 3), ...order(plainSweet).slice(0, 2)]) {
-    const isDairy = hasTag(p, 'חלב נוכרי');
-    const options = [KOSHER.yes, KOSHER.no];
-    qs.push({
-      id: p.id,
-      prompt: bubble(`<strong>${esc(p.name)}</strong>, זה בלי חלב נוכרי?`, 'לקוח שואל', p),
-      options,
-      correct: isDairy ? 1 : 0,
-      explain: isDairy
-        ? `${p.name}: חלב נוכרי. ${noteOf(p) || 'כל מה שעם ג׳אנדויה הוא חלב נוכרי, וגם פאן סוויס.'}`
-        : `${p.name}: כשרות רעננה. חלב נוכרי יש רק בג׳אנדויה ובפאן סוויס.`
-    });
-  }
-  // Pregnancy: tagged products plus a couple of safe ones.
-  const flagged = db.products.filter((p) => pregOf(p) !== 'ok');
-  // "Safe" examples avoid anything the FAQ calls out (cheese in water, meringue), tagged or not.
-  const safe = db.products.filter((p) => pregOf(p) === 'ok' && family(p) === 'savory'
-    && !/בוראטה|סטראצ׳אטלה|פטה|סלק|לימון|גבינה|מרנג/.test(textOf(p)));
-  for (const p of [...order(flagged).slice(0, 3), ...order(safe).slice(0, 2)]) {
-    const k = pregOf(p);
-    const options = [PREG.ok, PREG.no, PREG.maybe];
-    const why = noteOf(p, PREG[k]);
-    qs.push({
-      id: p.id,
-      prompt: bubble(`אני בהריון. אפשר <strong>${esc(p.name)}</strong>?`, 'לקוחה שואלת', p),
-      options,
-      correct: ['ok', 'no', 'maybe'].indexOf(k),
-      explain: k === 'ok' ? `${p.name}: אפשר. עקרונית הכול מפוסטר.` : `${p.name}: ${PREG[k]}.${why ? ` ${why}.` : ''}`
-    });
-  }
-  // From the FAQ.
-  qs.push({
-    id: 'faq:travel',
-    prompt: bubble('זה יחזיק נסיעה של שעה באוטו?', 'לקוח שואל'),
-    ...choices(['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'], 1),
-    explain: 'מחזיק נסיעה של חצי שעה באוטו; שעה זה גבולי.'
-  });
-  qs.push({
-    id: 'faq:freeze',
-    prompt: bubble('אני קונה היום לאירוע בעוד כמה ימים. איך שומרים?', 'לקוחה שואלת'),
-    ...choices(['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
-    explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
-  });
-  qs.push({
-    id: 'faq:dolce',
-    prompt: bubble('מקל קרואסון בטעם דולצ׳ה, זה חלב נוכרי?', 'לקוח שואל'),
-    ...choices(['לא, דולצ׳ה זה כשרות רעננה בלי חלב נוכרי', 'כן, כל המקלות חלב נוכרי'], 0),
-    explain: 'ג׳אנדויה: חלב נוכרי. דולצ׳ה (שוקולד לבן מקורמל): כשרות רעננה בלי חלב נוכרי.'
-  });
-  // Customer situations from the sales tips, once the team has approved them (drafts aren't quizzed).
-  const sit = db.situations;
-  if (sit && !sit.draft) {
-    // Only "not sweet" has answers that are clearly wrong (anything sweet); the others overlap too much to quiz.
-    for (const t of sit.items.filter((x) => x.id === 'not-sweet')) {
-      const fits = (t.products || []).map((x) => db.byId.get(x.id)).filter(Boolean);
-      if (!fits.length) continue;
-      const ids = new Set(fits.map((x) => x.id));
-      // Only situations that clearly lean one way (e.g. "not sweet"), so the wrong answers are really wrong.
-      const fams = fits.map(family);
-      const main = ['sweet', 'savory', 'drink'].find((f) => fams.filter((x) => x === f).length >= fams.length * 0.8);
-      if (!main) continue;
-      const right = pick(fits.filter((x) => family(x) === main), 1)[0];
-      const wrong = shuffle(db.products.filter((o) => !ids.has(o.id) && family(o) !== main && norm(o.name) !== norm(right.name))).slice(0, 3);
-      if (wrong.length < 3) continue;
-      qs.push({
-        id: right.id,
-        prompt: bubble(`${esc(t.title)}. מה יש לכם?`, 'לקוח מבקש'),
-        ...choices([right.name, ...wrong.map((o) => o.name)], 0),
-        explain: t.tip
-      });
+  const qs = [
+    {
+      id: 'faq:travel',
+      prompt: bubble('זה יחזיק נסיעה של שעה באוטו?', 'לקוח שואל'),
+      ...choices(['בלי בעיה, גם שלוש שעות', 'חצי שעה בטוח, שעה זה גבולי', 'רק אם זה במקרר', 'לא, צריך לאכול מיד'], 1),
+      explain: 'מחזיק נסיעה של חצי שעה באוטו. שעה זה גבולי.'
+    },
+    {
+      id: 'faq:freeze',
+      prompt: bubble('אני קונה היום לאירוע בעוד כמה ימים. איך שומרים?', 'לקוחה שואלת'),
+      ...choices(['לשמור במקפיא ולהוציא שעה לפני', 'לשמור במקרר עד האירוע', 'לא כדאי, רק לקנות ביום עצמו', 'לחמם בתנור לפני ההגשה'], 0),
+      explain: 'הכול קפוא. אפשר לשמור כמה ימים במקפיא ולהוציא שעה לפני שאוכלים.'
+    },
+    {
+      id: 'faq:pregnant',
+      prompt: bubble('אני בהריון. מה מתאים לי?', 'לקוחה שואלת'),
+      ...choices(['אפשר לראות את הרכיבים של כל מוצר. לשאלה רפואית כדאי לבדוק עם הרופא', 'הכול מפוסטר, אפשר הכול', 'רק המאפים המלוחים', 'שום דבר עם גבינה'], 0),
+      explain: 'לא נותנים המלצות רפואיות. מראים רכיבים ומפנים לרופא.'
+    },
+    {
+      id: 'faq:allergy',
+      prompt: bubble('יש בזה אגוזים? יש לי אלרגיה.', 'לקוח שואל'),
+      ...choices(['אין לי מידע מלא על אלרגנים. בודקים עם אחראי המשמרת', 'לא, אין', 'רק בפיסטוק', 'זה בסדר, רק טיפה'], 0),
+      explain: 'באתר אין מידע על אלרגנים. על אלרגיה תמיד בודקים עם אחראי המשמרת.'
     }
+  ];
+  // The rest: "how much is it?" at the counter, with the photo as a hint.
+  for (const q of questionsPrice(order).slice(0, ROUND - qs.length)) {
+    const p = db.byId.get(q.id);
+    const size = (p.sizes || []).length ? ` (${p.sizes[0].label})` : '';
+    qs.push({ ...q, prompt: bubble(`כמה עולה <strong>${esc(p.name)}</strong>${esc(size)}?`, 'לקוח שואל', p) });
   }
   return shuffle(qs).slice(0, ROUND);
 }
@@ -736,7 +680,7 @@ function playClock(secs) {
       sc.parentElement.classList.remove('bump'); void sc.offsetWidth; sc.parentElement.classList.add('bump');
       burst(btn, 10);
     }
-    announce(ok ? 'נכון' : `לא. ${q.options[q.correct]}`);
+    announce(ok ? 'נכון' : `לא נכון. התשובה: ${q.options[q.correct]}`);
     update();
     const go = () => {
       clearTimeout(wait);
@@ -752,7 +696,7 @@ function playClock(secs) {
       // Practice has no clock, so nothing moves on its own unless auto-advance is switched on.
       const opts = document.querySelector('#q .options');
       opts.insertAdjacentHTML('afterend', `
-        <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון' : `✗ זה ${nums(esc(q.options[q.correct]))}`}</p>
+        <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓ נכון' : `✗ לא נכון. התשובה: ${nums(esc(q.options[q.correct]))}`}</p>
         <button class="btn btn-wide" id="next" type="button" aria-describedby="verdict">${answered >= PRACTICE ? 'לתוצאה' : 'הבא'}</button>`);
       const nb = document.getElementById('next');
       nb.addEventListener('click', go);
@@ -780,7 +724,7 @@ function playClock(secs) {
         ${missedHtml(missed)}
         <div class="two">
           <a class="btn btn-no" href="#/games">משחקים</a>
-          <button class="btn btn-yes" type="button" id="again">עוד פעם</button>
+          <button class="btn btn-yes" type="button" id="again">עוד סבב</button>
         </div>
       </section>`;
     countUp(document.getElementById('sc'), score);
@@ -886,7 +830,7 @@ export function viewGame(id, custom = null) {
     }
     const line = ok
       ? (STREAK_PRAISE[run] || PRAISE[Math.floor(Math.random() * PRAISE.length)])
-      : `כמעט. זה ${q.options[q.correct]}`;
+      : `לא נכון. התשובה: ${q.options[q.correct]}`;
     const last = i + 1 >= qs.length;
     document.getElementById('feedback').innerHTML = `
       <p class="verdict ${ok ? 'ok' : 'bad'}" id="verdict">${ok ? '✓' : '✗'} ${nums(esc(line))}</p>
@@ -925,8 +869,8 @@ export function viewGame(id, custom = null) {
     const newBest = record && prev;
     const pct = Math.round((score / qs.length) * 100);
     const review = missedHtml(missed);
-    const line = score === qs.length ? 'מושלם. שף קונדיטור אמיתי'
-      : score >= 8 ? 'מעולה' : score >= 5 ? 'יפה, כמעט שם' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
+    const line = score === qs.length ? 'מושלם. עשר מתוך עשר'
+      : score >= 8 ? 'מעולה' : score >= 5 ? 'יפה. עוד קצת תרגול' : 'כדאי לעבור על הכרטיסיות ולנסות שוב';
     box.innerHTML = `
       <section class="flash result q-in">
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
@@ -960,7 +904,7 @@ export function viewGame(id, custom = null) {
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
         <h2 tabindex="-1" id="res" class="result-line">${score === 10 ? 'מושלם' : score >= 8 ? 'כמעט מושלם' : score >= 5 ? 'יפה מאוד' : 'מחר יש עוד הזדמנות'}</h2>
         <p class="sr-only">${score} מתוך ${qs.length}</p>
-        <p id="daily-status" role="status">${named ? 'שולח לטבלת הצוות…' : cloudEnabled() ? 'רוצים להופיע בטבלת הצוות? אפשר לבחור כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
+        <p id="daily-status" role="status">${named ? 'התוצאה נשלחת לטבלת הצוות…' : cloudEnabled() ? 'רוצים להופיע בטבלת הצוות? אפשר לבחור כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
         <div class="two">
           <a class="btn btn-no" href="#/">לדף הבית</a>
           ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">עוד משחקים</a>'}
@@ -987,7 +931,7 @@ function viewDailyDone(date) {
     <section class="flash result">
       ${ring(progress.daily[date] * 10, 150, 64, `${progress.daily[date]}/10`)}
       <h1 class="result-line">כבר עשית את האתגר של היום</h1>
-      <p>אתגר חדש מחכה מחר בבוקר. בינתיים אפשר לשחק בשאר המשחקים.</p>
+      <p>מחר יש אתגר חדש. בינתיים אפשר לשחק בשאר המשחקים.</p>
       <div class="two">
         <a class="btn btn-no" href="#/">לדף הבית</a>
         ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">משחקים</a>'}

@@ -1,4 +1,7 @@
-Copyright 2016 Michal Sahar. All rights reserved.
+Fonts in this folder, all under the SIL Open Font License 1.1 (full text below):
+- Frank Ruhl Libre: Copyright 2015 The Frank Ruhl Libre Project Authors (https://github.com/fontef/frankruhllibre)
+- Cormorant Garamond: Copyright 2015 The Cormorant Project Authors (github.com/CatharsisFonts/Cormorant) CormorantGaramond-Italic[wght].ttf: Copyright 2015 The Cormorant Project Authors (github.com/CatharsisFonts/Cormorant)
+Files from @fontsource 5.3.0.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
