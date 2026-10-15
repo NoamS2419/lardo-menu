@@ -211,7 +211,8 @@
     "93b2a2a78eae4b4fe73f00c6": {
       "aliases": [
         "מוס פרח אדום"
-      ]
+      ],
+      "ai_image": true
     },
     "17d62d0d916f24652ba6b9b4": {
       "aliases": [
@@ -222,6 +223,15 @@
       "aliases": [
         "פיצה בוראטה"
       ]
+    },
+    "2f4c4838ca3fb0c03d75dcad": {
+      "ai_image": true
+    },
+    "7619d91f6849ab6c76bfab38": {
+      "ai_image": true
+    },
+    "abd5685d979bb6cb3ae31765": {
+      "ai_image": true
     }
   },
   "counter_only": [
