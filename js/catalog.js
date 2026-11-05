@@ -48,11 +48,6 @@ const ring = (pct, size = 64, r = 27, label = '') => `
 
 export { ring };
 
-const greeting = () => {
-  const h = new Date().getHours();
-  return h < 5 ? 'לילה טוב' : h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
-};
-
 // Same product for the whole team on a given day.
 function productOfDay() {
   const pool = db.products.filter((p) => p.image && (p.staff_description || p.description));
@@ -100,7 +95,6 @@ export function viewHome() {
   setPage('', `
     <div class="home">
       <aside class="home-side">
-        <p class="hello">${greeting()}</p>
         <h1>מה לומדים היום?</h1>
         ${fresh ? `
         <div class="first-run">
@@ -126,8 +120,8 @@ export function viewHome() {
         <a class="daily" href="#/p/${encodeURIComponent(daily.id)}">
           <img class="daily-img" src="${esc(imgSrc(daily.image, 700))}" alt="" data-pid="${esc(daily.id)}" decoding="async">
           <span class="daily-body">
-            <span class="daily-kicker">המוצר של היום</span>
-            <span class="daily-name">${esc(daily.name)}</span>
+            <h2 class="daily-name">${esc(daily.name)}</h2>
+            <span class="daily-sub">המוצר של היום</span>
             <span class="daily-line">${esc(daily.staff_description || daily.description)}</span>
           </span>
         </a>` : ''}
@@ -150,7 +144,8 @@ export function viewCategory(id) {
     <a class="back" href="#/"><span aria-hidden="true">→</span> הוויטרינה</a>
     <header class="cat-head">
       <h1>${esc(cat.name)}</h1>
-      <p class="cat-line">מוכרים ${k} מתוך ${items.length} · <a href="#/learn/${encodeURIComponent(cat.id)}">לתרגל</a></p>
+      <p class="cat-line">מוכרים ${k} מתוך ${items.length}</p>
+      <a class="btn ghost cat-practice" href="#/learn/${encodeURIComponent(cat.id)}">לתרגל את הקטגוריה</a>
     </header>
     <ul class="grid">${items.map((p) => productCard(p, !!progress.known[p.id])).join('')}</ul>
   `);

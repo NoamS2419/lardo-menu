@@ -105,7 +105,7 @@ export function viewLearnHub() {
       <span class="row-sub full">קטגוריה או שתיים בכל יום: כרטיסיות, מבחן קצר, ובסוף תעודה.</span>
     </a>
     <h2>לפי קטגוריה</h2>
-    <ul class="rows">${rows}</ul>
+    <ul class="list">${rows}</ul>
   `);
 }
 
@@ -271,7 +271,7 @@ export function viewGames() {
       <span class="level-sub">כל תשובה נכונה: 10 נקודות</span>
     </div>
     <h2>איזה משחק?</h2>
-    <ul class="rows">${items}</ul>
+    <ul class="list">${items}</ul>
     ${badgesHtml()}
     <details class="settings">
       <summary>הגדרות משחק</summary>
@@ -322,17 +322,23 @@ const BADGE_ICONS = {
   cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>'
 };
 
+// A badge is a seal, like the stamp on a pastry box: copper when earned, an outline while locked.
+const SEAL = '<path class="seal-edge" d="M25.9 2.2 Q28.0 0.5 30.1 2.2 Q32.3 3.9 34.8 3.0 Q37.4 2.2 38.8 4.5 Q40.2 6.8 43.0 6.9 Q45.7 6.9 46.2 9.6 Q46.8 12.3 49.3 13.3 Q51.8 14.2 51.4 16.9 Q51.0 19.6 53.1 21.4 Q55.1 23.2 53.8 25.6 Q52.5 28.0 53.8 30.4 Q55.1 32.8 53.1 34.6 Q51.0 36.4 51.4 39.1 Q51.8 41.7 49.3 42.7 Q46.8 43.7 46.2 46.4 Q45.7 49.1 43.0 49.1 Q40.3 49.2 38.8 51.5 Q37.4 53.8 34.8 53.0 Q32.3 52.1 30.1 53.8 Q28.0 55.5 25.9 53.8 Q23.7 52.1 21.2 53.0 Q18.6 53.8 17.2 51.5 Q15.7 49.2 13.0 49.1 Q10.3 49.1 9.8 46.4 Q9.2 43.7 6.7 42.7 Q4.2 41.8 4.6 39.1 Q5.0 36.4 2.9 34.6 Q0.9 32.8 2.2 30.4 Q3.5 28.0 2.2 25.6 Q0.9 23.2 2.9 21.4 Q5.0 19.6 4.6 16.9 Q4.2 14.3 6.7 13.3 Q9.2 12.3 9.8 9.6 Q10.3 6.9 13.0 6.9 Q15.8 6.8 17.2 4.5 Q18.6 2.2 21.2 3.0 Q23.7 3.9 25.9 2.2Z"/>';
+
 function badgesHtml() {
   const all = badges();
   const n = all.filter((b) => b.got).length;
   return `
     <h2>תגים <span class="counter">(${n} מתוך ${all.length})</span></h2>
-    <ul class="badges">${all.map((b) => `
-      <li class="badge${b.got ? ' got' : ''}">
-        <span class="badge-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${BADGE_ICONS[b.icon]}</svg></span>
-        <span class="badge-name">${esc(b.name)}</span>
-        ${b.got ? '<span class="badge-got">✓ הושג</span>' : ''}
-        <span class="badge-how">${b.got ? '' : '<span class="sr-only">עוד לא. </span>'}${esc(b.how)}</span>
+    <ul class="seals">${all.map((b) => `
+      <li class="seal${b.got ? ' got' : ''}">
+        <details>
+          <summary>
+            <svg class="seal-mark" viewBox="0 0 56 56" aria-hidden="true">${SEAL}<g transform="translate(16 16)">${BADGE_ICONS[b.icon]}</g></svg>
+            <span class="seal-name">${esc(b.name)}<span class="sr-only">${b.got ? ', הושג' : ', עוד לא'}</span></span>
+          </summary>
+          <p class="seal-how">${b.got ? '✓ הושג. ' : ''}${esc(b.how)}</p>
+        </details>
       </li>`).join('')}
     </ul>`;
 }
