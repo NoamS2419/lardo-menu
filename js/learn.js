@@ -281,6 +281,7 @@ export function viewGames() {
       </label>
     </details>
   `);
+  bindSeals();
   document.getElementById('auto').addEventListener('change', (e) => {
     progress.autoNext = e.target.checked;
     saveProgress();
@@ -298,7 +299,7 @@ function badges() {
     { icon: 'tag', name: 'מחירון מהלך', how: '10 מתוך 10 ב"כמה זה עולה?"', got: () => perfect('price') },
     { icon: 'eye', name: 'עין של קונדיטור', how: '10 מתוך 10 ב"מה זה?"', got: () => perfect('what') },
     { icon: 'list', name: 'קריאת מתכונים', how: '10 מתוך 10 ב"ממה זה עשוי?"', got: () => perfect('made') },
-    { icon: 'search', name: 'עין של בלש', how: '10 מתוך 10 ב"מי המוצר?"', got: () => perfect('who') },
+    { icon: 'search', name: 'עין של בלש', how: '10 מתוך 10 ב"איזה מוצר?"', got: () => perfect('who') },
     { icon: 'bell', name: 'שירות מושלם', how: '10 מתוך 10 ב"שאלת לקוח"', got: () => perfect('customer') },
     { icon: 'bolt', name: 'ידיים מהירות', how: '15 נכונות בדקה ב"נגד השעון"', got: () => (progress.best.clock60 || {}).score >= 15 },
     { icon: 'medal', name: 'אליפות היום', how: '10 מתוך 10 באתגר היומי', got: () => Object.values(progress.daily).some((v) => v >= ROUND) },
@@ -330,17 +331,29 @@ function badgesHtml() {
   const n = all.filter((b) => b.got).length;
   return `
     <h2>תגים <span class="counter">(${n} מתוך ${all.length})</span></h2>
-    <ul class="seals">${all.map((b) => `
+    <p class="hint">נגיעה בתג מראה איך משיגים אותו.</p>
+    <p class="seal-info" id="seal-info" aria-live="polite"></p>
+    <ul class="seals">${all.map((b, i) => `
       <li class="seal${b.got ? ' got' : ''}">
-        <details>
-          <summary>
-            <svg class="seal-mark" viewBox="0 0 56 56" aria-hidden="true">${SEAL}<g transform="translate(16 16)">${BADGE_ICONS[b.icon]}</g></svg>
-            <span class="seal-name">${esc(b.name)}<span class="sr-only">${b.got ? ', הושג' : ', עוד לא'}</span></span>
-          </summary>
-          <p class="seal-how">${b.got ? '✓ הושג. ' : ''}${esc(b.how)}</p>
-        </details>
+        <button type="button" class="seal-btn" data-i="${i}" aria-pressed="false" aria-controls="seal-info">
+          <svg class="seal-mark" viewBox="0 0 56 56" aria-hidden="true">${SEAL}<g transform="translate(16 16)">${BADGE_ICONS[b.icon]}</g></svg>
+          <span class="seal-name">${esc(b.name)}<span class="sr-only">${b.got ? ', הושג' : ', עוד לא'}</span></span>
+        </button>
       </li>`).join('')}
     </ul>`;
+}
+
+// One line above the seals says how the tapped one is earned, so the grid never shifts.
+function bindSeals() {
+  const all = badges();
+  const info = document.getElementById('seal-info');
+  document.querySelectorAll('.seal-btn').forEach((btn) => btn.addEventListener('click', () => {
+    const on = btn.getAttribute('aria-pressed') !== 'true';
+    document.querySelectorAll('.seal-btn').forEach((o) => o.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', String(on));
+    const b = all[Number(btn.dataset.i)];
+    info.textContent = on ? `${b.name}: ${b.got ? 'הושג. ' : ''}${b.how}` : '';
+  }));
 }
 
 const PRAISE = ['בול', 'נכון', 'בדיוק ככה', 'יפה מאוד', 'עין של קונדיטור'];
