@@ -245,7 +245,7 @@ export function viewSearch(q = '') {
 
 /* ---------- selling: a pitch line and what to offer alongside (staff-editable, may still be a draft) ---------- */
 
-const draftNote = '<p class="draft-note"><span class="draft-badge">טיוטה</span> ממתין לאישור.</p>';
+// The draft flag stays in the data (tips await Sharon's OK) but is not shown to staff (design review round 11).
 // Two products can share a name (personal and whole lemon tart): the chip then says which one.
 const KIND = { patisserie: 'אישי', tarts: 'שלם', cakes: 'בפס' };
 const chipName = (p) => {
@@ -266,7 +266,6 @@ function salesHtml(p) {
       <h2 id="sell-h">איך מציעים</h2>
       ${s.pitch ? `<p class="pitch">${esc(s.pitch)}</p>` : ''}
       ${(s.pair_with || []).length ? `<h3>מה להציע ליד</h3>${productLinks(s.pair_with)}` : ''}
-      ${s.draft ? draftNote : ''}
     </section>`;
 }
 
@@ -277,7 +276,6 @@ export function viewSell() {
     <article class="prose">
       <h1>טיפים למכירה</h1>
       <p>מה מציעים כשלקוח מבקש משהו מסוים. בכל דף מוצר יש גם "איך מציעים" ומה להציע ליד.</p>
-      ${sit.draft ? draftNote : ''}
       ${sit.items.length ? sit.items.map((t) => `
         <section class="situation">
           <h2>${esc(t.title)}</h2>
