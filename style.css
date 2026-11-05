@@ -412,8 +412,6 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .sell h2 { margin-top: 0; }
 .sell h3 { margin: var(--sp-4) 0 var(--sp-2); }
 .pitch { font-size: var(--fs-3); margin: 0; }
-.draft-note { color: var(--muted); font-size: var(--fs-1); margin: var(--sp-2) 0 0; }
-.draft-badge { display: inline-block; padding: 0 var(--sp-2); margin-inline-end: var(--sp-1); border: 1px solid var(--accent-deco); border-radius: var(--r-1); color: var(--accent); font-size: var(--fs-1); font-weight: var(--fw-medium); letter-spacing: .04em; }
 .fc-pitch { font-size: var(--fs-2); color: var(--muted); }
 .situation { border-top: 1px solid var(--line); padding-top: var(--sp-2); margin-top: var(--sp-4); }
 .chips { list-style: none; padding: 0; margin: 0 0 var(--sp-3); display: flex; flex-wrap: wrap; gap: var(--sp-2); }

@@ -156,7 +156,7 @@ export function viewFlashcards(catId, opts = null) {
             <h2 class="flash-name" tabindex="-1" id="ans">${esc(p.name)}</h2>
             <p class="price"><bdi>${esc(priceLabel(p))}</bdi></p>
             ${(p.staff_description || p.description) ? `<p>${esc(p.staff_description || p.description)}</p>` : ''}
-            ${p.sales && p.sales.pitch ? `<p class="fc-pitch">${p.sales.draft ? '<span class="draft-badge">טיוטה</span> ' : ''}<b>איך מציעים:</b> ${esc(p.sales.pitch)}</p>` : ''}
+            ${p.sales && p.sales.pitch ? `<p class="fc-pitch"><b>איך מציעים:</b> ${esc(p.sales.pitch)}</p>` : ''}
             <div class="two">
               <button class="btn btn-no" id="no" type="button">✗ עוד לא</button>
               <button class="btn btn-yes" id="yes" type="button">✓ ידעתי</button>
