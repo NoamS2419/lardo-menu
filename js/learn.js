@@ -332,7 +332,6 @@ function badgesHtml() {
   return `
     <h2>תגים <span class="counter">(${n} מתוך ${all.length})</span></h2>
     <p class="hint">נגיעה בתג מראה איך משיגים אותו.</p>
-    <p class="seal-info" id="seal-info" aria-live="polite"></p>
     <ul class="seals">${all.map((b, i) => `
       <li class="seal${b.got ? ' got' : ''}">
         <button type="button" class="seal-btn" data-i="${i}" aria-pressed="false" aria-controls="seal-info">
@@ -340,10 +339,11 @@ function badgesHtml() {
           <span class="seal-name">${esc(b.name)}<span class="sr-only">${b.got ? ', הושג' : ', עוד לא'}</span></span>
         </button>
       </li>`).join('')}
-    </ul>`;
+    </ul>
+    <p class="seal-info" id="seal-info" aria-live="polite"></p>`;
 }
 
-// One line above the seals says how the tapped one is earned, so the grid never shifts.
+// One line under the seals (it sticks to the bottom of the screen while they're in view) says how the tapped one is earned, so the grid never shifts.
 function bindSeals() {
   const all = badges();
   const info = document.getElementById('seal-info');
