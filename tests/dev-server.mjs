@@ -1,7 +1,7 @@
 /* Local test site on the Firebase emulators, with test accounts (so testing never needs Or).
    Run: cd tests && npm run dev, then open http://localhost:8123/?emu
    Accounts (password "password1"): noam (admin), or (scheduler), roni and lia (approved), dan (pending).
-   Pass --empty for an empty project (no accounts or branch) to test the first setup. */
+   Pass --empty for an empty project with the old rules live, to rehearse launch day. */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -55,7 +55,7 @@ const put = (writes) => post(`${FS}/v1/${docs}:commit`, {
 }, { Authorization: 'Bearer owner' });
 
 async function setRules(adminUid) {
-  const rules = (await readFile(join(ROOT, 'firestore.shifts.rules'), 'utf8')).replace('__ADMIN_UID__', adminUid);
+  const rules = (await readFile(join(ROOT, 'firestore.rules'), 'utf8')).replace('__ADMIN_UID__', adminUid);
   const r = await fetch(`${FS}/emulator/v1/projects/${PROJECT}:securityRules`, { method: 'PUT', body: JSON.stringify({ rules: { files: [{ content: rules }] } }) });
   if (!r.ok) throw new Error(`rules: ${await r.text()}`);
 }
@@ -68,14 +68,12 @@ const sunday = (d = new Date()) => {
 const iso = (d) => d.toISOString().slice(0, 10);
 
 if (empty) {
-  console.log('empty project: register "noam" on the site, then the rules get its uid');
-  // Keep the admin placeholder until noam exists, then load the rules with its uid.
-  await setRules('nobody-yet');
-  const timer = setInterval(async () => {
-    const r = await post(`${AUTH}/identitytoolkit.googleapis.com/v1/projects/${PROJECT}/accounts:query`, {}, { Authorization: 'Bearer owner' }).catch(() => null);
-    const noam = r && (r.userInfo || []).find((u) => u.email === 'noam@staff.lardo.invalid');
-    if (noam) { await setRules(noam.localId); console.log('rules loaded for admin', noam.localId); clearInterval(timer); }
-  }, 1000);
+  // Like launch day: the old rules are live until the admin pastes the new ones from the site.
+  const old = await readFile(join(ROOT, 'tests/old-live.rules'), 'utf8');
+  const live = old.includes('__ADMIN_UID__') ? old.replace('__ADMIN_UID__', 'nobody-yet') : old;
+  const r = await fetch(`${FS}/emulator/v1/projects/${PROJECT}:securityRules`, { method: 'PUT', body: JSON.stringify({ rules: { files: [{ content: live }] } }) });
+  if (!r.ok) throw new Error(`rules: ${await r.text()}`);
+  console.log('empty project with the current firestore.rules; paste new rules with PUT /emulator/v1/projects/demo-lardo:securityRules');
 } else {
   const [noam, or, roni, lia, dan] = await Promise.all(['noam', 'or', 'roni', 'lia', 'dan'].map(signUp));
   await setRules(noam);

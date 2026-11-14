@@ -37,7 +37,9 @@ export function errorState(ex, retryHash) {
       <h1>לא הצלחנו לטעון</h1>
       <p>כדאי לבדוק את החיבור לאינטרנט ולנסות שוב.</p>
       <a class="btn" href="#${esc(retryHash)}" data-retry>לנסות שוב</a>
-    </div>`);
+    </div>
+    ${retryHash === '/shifts' ? accountHtml() : ''}`);
+  bindAccount();
   document.querySelector('[data-retry]')?.addEventListener('click', (e) => {
     if (location.hash === `#${retryHash}`) { e.preventDefault(); window.dispatchEvent(new HashChangeEvent('hashchange')); }
   });
@@ -50,7 +52,8 @@ export const slotLabel = (branch, dow, shift, week) => {
 };
 
 // The published schedule as a real table: rows are days, columns are shifts.
-export function scheduleTable(branch, week, sched, myIds = new Set()) {
+export function scheduleTable(branch0, week, sched, myIds = new Set()) {
+  const branch = asPublished(branch0, sched);
   const shifts = branch.shifts;
   const changed = new Set(sched.changed || []);
   const rows = WORK_DAYS.map((dow) => {
@@ -77,6 +80,8 @@ export function scheduleTable(branch, week, sched, myIds = new Set()) {
 }
 
 const weekId = (branch, week) => `${branch}_${week}`;
+// A published week keeps the shift names and hours it was published with.
+export const asPublished = (branch, sched) => (sched && sched.shifts ? { ...branch, shifts: sched.shifts, hours: sched.hours || {} } : branch);
 
 // A published week (or null), cached so the home card works offline.
 async function loadPublished(branchId, week) {
@@ -96,19 +101,20 @@ async function loadPublished(branchId, week) {
 const myIdsOf = (member) => new Set([member.uid, ...(member.replaces ? [member.replaces] : [])]);
 
 // My shifts from today on, in this week and next week.
-function myShifts(branch, member, weeks) {
+function myShifts(branch0, member, weeks) {
   const ids = myIdsOf(member);
   const from = today();
   const out = [];
   for (const { week, sched } of weeks) {
     if (!sched) continue;
+    const branch = asPublished(branch0, sched);
     for (const dow of WORK_DAYS) {
       const date = dayDate(week, dow);
       if (date < from) continue;
       for (const s of branch.shifts) {
         const k = slotKey(dow, s.id);
         const me = ((sched.slots || {})[k] || []).find((p) => ids.has(p.uid));
-        if (me) out.push({ date, dow, shift: s, start: me.start, changed: (sched.changed || []).includes(k) && (sched.changedFor || []).some((u) => ids.has(u)) });
+        if (me) out.push({ date, dow, shift: s, hours: hoursOf(branch, dow, s), start: me.start, changed: (sched.changed || []).includes(k) && (sched.changedFor || []).some((u) => ids.has(u)) });
       }
     }
   }
@@ -123,7 +129,7 @@ const markSeen = (branchId, week, sched) => { if (sched && sched.publishedAt) ca
 function myShiftsHtml(branch, list) {
   if (!list.length) return '<p class="muted">אין משמרות בסידור שפורסם.</p>';
   return `<ul class="my-shifts">${list.map((x) => {
-    const h = hoursOf(branch, x.dow, x.shift);
+    const h = x.hours;
     return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${esc(x.shift.name)}, ${esc(timeRange(h.start, h.end))}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
   }).join('')}</ul>`;
 }
@@ -155,8 +161,9 @@ export async function homeCard(el) {
       getDoc(`availability/${weekId(branch.id, nw)}_${member.uid}`).catch(() => null)
     ]);
     if (!el.isConnected) return;
-    const list = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]).slice(0, 3);
-    const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
+    const all = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
+    const list = all.slice(0, 3);
+    const changed = all.some((x) => x.changed) && (unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b));
     const late = Date.now() > closesAt(branch, nw).getTime();
     const availLine = b ? '' : mine ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
       : late && !branch.lateOk ? ''
@@ -166,7 +173,7 @@ export async function homeCard(el) {
         <span class="sc-title">המשמרות שלי</span>
         ${changed ? '<span class="sc-change">המשמרות שלך השתנו</span>' : ''}
         ${list.length ? `<span class="sc-list">${list.map((x) => {
-          const h = hoursOf(branch, x.dow, x.shift);
+          const h = x.hours;
           return `<span class="sc-item"><strong>${DAYS[x.dow]}, ${short(x.date)}</strong> ${esc(x.shift.name)}, ${esc(timeRange(x.start || h.start, h.end))}</span>`;
         }).join('')}</span>` : `<span class="sc-sub">${a || b ? 'אין לך משמרות בימים הקרובים.' : 'הסידור עוד לא פורסם.'}</span>`}
         ${availLine}
@@ -178,7 +185,12 @@ export async function homeCard(el) {
 
 /* ---------- sign in / sign up ---------- */
 
-const NOTICE = 'נשמרים: השם בסידור, שם המשתמש, הזמינות וההערות. המטרה: בניית סידור העבודה. את הזמינות וההערות רואים רק את/ה וניהול הסידור; את הסידור שפורסם רואים כל העובדים המאושרים, והשם מופיע גם בטבלת הניקוד. המידע נשמר בשרתי Google (Firebase) ונמחק אחרי 3 חודשים. בלי טלפון ובלי מייל. לעיון, תיקון או מחיקה: אפשר למחוק את החשבון מכאן, או לפנות לאור.';
+const NOTICE_HTML = `
+  <ul class="notice">
+    <li>נשמרים רק השם בסידור, שם המשתמש, הזמינות וההערות. בלי טלפון ובלי מייל.</li>
+    <li>הזמינות וההערות גלויות רק לך ולניהול הסידור. הסידור שפורסם והשם בטבלת הניקוד גלויים לכל הצוות המאושר.</li>
+    <li>המידע נשמר בשרתי Google (Firebase), רק לבניית הסידור, ונמחק אחרי 3 חודשים. אפשר למחוק את החשבון בכל רגע מהמסך הזה.</li>
+  </ul>`;
 
 function field(id, label, attrs, hint = '') {
   return `
@@ -209,10 +221,10 @@ function authHtml(mode) {
       <button type="button" class="seg-btn" data-mode="new" aria-pressed="${isNew}">חשבון חדש</button>
     </div>
     <form class="name-form auth-form" id="auth-form" novalidate>
-      ${isNew ? field('dname', 'שם שיופיע בסידור', 'type="text" maxlength="20" autocomplete="name"', 'שם פרטי ואות ראשונה של שם המשפחה, למשל רוני ל.') : ''}
+      ${isNew ? field('dname', 'שם שיופיע בסידור', 'type="text" maxlength="20" autocomplete="name"', 'שם פרטי ואות ראשונה של שם המשפחה, למשל <bdi class="nw">רוני ל.</bdi>') : ''}
       ${field('uname', 'שם משתמש', 'type="text" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" dir="ltr" inputmode="email"', isNew ? 'באנגלית או מספרים, בלי רווחים. לא צריך מייל.' : '')}
       ${pwField('pw', 'סיסמה', isNew ? 'new-password' : 'current-password')}
-      ${isNew ? `<p class="hint notice">${esc(NOTICE)}</p>` : '<p class="hint">שכחת סיסמה? אפשר לפתוח חשבון חדש ולבקש מאור לחבר אותו לחשבון הקודם.</p>'}
+      ${isNew ? NOTICE_HTML : '<p class="hint">שכחת סיסמה? אפשר לפתוח חשבון חדש ולבקש מאור לחבר אותו לחשבון הקודם.</p>'}
       <p class="form-err" id="form-err" role="alert"></p>
       <button class="btn btn-wide" type="submit">${isNew ? 'הרשמה' : 'כניסה'}</button>
     </form>`;
@@ -287,10 +299,10 @@ function accountHtml(member) {
     <details class="settings" id="account">
       <summary>החשבון שלי</summary>
       <p>${member ? `השם בסידור: <bdi>${esc(member.name)}</bdi><br>` : ''}שם משתמש: <bdi dir="ltr">${esc(acc.username)}</bdi></p>
-      <p class="hint">${esc(NOTICE)}</p>
+      ${NOTICE_HTML}
       <button class="btn ghost" id="sign-out" type="button">יציאה מהחשבון בטלפון הזה</button>
-      ${acc.isAdmin ? `<h2>הגדרה ראשונה (מנהל ראשי)</h2>
-      <p>מעתיק את חוקי Firestore, כשהחשבון הזה מוגדר בהם כמנהל הראשי, להדבקה במסוף Firebase.</p>
+      ${acc.isAdmin ? `<h2>הגדרה ראשונה (ניהול ראשי)</h2>
+      <p>מעתיק את חוקי Firestore, כשהחשבון הזה מוגדר בהם לניהול הראשי, להדבקה במסוף Firebase.</p>
       <button class="btn ghost" id="copy-rules" type="button">העתקת החוקים</button>
       <p id="rules-msg" role="status"></p>
       <textarea id="rules-text" class="rules-text" readonly hidden aria-label="חוקי Firestore"></textarea>` : ''}
@@ -345,7 +357,7 @@ async function viewFinishSignUp() {
   setPage('משמרות', `
     <h1>עוד צעד אחד</h1>
     <form class="name-form" id="finish-form" novalidate>
-      ${field('dname', 'שם שיופיע בסידור', `type="text" maxlength="20" autocomplete="name" value="${esc(p.name || '')}"`, 'שם פרטי ואות ראשונה של שם המשפחה, למשל רוני ל.')}
+      ${field('dname', 'שם שיופיע בסידור', `type="text" maxlength="20" autocomplete="name" value="${esc(p.name || '')}"`, 'שם פרטי ואות ראשונה של שם המשפחה, למשל <bdi class="nw">רוני ל.</bdi>')}
       <div class="field">
         <label for="branch">סניף</label>
         <select id="branch" name="branch">${branches.map((b) => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('')}</select>
@@ -393,7 +405,7 @@ export async function viewShifts() {
   if (!member) { await viewFinishSignUp().catch((ex) => errorState(ex, '/shifts')); return; }
   if (member.status === 'pending') {
     stateScreen('הבקשה נשלחה לאור', 'כשהבקשה תאושר, המשמרות ייפתחו כאן. בינתיים התפריט והמשחקים פתוחים כרגיל.',
-      '<a class="btn ghost" href="#/shifts" id="again">בדיקה אם אושר</a>');
+      '<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>');
     document.getElementById('again').addEventListener('click', (e) => { e.preventDefault(); viewShifts(); });
     return;
   }
@@ -419,7 +431,7 @@ async function viewHub(member, here) {
   ]);
   if (!here()) return;
   const mineList = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
-  const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
+  const changed = mineList.some((x) => x.changed) && (unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b));
   const closeAt = closesAt(branch, nw);
   const late = Date.now() > closeAt.getTime();
   let availCard;
@@ -519,7 +531,8 @@ export async function viewAvailability(forMember = null) {
         <p class="hint" id="count" aria-live="polite"></p>
         <div class="field">
           <label for="note">הערה לאור (לא חובה)</label>
-          <input id="note" name="note" type="text" maxlength="100" value="${esc(note)}" placeholder="למשל: עד 14:00. אין צורך לכתוב סיבה."${locked ? ' readonly' : ''}>
+          <p class="hint" id="note-hint">אין צורך לכתוב סיבה.</p>
+          <input id="note" name="note" type="text" maxlength="100" value="${esc(note)}" placeholder="למשל: עד 14:00" aria-describedby="note-hint"${locked ? ' readonly' : ''}>
         </div>
         ${byManager ? '' : `<label class="toggle-row"><input type="checkbox" id="keep"${standing ? ' checked' : ''}${locked ? ' disabled' : ''}> לשמור גם לשבועות הבאים</label>
         <p class="hint">כשמסומן, הזמינות הזו תיכנס לבד לכל שבוע עד שמשנים אותה.</p>`}
@@ -529,7 +542,7 @@ export async function viewAvailability(forMember = null) {
 
     const count = () => {
       const n = document.querySelectorAll('.av-btn[aria-pressed="true"]').length;
-      document.getElementById('count').textContent = n ? `סומנו ${plural(n, 'משמרת אחת', 'משמרות')}.` : 'עוד לא סומנה אף משמרת.';
+      document.getElementById('count').textContent = n === 1 ? 'סומנה משמרת אחת.' : n ? `סומנו ${n} משמרות.` : 'עוד לא סומנה אף משמרת.';
     };
     count();
     document.querySelectorAll('.av-btn').forEach((b) => b.addEventListener('click', () => {

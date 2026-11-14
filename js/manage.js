@@ -9,7 +9,7 @@ import {
 } from './account.js';
 import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from './fs.js';
 import {
-  DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
+  DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, weekRangeText, closesAt, deadlineText,
   expiry, slotKey, hoursOf, openSlots, timeRange
 } from './week.js';
 import { busy, errorState, loadingHtml, plural, slotLabel, scheduleTable, viewAvailability } from './shifts.js';
@@ -18,6 +18,11 @@ import { shareImage } from './share.js';
 const stillAt = (h) => () => location.hash === h;
 const back = (href, label) => `<a class="back" href="${href}"><span aria-hidden="true">→</span> ${label}</a>`;
 const weekId = (b, w) => `${b}_${w}`;
+// Slots whose people or start times differ between two schedules.
+function slotsDiffer(a = {}, b = {}) {
+  const sig = (l) => (l || []).map((p) => `${p.uid}@${p.start || ''}`).sort().join(',');
+  return [...new Set([...Object.keys(a || {}), ...Object.keys(b || {})])].filter((k) => sig((a || {})[k]) !== sig((b || {})[k]));
+}
 
 // Loads the signed-in scheduler (or admin) and their branch; anyone else goes back to the shifts tab.
 async function gate(route) {
@@ -83,24 +88,31 @@ export async function viewManage() {
     const { branch } = g;
     const nw = nextWeek();
     await ensureWeek(branch, nw).catch(() => null);
-    const [members, avail, standing, wk, off] = await Promise.all([
+    const tw = thisWeek();
+    const [members, avail, standing, wk, off, dNext, wNow, dNow] = await Promise.all([
       list('members', [['branch', '==', branch.id]]),
       list('availability', [['branch', '==', branch.id], ['week', '==', nw]]),
       list('standing', [['branch', '==', branch.id]]),
       getDoc(`schedules/${weekId(branch.id, nw)}`),
-      list('timeoff', [['branch', '==', branch.id]])
+      list('timeoff', [['branch', '==', branch.id]]),
+      getDoc(`drafts/${weekId(branch.id, nw)}`),
+      getDoc(`schedules/${weekId(branch.id, tw)}`),
+      getDoc(`drafts/${weekId(branch.id, tw)}`)
     ]);
+    const unpublished = (pub, dr) => Boolean(pub && pub.status === 'published' && dr && slotsDiffer(pub.slots, dr.slots).length);
     if (!here()) return;
     cleanup(branch);
     const pending = members.filter((m) => m.status === 'pending');
     const staff = members.filter((m) => m.status === 'approved');
     const submitted = new Set(avail.map((a) => a.uid));
     const fixed = new Set(standing.map((s) => s.uid));
-    const missing = staff.filter((m) => !submitted.has(m.id) && !fixed.has(m.id));
-    const done = staff.length - missing.length;
+    // Whoever runs the schedule and hasn't submitted is probably not working shifts: no reminder for them.
+    const missing = staff.filter((m) => !submitted.has(m.id) && !fixed.has(m.id) && m.role !== 'scheduler');
+    const counted = staff.filter((m) => m.role !== 'scheduler' || submitted.has(m.id) || fixed.has(m.id));
+    const done = counted.length - missing.length;
     const published = wk && wk.status === 'published';
     const soonOff = off.filter((o) => o.to >= today() && o.from <= addDays(today(), 14)).sort((a, b) => a.from.localeCompare(b.from));
-    const reminder = `היי, אפשר להגיש זמינות לשבוע ${weekRange(nw).replace(/[^\d.–-]/g, '')} ${deadlineText(branch)}: ${location.origin}${location.pathname}#/shifts`;
+    const reminder = `היי, אפשר להגיש זמינות לשבוע ${weekRangeText(nw)} ${deadlineText(branch)}: ${location.origin}${location.pathname}#/shifts`;
     const isAdmin = account()?.isAdmin;
 
     setPage('ניהול סידור', `
@@ -109,14 +121,14 @@ export async function viewManage() {
       <p class="sub">${esc(branch.name)}, שבוע ${weekRange(nw)}</p>
       <ul class="list manage-list">
         <li><a class="row-link" href="#/shifts/people"><span class="row-title">בקשות הצטרפות והצוות</span>${pending.length ? `<span class="soon ok">${plural(pending.length, 'בקשה אחת', 'בקשות')}</span>` : '<span></span>'}<span class="row-sub full">${plural(staff.length, 'אדם אחד בצוות', 'אנשים בצוות')}</span></a></li>
-        <li><a class="row-link" href="#/shifts/build"><span class="row-title">בניית הסידור</span><span class="soon${published ? ' ok' : ''}">${published ? 'פורסם' : 'טיוטה'}</span><span class="row-sub full">שבוע ${weekRange(nw)}</span></a></li>
-        <li><a class="row-link" href="#/shifts/build?w=${thisWeek()}"><span class="row-title">הסידור של השבוע</span><span></span><span class="row-sub full">תיקונים לשבוע ${weekRange(thisWeek())}</span></a></li>
+        <li><a class="row-link" href="#/shifts/build"><span class="row-title">בניית הסידור</span><span class="soon${published && !unpublished(wk, dNext) ? ' ok' : ''}">${unpublished(wk, dNext) ? 'יש שינויים שלא פורסמו' : published ? 'פורסם' : 'טיוטה'}</span><span class="row-sub full">שבוע ${weekRange(nw)}</span></a></li>
+        <li><a class="row-link" href="#/shifts/build?w=${thisWeek()}"><span class="row-title">הסידור של השבוע</span>${unpublished(wNow, dNow) ? '<span class="soon">יש שינויים שלא פורסמו</span>' : '<span></span>'}<span class="row-sub full">תיקונים לשבוע ${weekRange(thisWeek())}</span></a></li>
         <li><a class="row-link" href="#/shifts/settings"><span class="row-title">הגדרות</span><span></span><span class="row-sub full">משמרות, שעות, כמה אנשים צריך ומועד ההגשה</span></a></li>
         ${isAdmin ? '<li><a class="row-link" href="#/shifts/branches"><span class="row-title">סניפים וניהול סידור</span><span></span><span class="row-sub full">למנהל הראשי</span></a></li>' : ''}
       </ul>
       <section class="block" aria-labelledby="subs-h">
         <h2 id="subs-h">הגשות לשבוע הבא</h2>
-        <p>${done} מתוך ${staff.length} הגישו${fixed.size ? ` (כולל זמינות קבועה)` : ''}. ההגשה נסגרת ${esc(deadlineText(branch).replace(/^עד /, 'ב'))}.</p>
+        <p>${done} מתוך ${counted.length} הגישו${fixed.size ? ` (כולל זמינות קבועה)` : ''}. ההגשה נסגרת ${esc(deadlineText(branch).replace(/^עד /, 'ב'))}.</p>
         ${missing.length ? `<p>עוד לא הגישו: ${missing.map((m) => `<bdi>${esc(m.name)}</bdi>`).join(', ')}</p>
         <a class="btn ghost" href="https://wa.me/?text=${encodeURIComponent(reminder)}" target="_blank" rel="noopener noreferrer">לשלוח תזכורת בוואטסאפ</a>` : staff.length ? '<p class="ok-line">✓ כולם הגישו.</p>' : ''}
       </section>
@@ -205,11 +217,15 @@ export async function viewPeople() {
             if (!confirm(`לדחות את הבקשה של ${m.name}?`)) return undefined;
             await deleteDoc(`members/${m.id}`); return done('הבקשה נדחתה');
           case 'disable': {
-            const nw = nextWeek();
-            const [pub, dr] = await Promise.all([getDoc(`schedules/${weekId(branch.id, nw)}`), getDoc(`drafts/${weekId(branch.id, nw)}`)]);
-            const count = (d) => Object.values((d && d.slots) || {}).filter((l) => l.some((p) => p.uid === m.id)).length;
-            const n = Math.max(count(pub && pub.status === 'published' ? pub : null), count(dr));
-            if (!confirm(`להשבית את ${m.name}? הגישה למשמרות נחסמת מיד.${n ? ` שימו לב: ${plural(n, 'משובץ במשמרת אחת', 'משובץ ב־' + n + ' משמרות').replace(/^\d+ /, '')} בשבוע הבא.` : ''}`)) return undefined;
+            const count = async (week) => {
+              const [pub, dr] = await Promise.all([getDoc(`schedules/${weekId(branch.id, week)}`), getDoc(`drafts/${weekId(branch.id, week)}`)]);
+              const c = (d) => Object.values((d && d.slots) || {}).filter((l) => l.some((p) => p.uid === m.id)).length;
+              return Math.max(c(pub && pub.status === 'published' ? pub : null), c(dr));
+            };
+            const [nNow, nNext] = await Promise.all([count(thisWeek()), count(nextWeek())]);
+            const shifts = (n) => (n === 1 ? 'במשמרת אחת' : `ב־${n} משמרות`);
+            const where = [nNow ? `${shifts(nNow)} השבוע` : '', nNext ? `${shifts(nNext)} בשבוע הבא` : ''].filter(Boolean).join(' ו');
+            if (!confirm(`להשבית את ${m.name}? הגישה למשמרות נחסמת מיד.${where ? ` שימו לב: משובץ ${where}. המשמרות יישארו בסידור עד שמתקנים אותן.` : ''}`)) return undefined;
             await update(m, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) }); return done(`${m.name} הושבת`);
           }
           case 'enable': await update(m, { status: 'approved' }); return done(`${m.name} חזר לצוות`);
@@ -382,7 +398,7 @@ export async function viewBuild(weekParam) {
     for (const m of staff) {
       const a = avail.find((x) => x.uid === m.id);
       const s = standing.find((x) => x.uid === m.id);
-      if (a) said.set(m.id, { slots: new Set(a.slots), note: a.note, kind: a.updatedAt && a.updatedAt > deadline ? 'late' : a.by === 'manager' ? 'manager' : 'sent' });
+      if (a) said.set(m.id, { slots: new Set(a.slots), note: a.note, kind: a.by === 'manager' ? 'manager' : a.updatedAt && a.updatedAt > deadline ? 'late' : 'sent' });
       else if (s) said.set(m.id, { slots: new Set(s.slots), note: s.note || '', kind: 'standing' });
     }
     // Time off turns that day's slots into "can't", labelled.
@@ -438,7 +454,8 @@ export async function viewBuild(weekParam) {
       }
       try {
         await setDoc(`drafts/${weekId(branch.id, week)}`, data, { mask, stamp: ['updatedAt'] });
-        if (saveMsg()) saveMsg().textContent = 'הטיוטה נשמרה';
+        if (saveMsg()) saveMsg().textContent = published ? 'נשמר, עוד לא פורסם לצוות' : 'הטיוטה נשמרה';
+        showUnpublished();
       } catch (ex) {
         keys.forEach((k) => pendingKeys.add(k));
         if (saveMsg()) saveMsg().textContent = 'הטיוטה לא נשמרה. ננסה שוב בשינוי הבא.';
@@ -448,11 +465,10 @@ export async function viewBuild(weekParam) {
     const touch = (k) => { pendingKeys.add(k); if (saveMsg()) saveMsg().textContent = 'שומר…'; clearTimeout(timer); timer = setTimeout(flush, 800); };
     window.addEventListener('hashchange', () => { if (timer) { clearTimeout(timer); flush(); } }, { once: true });
 
-    const changedSincePublish = () => {
-      if (!published) return [];
-      const keys = new Set([...Object.keys(published.slots || {}), ...Object.keys(state.slots)]);
-      const sig = (l) => (l || []).map((p) => `${p.uid}@${p.start || ''}`).sort().join(',');
-      return [...keys].filter((k) => sig(published.slots[k]) !== sig(state.slots[k]));
+    const changedSincePublish = () => (published ? slotsDiffer(published.slots, state.slots) : []);
+    const showUnpublished = () => {
+      const el = document.getElementById('unpub');
+      if (el) el.hidden = !changedSincePublish().length;
     };
 
     function cellHtml(o) {
@@ -494,9 +510,9 @@ export async function viewBuild(weekParam) {
       ${back('#/shifts/manage', 'ניהול סידור')}
       <h1>בניית הסידור</h1>
       <p class="sub">שבוע ${weekRange(week)} ${published ? '<span class="tag">פורסם</span>' : '<span class="tag">טיוטה</span>'}</p>
-      ${published && fromDraft && changedSincePublish().length ? '<p class="note">יש שינויים שעוד לא פורסמו.</p>' : ''}
+      ${published ? `<p class="warn-line" id="unpub" role="status"${changedSincePublish().length ? '' : ' hidden'}>יש שינויים שעוד לא פורסמו. הצוות רואה את הגרסה הקודמת עד שלוחצים "פרסום העדכון".</p>` : ''}
       <p class="hint">לוחצים על משמרת כדי לשבץ. מי שסימן "אפשר" מופיע ראשון. הטיוטה נשמרת לבד, והצוות רואה רק את מה שפורסם.</p>
-      ${!Object.keys(state.slots).length && prevPub && prevPub.status === 'published' ? '<button class="btn ghost btn-wide" type="button" id="copy-prev">התחלה מהסידור של השבוע הקודם</button>' : ''}
+      ${!published && prevPub && prevPub.status === 'published' ? '<button class="btn ghost btn-wide" type="button" id="copy-prev">התחלה מהסידור של השבוע הקודם</button>' : ''}
       <div class="sch-wrap" id="grid">${gridHtml()}</div>
       <p class="hint" id="save-state" role="status"></p>
       <div class="publish-bar">
@@ -589,15 +605,16 @@ export async function viewBuild(weekParam) {
       touch(`need:${current}`);
     });
 
-    document.getElementById('copy-prev')?.addEventListener('click', (e) => {
+    document.getElementById('copy-prev')?.addEventListener('click', () => {
+      if (Object.values(state.slots).some((l) => l.length) && !confirm('להחליף את מה שכבר שובץ בסידור של השבוע הקודם?')) return;
       const keys = new Set(open().map((o) => o.key));
+      for (const k of Object.keys(state.slots)) { if (state.slots[k].length) { state.slots[k] = []; touch(k); } }
       const ids = new Set(staff.map((m) => m.id));
       for (const [k, l] of Object.entries(prevPub.slots || {})) {
         if (!keys.has(k)) continue;
         state.slots[k] = l.filter((p) => ids.has(p.uid)).map((p) => ({ ...p, name: (staff.find((m) => m.id === p.uid) || p).name }));
         touch(k);
       }
-      e.currentTarget.remove();
       redraw();
       const clashes = problems().filter((t) => t.includes('וסימן')).length;
       announce(`הסידור הועתק מהשבוע הקודם.${clashes ? ` ${plural(clashes, 'שיבוץ אחד מתנגש', 'שיבוצים מתנגשים')} עם הזמינות, מסומנים באדום.` : ''}`);
@@ -623,7 +640,7 @@ export async function viewBuild(weekParam) {
       const keys = new Set(open().map((o) => o.key));
       const slots = Object.fromEntries(Object.entries(state.slots).filter(([k, l]) => keys.has(k) && l.length));
       const data = {
-        branch: branch.id, week, status: 'published', closesAt: deadline, slots, need: state.need,
+        branch: branch.id, week, status: 'published', closesAt: deadline, slots, need: state.need, shifts: branch.shifts, hours: branch.hours || {},
         changed: published ? changed.slice(0, 42) : [], changedFor: published ? changedFor.slice(0, 80) : [], expireAt: expiry(week)
       };
       try {

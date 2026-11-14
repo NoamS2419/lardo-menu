@@ -805,7 +805,8 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .field input[aria-invalid="true"] { border-color: var(--bad); }
 .field .form-err { font-size: var(--fs-2); }
 .rules-text { min-height: 160px; font-size: var(--fs-1); direction: ltr; text-align: left; margin-top: var(--sp-2); }
-.notice { font-size: var(--fs-1); }
+.notice { font-size: var(--fs-2); color: var(--muted); margin: var(--sp-2) 0; padding-inline-start: var(--sp-4); display: grid; gap: var(--sp-1); }
+.nw { white-space: nowrap; }
 .pw { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-2); }
 .pw .btn { min-height: 48px; padding-inline: var(--sp-3); font-size: var(--fs-2); }
 .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: var(--r-1); overflow: hidden; margin: var(--sp-4) 0 0; max-width: 460px; }

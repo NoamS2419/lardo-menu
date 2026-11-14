@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "rules": "cp ../firestore.shifts.rules emulator.rules && firebase emulators:exec --only firestore --project demo-lardo \"node rules.test.mjs\"",
-    "dev": "cp ../firestore.shifts.rules emulator.rules && firebase emulators:exec --only firestore,auth --project demo-lardo \"node dev-server.mjs\""
+    "rules": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore --project demo-lardo \"node rules.test.mjs\"",
+    "dev": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore,auth --project demo-lardo \"node dev-server.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",

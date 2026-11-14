@@ -31,11 +31,12 @@ export const timeRange = (a, b) => ltr(`${a}–${b}`);
 
 // "22.11"
 export const short = (iso) => { const [, m, d] = iso.split('-'); return `${Number(d)}.${Number(m)}`; };
-// "22–27.11" (or "29.11–4.12")
-export const weekRange = (week) => {
+// "22–27.11" (or "29.11–4.12") as plain text, and as HTML that stays in one piece inside Hebrew.
+export const weekRangeText = (week) => {
   const end = addDays(week, 5);
-  return ltr(week.slice(5, 7) === end.slice(5, 7) ? `${Number(week.slice(8))}–${short(end)}` : `${short(week)}–${short(end)}`);
+  return week.slice(5, 7) === end.slice(5, 7) ? `${Number(week.slice(8))}–${short(end)}` : `${short(week)}–${short(end)}`;
 };
+export const weekRange = (week) => `<bdi dir="ltr" class="nw">${weekRangeText(week)}</bdi>`;
 
 // The moment a wall-clock time in Israel happens (handles summer time).
 export function israelTime(iso, minutes) {

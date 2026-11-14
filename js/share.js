@@ -23,7 +23,8 @@ function wrap(ctx, text, max) {
   return lines;
 }
 
-export async function drawWeek(branch, week, sched) {
+export async function drawWeek(branch0, week, sched) {
+  const branch = sched && sched.shifts ? { ...branch0, shifts: sched.shifts, hours: sched.hours || {} } : branch0;
   // Light colors always: the image is shared into chats, whatever the phone's theme.
   const ink = '#2A211C'; const muted = '#6B625C'; const line = '#E2E0DC'; const copper = '#9A5B3C'; const closed = '#EEEDEA';
   const display = css('--display', 'serif');

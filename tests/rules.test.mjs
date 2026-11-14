@@ -1,4 +1,4 @@
-/* Emulator tests for firestore.shifts.rules. Run: npm run rules (needs Java). */
+/* Emulator tests for firestore.rules. Run: npm run rules (needs Java). */
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import { readFileSync } from 'node:fs';
 import {
@@ -7,7 +7,7 @@ import {
 
 const env = await initializeTestEnvironment({
   projectId: 'demo-lardo',
-  firestore: { rules: readFileSync(new URL('../firestore.shifts.rules', import.meta.url), 'utf8').replace('__ADMIN_UID__', 'noam'), host: '127.0.0.1', port: 8085 }
+  firestore: { rules: readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8').replace('__ADMIN_UID__', 'noam'), host: '127.0.0.1', port: 8085 }
 });
 const mail = (u) => `${u}@staff.lardo.invalid`;
 const as = (u) => env.authenticatedContext(u, { email: mail(u) }).firestore();
