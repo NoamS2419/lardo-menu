@@ -31,11 +31,26 @@ export async function busy(btn, fn) {
 export function errorState(ex, retryHash) {
   console.error(ex);
   if (ex && ex.code === 'SIGNED_OUT') return viewShifts();
+  const acc = account();
+  // 403 before the shifts rules are live in Firebase (launch day): say so instead of "check the connection".
+  const notLive = ex && ex.status === 403;
+  if (notLive && acc && acc.isAdmin) {
+    setPage('משמרות', `
+      <div class="state">
+        ${rosette()}
+        <h1>החשבון נוצר. נשאר להפעיל את המשמרות</h1>
+        <p>לוחצים על "העתקת החוקים" למטה, מדביקים אותם במסוף Firebase (Firestore ← Rules), לוחצים Publish, ואז מרעננים את הדף.</p>
+      </div>
+      ${accountHtml()}`);
+    bindAccount();
+    document.getElementById('account').open = true;
+    return undefined;
+  }
   setPage('משמרות', `
     <div class="state">
       ${rosette()}
-      <h1>לא הצלחנו לטעון</h1>
-      <p>כדאי לבדוק את החיבור לאינטרנט ולנסות שוב.</p>
+      <h1>${notLive ? 'המשמרות עוד לא הופעלו' : 'לא הצלחנו לטעון'}</h1>
+      <p>${notLive ? 'החשבון נוצר, אבל המערכת עוד בהקמה. כדאי לנסות שוב מאוחר יותר.' : 'כדאי לבדוק את החיבור לאינטרנט ולנסות שוב.'}</p>
       <a class="btn" href="#${esc(retryHash)}" data-retry>לנסות שוב</a>
     </div>
     ${retryHash === '/shifts' ? accountHtml() : ''}`);
