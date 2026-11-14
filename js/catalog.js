@@ -51,7 +51,8 @@ export { ring };
 
 // Same product for the whole team on a given day.
 function productOfDay() {
-  const pool = db.products.filter((p) => p.image && (p.staff_description || p.description));
+  const skip = new Set(['drinks', 'boxes']);
+  const pool = db.products.filter((p) => p.image && !skip.has(p.category) && (p.staff_description || p.description));
   const key = today();
   let h = 0;
   for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
@@ -125,8 +126,10 @@ export function viewHome() {
             <h2 class="daily-name">${esc(daily.name)}</h2>
             <span class="daily-sub">המוצר של היום</span>
             <span class="daily-line">${esc(daily.staff_description || daily.description)}</span>
+            ${priceLabel(daily) ? `<span class="daily-price"><bdi>${esc(priceLabel(daily))}</bdi></span>` : ''}
           </span>
         </a>` : ''}
+        <div id="shift-link"></div>
       </aside>
       <section aria-labelledby="cats-h">
         <div class="divider">${rosette()}</div>
@@ -135,7 +138,7 @@ export function viewHome() {
       </section>
     </div>
   `);
-  homeCard(document.getElementById('shift-card'));
+  homeCard(document.getElementById('shift-card'), document.getElementById('shift-link'));
 }
 
 export function viewCategory(id) {
@@ -175,7 +178,7 @@ export function viewProduct(id) {
   const notWolt = p.is_wolt === false
     ? '<p class="note">נמכר בדלפק בלבד, לא מופיע בוולט.</p>'
     : '';
-  const knowLabel = (on) => on ? `${CHECK} מוכר לי` : 'סימון: מוכר לי';
+  const knowLabel = (on) => on ? `${CHECK} מוכר לי` : 'לסמן כמוכר';
   const known = !!progress.known[p.id];
   setPage(p.name, `
     ${cat ? `<a class="back" href="#/c/${encodeURIComponent(cat.id)}"><span aria-hidden="true">→</span> ${esc(cat.name)}</a>` : ''}

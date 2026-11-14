@@ -96,7 +96,7 @@ export async function viewTeam() {
       <h1>טבלת הצוות</h1>
       <p>הטבלה פתוחה לעובדים שאושרו במערכת המשמרות, עם השם מהסידור. המשחקים והאתגר היומי פתוחים לכולם.</p>
       ${member ? '<p class="note">הבקשה להצטרף עוד ממתינה לאישור.</p>' : '<a class="btn btn-wide" href="#/shifts">כניסה או הרשמה</a>'}
-      ${dailyCta}
+      ${dailyCta.replace('class="btn btn-wide"', 'class="btn btn-wide ghost"')}
     `);
     return;
   }

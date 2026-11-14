@@ -137,22 +137,23 @@ function myShiftsHtml(branch, list) {
 /* ---------- the home card ---------- */
 
 // Fills the "המשמרות שלי" card on the home page (quietly does nothing on errors).
-export async function homeCard(el) {
-  if (!el || !cloudEnabled()) return;
+const CAL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7 14h4M7 17h7"/></svg>';
+// A quiet row at the end of the home page's side column.
+const shiftRow = (title, sub) => `<ul class="secondary"><li><a href="#/shifts">${CAL_ICON}<span>${title}<small>${sub}</small></span></a></li></ul>`;
+
+// Home page: the shifts card sits on top only when there is something to see or do (an upcoming
+// shift, a change, availability still due); otherwise a quiet row at the end of the column.
+export async function homeCard(top, bottom = top) {
+  if (!top || !cloudEnabled()) return;
+  const put = (el, html) => { top.innerHTML = el === top ? html : ''; if (bottom !== top) bottom.innerHTML = el === bottom ? html : ''; };
   const acc = account();
-  if (!acc) {
-    el.innerHTML = `<a class="shift-card signed-out" href="#/shifts"><span class="sc-title">משמרות</span><span class="sc-sub">כניסה או הרשמה, כדי להגיש זמינות ולראות את הסידור</span></a>`;
-    return;
-  }
+  if (!acc) { put(bottom, shiftRow('משמרות', 'כניסה או הרשמה, כדי להגיש זמינות ולראות את הסידור')); return; }
   const cm = cachedMember();
   try {
     const member = await loadMember();
-    if (!el.isConnected) return;
-    if (!member || member.status === 'pending') {
-      el.innerHTML = `<a class="shift-card" href="#/shifts"><span class="sc-title">המשמרות שלי</span><span class="sc-sub">הבקשה להצטרף עוד ממתינה לאישור.</span></a>`;
-      return;
-    }
-    if (!isApproved(member)) { el.innerHTML = ''; return; }
+    if (!top.isConnected) return;
+    if (!member || member.status === 'pending') { put(bottom, shiftRow('המשמרות שלי', 'הבקשה להצטרף עוד ממתינה לאישור.')); return; }
+    if (!isApproved(member)) { put(null, ''); return; }
     const branch = await loadBranch(member.branch);
     if (!branch) return;
     const tw = thisWeek(); const nw = nextWeek();
@@ -160,15 +161,20 @@ export async function homeCard(el) {
       loadPublished(branch.id, tw), loadPublished(branch.id, nw),
       getDoc(`availability/${weekId(branch.id, nw)}_${member.uid}`).catch(() => null)
     ]);
-    if (!el.isConnected) return;
+    if (!top.isConnected) return;
     const all = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
     const list = all.slice(0, 3);
     const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
     const late = Date.now() > closesAt(branch, nw).getTime();
+    const due = !b && !mine && !(late && !branch.lateOk);
     const availLine = b ? '' : mine ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
-      : late && !branch.lateOk ? ''
+      : !due ? ''
       : `<span class="sc-warn">עוד לא הוגשה זמינות לשבוע הבא. ${late ? 'המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם.' : `אפשר ${esc(deadlineText(branch))}.`}</span>`;
-    el.innerHTML = `
+    if (!list.length && !changed && !due) {
+      put(bottom, shiftRow('המשמרות שלי', a || b ? 'אין לך משמרות בימים הקרובים.' : 'הסידור עוד לא פורסם.'));
+      return;
+    }
+    put(top, `
       <a class="shift-card${changed ? ' has-change' : ''}" href="#/shifts">
         <span class="sc-title">המשמרות שלי</span>
         ${changed ? '<span class="sc-change">המשמרות שלך השתנו</span>' : ''}
@@ -177,9 +183,9 @@ export async function homeCard(el) {
           return `<span class="sc-item"><strong>${DAYS[x.dow]}, ${short(x.date)}</strong> ${esc(x.shift.name)}, ${esc(timeRange(x.start || h.start, h.end))}</span>`;
         }).join('')}</span>` : `<span class="sc-sub">${a || b ? 'אין לך משמרות בימים הקרובים.' : 'הסידור עוד לא פורסם.'}</span>`}
         ${availLine}
-      </a>`;
+      </a>`);
   } catch (e) {
-    if (el.isConnected && cm && cm.status === 'approved') el.innerHTML = `<a class="shift-card" href="#/shifts"><span class="sc-title">המשמרות שלי</span><span class="sc-sub">אין חיבור כרגע.</span></a>`;
+    if (top.isConnected && cm && cm.status === 'approved') put(bottom, shiftRow('המשמרות שלי', 'אין חיבור כרגע.'));
   }
 }
 
