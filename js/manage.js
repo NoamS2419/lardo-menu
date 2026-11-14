@@ -15,6 +15,13 @@ import {
 import { busy, errorState, loadingHtml, plural, slotLabel, scheduleTable, viewAvailability } from './shifts.js';
 import { shareImage } from './share.js';
 
+// Someone who leaves comes off the team table at once: their board entry and daily scores go.
+// Failures are ignored (the 3-month cleanup catches leftovers).
+async function removeFromBoard(uid) {
+  const daily = await list('daily', [['uid', '==', uid]], { limit: 400 }).catch(() => []);
+  await Promise.allSettled([deleteDoc(`players/${uid}`), ...daily.map((d) => deleteDoc(`daily/${d.id}`))]);
+}
+
 const stillAt = (h) => () => location.hash === h;
 const back = (href, label) => `<a class="back" href="${href}"><span aria-hidden="true">→</span> ${label}</a>`;
 const weekId = (b, w) => `${b}_${w}`;
@@ -226,7 +233,9 @@ export async function viewPeople() {
             const shifts = (n) => (n === 1 ? 'במשמרת אחת' : `ב־${n} משמרות`);
             const where = [nNow ? `${shifts(nNow)} השבוע` : '', nNext ? `${shifts(nNext)} בשבוע הבא` : ''].filter(Boolean).join(' ו');
             if (!confirm(`להשבית את ${m.name}? הגישה למשמרות נחסמת מיד.${where ? ` שימו לב: משובץ ${where}. המשמרות יישארו בסידור עד שמתקנים אותן.` : ''}`)) return undefined;
-            await update(m, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) }); return done(`${m.name} הושבת`);
+            await update(m, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) });
+            await removeFromBoard(m.id);
+            return done(`${m.name} הושבת`);
           }
           case 'enable': await update(m, { status: 'approved' }); return done(`${m.name} חזר לצוות`);
           case 'rename': {
@@ -239,7 +248,7 @@ export async function viewPeople() {
             if (!old) { err.textContent = 'צריך לבחור את החשבון הקודם.'; return undefined; }
             if (!confirm(`לחבר את החשבון החדש של ${m.name} לחשבון הקודם של ${old.name}? החשבון הקודם יושבת.`)) return undefined;
             await update(m, { replaces: old.id, status: 'approved', name: old.name });
-            if (old.status !== 'disabled') await update(old, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) });
+            if (old.status !== 'disabled') { await update(old, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) }); await removeFromBoard(old.id); }
             return done('החשבונות חוברו');
           }
           case 'role': await update(m, { role: m.role === 'scheduler' ? 'staff' : 'scheduler' }); return done('התפקיד עודכן');
@@ -399,7 +408,7 @@ export async function viewBuild(weekParam) {
       const a = avail.find((x) => x.uid === m.id);
       const s = standing.find((x) => x.uid === m.id);
       if (a) said.set(m.id, { slots: new Set(a.slots), note: a.note, kind: a.by === 'manager' ? 'manager' : a.updatedAt && a.updatedAt > deadline ? 'late' : 'sent' });
-      else if (s) said.set(m.id, { slots: new Set(s.slots), note: s.note || '', kind: 'standing' });
+      else if (s) said.set(m.id, { slots: new Set(s.slots), note: s.note || '', kind: s.updatedAt && s.updatedAt > deadline ? 'late' : 'standing' });
     }
     // Time off turns that day's slots into "can't", labelled.
     const offOn = (uid, date) => offAll.find((o) => o.uid === uid && o.from <= date && o.to >= date);
@@ -463,7 +472,12 @@ export async function viewBuild(weekParam) {
       }
     }
     const touch = (k) => { pendingKeys.add(k); if (saveMsg()) saveMsg().textContent = 'שומר…'; clearTimeout(timer); timer = setTimeout(flush, 800); };
-    window.addEventListener('hashchange', () => { if (timer) { clearTimeout(timer); flush(); } }, { once: true });
+    const flushNow = () => { if (timer) { clearTimeout(timer); flush(); } };
+    window.addEventListener('hashchange', flushNow, { once: true });
+    const onHide = () => { if (document.visibilityState === 'hidden') flushNow(); };
+    document.addEventListener('visibilitychange', onHide);
+    window.addEventListener('pagehide', flushNow);
+    window.addEventListener('hashchange', () => { document.removeEventListener('visibilitychange', onHide); window.removeEventListener('pagehide', flushNow); }, { once: true });
 
     const changedSincePublish = () => (published ? slotsDiffer(published.slots, state.slots) : []);
     const showUnpublished = () => {
@@ -609,10 +623,13 @@ export async function viewBuild(weekParam) {
       if (Object.values(state.slots).some((l) => l.length) && !confirm('להחליף את מה שכבר שובץ בסידור של השבוע הקודם?')) return;
       const keys = new Set(open().map((o) => o.key));
       for (const k of Object.keys(state.slots)) { if (state.slots[k].length) { state.slots[k] = []; touch(k); } }
-      const ids = new Set(staff.map((m) => m.id));
+      // A re-linked account (forgot password) takes the old account's shifts.
+      const who = (uid) => staff.find((m) => m.id === uid) || staff.find((m) => m.replaces === uid);
       for (const [k, l] of Object.entries(prevPub.slots || {})) {
         if (!keys.has(k)) continue;
-        state.slots[k] = l.filter((p) => ids.has(p.uid)).map((p) => ({ ...p, name: (staff.find((m) => m.id === p.uid) || p).name }));
+        const seen = new Set();
+        state.slots[k] = l.map((p) => ({ p, m: who(p.uid) })).filter(({ m }) => m && !seen.has(m.id) && seen.add(m.id))
+          .map(({ p, m }) => ({ ...p, uid: m.id, name: m.name }));
         touch(k);
       }
       redraw();

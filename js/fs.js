@@ -27,10 +27,12 @@ export function writeJson(k, value) {
 /* ---------- HTTP ---------- */
 
 async function call(url, { method = 'POST', body, token } = {}) {
+  const json = body ? JSON.stringify(body) : undefined;
   const res = await fetch(url, {
     method,
     headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body ? JSON.stringify(body) : undefined,
+    body: json,
+    keepalive: !!json && json.length < 60000, // a save started as the page closes still goes out
     referrerPolicy: 'strict-origin' // the API key may be restricted by referrer
   });
   const data = await res.json().catch(() => ({}));

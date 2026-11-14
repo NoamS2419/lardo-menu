@@ -163,7 +163,7 @@ export async function homeCard(el) {
     if (!el.isConnected) return;
     const all = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
     const list = all.slice(0, 3);
-    const changed = all.some((x) => x.changed) && (unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b));
+    const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
     const late = Date.now() > closesAt(branch, nw).getTime();
     const availLine = b ? '' : mine ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
       : late && !branch.lateOk ? ''
@@ -431,7 +431,8 @@ async function viewHub(member, here) {
   ]);
   if (!here()) return;
   const mineList = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
-  const changed = mineList.some((x) => x.changed) && (unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b));
+  const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
+  const marked = mineList.some((x) => x.changed);
   const closeAt = closesAt(branch, nw);
   const late = Date.now() > closeAt.getTime();
   let availCard;
@@ -453,7 +454,7 @@ async function viewHub(member, here) {
     ${runsBranch(member) ? '<a class="row-link manage-link" href="#/shifts/manage"><span class="row-title">ניהול סידור</span><span aria-hidden="true">←</span></a>' : ''}
     <section aria-labelledby="mine-h" class="block">
       <h2 id="mine-h">המשמרות שלי</h2>
-      ${changed ? '<p class="change-line" role="status">המשמרות שלך השתנו מאז הפעם הקודמת. השינויים מסומנים "עודכן".</p>' : ''}
+      ${changed ? `<p class="change-line" role="status">המשמרות שלך השתנו מאז הפעם הקודמת.${marked ? ' השינויים מסומנים "עודכן".' : ''}</p>` : ''}
       ${a || b ? myShiftsHtml(branch, mineList) : '<p class="muted">הסידור עוד לא פורסם.</p>'}
     </section>
     <section aria-labelledby="avail-h" class="block">
