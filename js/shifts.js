@@ -127,7 +127,7 @@ const unseenChange = (member, branchId, week, sched) => sched && sched.published
 const markSeen = (branchId, week, sched) => { if (sched && sched.publishedAt) cachePut(seenKey(branchId, week), new Date(sched.publishedAt).toISOString()); };
 
 function myShiftsHtml(branch, list) {
-  if (!list.length) return '<p class="muted">אין משמרות בסידור שפורסם.</p>';
+  if (!list.length) return '<p class="muted">אין לך משמרות קרובות.</p>';
   return `<ul class="my-shifts">${list.map((x) => {
     const h = x.hours;
     return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${esc(x.shift.name)}, ${esc(timeRange(h.start, h.end))}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
@@ -509,7 +509,7 @@ export async function viewAvailability(forMember = null) {
         const k = slotKey(dow, s.id);
         if (!openKeys.has(k)) return '<td class="av-closed">סגור</td>';
         const on = slots.has(k);
-        return `<td><button type="button" class="av-btn" data-k="${k}" aria-pressed="${on}" aria-label="${esc(slotLabel(branch, dow, s, week))}"${locked ? ' aria-disabled="true"' : ''}>${on ? '✓ אפשר' : 'אי אפשר'}</button></td>`;
+        return `<td><button type="button" class="av-btn" data-k="${k}" aria-pressed="${on}" aria-label="${esc(slotLabel(branch, dow, s, week))}"${locked ? ' aria-disabled="true"' : ''}>${on ? '✓ אפשר' : ''}</button></td>`;
       }).join('')}</tr>`).join('');
 
     setPage('הגשת זמינות', `
@@ -549,7 +549,7 @@ export async function viewAvailability(forMember = null) {
       if (b.getAttribute('aria-disabled') === 'true') return;
       const on = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', String(on));
-      b.textContent = on ? '✓ אפשר' : 'אי אפשר';
+      b.textContent = on ? '✓ אפשר' : '';
       count();
     }));
     const form = document.getElementById('avail-form');

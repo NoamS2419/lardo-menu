@@ -171,9 +171,9 @@ export async function viewPeople() {
             <button class="btn ghost small" type="button" data-act="reject">דחייה</button>` : ''}
           ${m.status === 'approved' ? `
             <a class="btn ghost small" href="#/shifts/people/${encodeURIComponent(m.id)}">הזנת זמינות</a>
-            <button class="btn ghost small" type="button" data-act="disable">השבתה</button>` : ''}
+            <button class="btn ghost small danger" type="button" data-act="disable">השבתה</button>` : ''}
           ${m.status === 'disabled' ? '<button class="btn ghost small" type="button" data-act="enable">החזרה לצוות</button>' : ''}
-          <details class="more"><summary>עוד</summary>
+          <details class="more"><summary>עוד פעולות</summary>
             <div class="field"><label for="name-${esc(m.id)}">השם בסידור</label>
               <div class="pw"><input id="name-${esc(m.id)}" type="text" maxlength="20" value="${esc(m.name)}"><button class="btn ghost small" type="button" data-act="rename">שמירה</button></div></div>
             ${m.status !== 'disabled' && staff.length ? `<div class="field"><label for="same-${esc(m.id)}">זה אותו אדם כמו חשבון קודם (שכחו סיסמה)</label>
@@ -478,7 +478,7 @@ export async function viewBuild(weekParam) {
       const label = `${slotLabel(branch, o.dow, o.shift, week)}: ${people.length} מתוך ${need}${missing ? `, חסר ${missing}` : ''}${people.length ? `. ${people.map((p) => p.name + (p.start ? ` מ־${p.start}` : '')).join(', ')}` : ''}`;
       const clash = people.some((p) => status(p.uid, o.key, o.dow).can === false);
       return `<button type="button" class="cell${missing ? ' short' : ''}${clash ? ' clash' : ''}" data-k="${o.key}" aria-label="${esc(label)}">
-        <span class="cell-count">${people.length}/${need}${missing ? ` · חסר ${missing}` : ''}</span>
+        <span class="cell-count">${missing ? `חסר ${missing}` : `${people.length}/${need}`}</span>
         ${people.map((p) => `<span class="cell-name${status(p.uid, o.key, o.dow).can === false ? ' bad' : ''}"><bdi>${esc(p.name)}</bdi>${p.start ? ` <span class="start">${esc(p.start)}</span>` : ''}</span>`).join('')}
       </button>`;
     }
