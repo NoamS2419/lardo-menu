@@ -135,6 +135,7 @@ export function viewHome() {
       </section>
     </div>
   `);
+  homeCard(document.getElementById('shift-card'));
 }
 
 export function viewCategory(id) {

@@ -23,12 +23,18 @@ export const thisWeek = (now) => weekOf(today(now));
 export const nextWeek = (now) => addDays(thisWeek(now), 7);
 export const dayDate = (week, dow) => addDays(week, dow);
 
+// Keeps "8–13.11" and "06:30–14:30" in reading order inside Hebrew text (LRI … PDI).
+const LRI = String.fromCharCode(0x2066);
+const PDI = String.fromCharCode(0x2069);
+export const ltr = (s) => `${LRI}${s}${PDI}`;
+export const timeRange = (a, b) => ltr(`${a}–${b}`);
+
 // "22.11"
 export const short = (iso) => { const [, m, d] = iso.split('-'); return `${Number(d)}.${Number(m)}`; };
 // "22–27.11" (or "29.11–4.12")
 export const weekRange = (week) => {
   const end = addDays(week, 5);
-  return week.slice(5, 7) === end.slice(5, 7) ? `${Number(week.slice(8))}–${short(end)}` : `${short(week)}–${short(end)}`;
+  return ltr(week.slice(5, 7) === end.slice(5, 7) ? `${Number(week.slice(8))}–${short(end)}` : `${short(week)}–${short(end)}`);
 };
 
 // The moment a wall-clock time in Israel happens (handles summer time).

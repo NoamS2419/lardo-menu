@@ -25,7 +25,9 @@ export function checkUsername(raw) {
   if (!/^[a-z0-9][a-z0-9._-]{1,19}$/.test(u)) return { error: 'שם משתמש: 2 עד 20 אותיות באנגלית או מספרים (אפשר גם . _ -)' };
   return { username: u };
 }
-const BAD_CHARS = /[\u0000-\u001F\u007F­؜​-‏ -‮⁠-⁯﻿<>/]/;
+// Control, zero-width, bidi and line-separator characters, and < > / (same list as firestore.rules validName).
+const BAD_RANGES = [[0x0, 0x1f], [0x7f, 0x7f], [0xad, 0xad], [0x61c, 0x61c], [0x200b, 0x200f], [0x2028, 0x202e], [0x2060, 0x206f], [0xfeff, 0xfeff]];
+const BAD_CHARS = new RegExp(`[${BAD_RANGES.map(([x, y]) => `${String.fromCharCode(x)}-${String.fromCharCode(y)}`).join('')}<>/]`);
 export function checkDisplayName(raw) {
   const name = String(raw || '').replace(/\s+/g, ' ').trim();
   if (!name) return { error: 'צריך לכתוב שם לסידור' };

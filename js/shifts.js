@@ -11,7 +11,7 @@ import {
 import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from './fs.js';
 import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
-  expiry, slotKey, hoursOf, openSlots
+  expiry, slotKey, hoursOf, openSlots, timeRange
 } from './week.js';
 
 const stillAt = (h) => () => location.hash === h;
@@ -46,7 +46,7 @@ export function errorState(ex, retryHash) {
 
 export const slotLabel = (branch, dow, shift, week) => {
   const h = hoursOf(branch, dow, shift);
-  return `${DAYS[dow]}${week ? ` ${short(dayDate(week, dow))}` : ''}, ${shift.name} ${h.start}–${h.end}`;
+  return `${DAYS[dow]}${week ? ` ${short(dayDate(week, dow))}` : ''}, ${shift.name} ${timeRange(h.start, h.end)}`;
 };
 
 // The published schedule as a real table: rows are days, columns are shifts.
@@ -70,7 +70,7 @@ export function scheduleTable(branch, week, sched, myIds = new Set()) {
     <div class="sch-wrap">
       <table class="sch">
         <caption>הסידור לשבוע ${weekRange(week)}</caption>
-        <thead><tr><td></td>${shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(s.start)}–${esc(s.end)}</span></th>`).join('')}</tr></thead>
+        <thead><tr><td></td>${shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(timeRange(s.start, s.end))}</span></th>`).join('')}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -124,7 +124,7 @@ function myShiftsHtml(branch, list) {
   if (!list.length) return '<p class="muted">אין משמרות בסידור שפורסם.</p>';
   return `<ul class="my-shifts">${list.map((x) => {
     const h = hoursOf(branch, x.dow, x.shift);
-    return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${esc(x.shift.name)}, ${esc(h.start)}–${esc(h.end)}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
+    return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${esc(x.shift.name)}, ${esc(timeRange(h.start, h.end))}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
   }).join('')}</ul>`;
 }
 
@@ -157,15 +157,17 @@ export async function homeCard(el) {
     if (!el.isConnected) return;
     const list = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]).slice(0, 3);
     const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
+    const late = Date.now() > closesAt(branch, nw).getTime();
     const availLine = b ? '' : mine ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
-      : `<span class="sc-warn">עוד לא הוגשה זמינות לשבוע הבא. אפשר ${esc(deadlineText(branch))}.</span>`;
+      : late && !branch.lateOk ? ''
+      : `<span class="sc-warn">עוד לא הוגשה זמינות לשבוע הבא. ${late ? 'המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם.' : `אפשר ${esc(deadlineText(branch))}.`}</span>`;
     el.innerHTML = `
       <a class="shift-card${changed ? ' has-change' : ''}" href="#/shifts">
         <span class="sc-title">המשמרות שלי</span>
         ${changed ? '<span class="sc-change">המשמרות שלך השתנו</span>' : ''}
         ${list.length ? `<span class="sc-list">${list.map((x) => {
           const h = hoursOf(branch, x.dow, x.shift);
-          return `<span class="sc-item"><strong>${DAYS[x.dow]}, ${short(x.date)}</strong> ${esc(x.shift.name)}, ${esc(x.start || h.start)}–${esc(h.end)}</span>`;
+          return `<span class="sc-item"><strong>${DAYS[x.dow]}, ${short(x.date)}</strong> ${esc(x.shift.name)}, ${esc(timeRange(x.start || h.start, h.end))}</span>`;
         }).join('')}</span>` : `<span class="sc-sub">${a || b ? 'אין לך משמרות בימים הקרובים.' : 'הסידור עוד לא פורסם.'}</span>`}
         ${availLine}
       </a>`;
@@ -510,7 +512,7 @@ export async function viewAvailability(forMember = null) {
         <div class="sch-wrap">
           <table class="sch av">
             <caption class="sr-only">זמינות לשבוע ${weekRange(week)}</caption>
-            <thead><tr><td></td>${branch.shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(s.start)}–${esc(s.end)}</span></th>`).join('')}</tr></thead>
+            <thead><tr><td></td>${branch.shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(timeRange(s.start, s.end))}</span></th>`).join('')}</tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
