@@ -1,0 +1,322 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    /* ---------- who is asking ---------- */
+
+    // A staff account: email/password sign-in whose internal address is <username>@staff.lardo.invalid.
+    // Anonymous sign-ins (the old nickname board) have no email and get nothing.
+    function isUser() {
+      return request.auth != null
+        && request.auth.token.email is string
+        && request.auth.token.email.matches('^[a-z0-9][a-z0-9._-]{1,19}@staff[.]lardo[.]invalid$');
+    }
+    function myUsername() { return request.auth.token.email.split('@')[0]; }
+    // The main admin (adds branches, appoints schedulers). The address is unique in Firebase Auth.
+    function isAdmin() { return isUser() && request.auth.token.email == 'noam@staff.lardo.invalid'; }
+    function isOwner(uid) { return isUser() && request.auth.uid == uid; }
+    function memberPath(uid) { return /databases/$(db)/documents/members/$(uid); }
+    function me() { return get(memberPath(request.auth.uid)).data; }
+    // Checked on every request, so a disabled or still-pending account loses access at once.
+    function approved() { return isUser() && exists(memberPath(request.auth.uid)) && me().status == 'approved'; }
+    function inBranch(b) { return approved() && me().branch == b; }
+    // Runs a branch's schedule: its scheduler, or the admin.
+    function runs(b) { return isAdmin() || (inBranch(b) && me().role == 'scheduler'); }
+    function anyScheduler() { return isAdmin() || (approved() && me().role == 'scheduler'); }
+
+    /* ---------- shared checks ---------- */
+
+    // 1-20 chars, trimmed, single spaces; no control, zero-width, bidi, line-separator characters, < > or /.
+    function validName(n) {
+      return n is string && n.size() >= 1 && n.size() <= 20
+        && n == n.trim()
+        && !n.matches('.*\\s\\s.*')
+        && !n.matches('.*[\\x{0000}-\\x{001F}\\x{007F}\\x{00AD}\\x{061C}\\x{200B}-\\x{200F}\\x{2028}-\\x{202E}\\x{2060}-\\x{206F}\\x{FEFF}<>/].*');
+    }
+    function validId(s) { return s is string && s.matches('^[a-z][a-z0-9-]{1,19}$'); }
+    function validWeek(s) { return s is string && s.matches('^\\d{4}-\\d{2}-\\d{2}$'); }
+    // Slot keys are "<day 0-6><shift id>", e.g. ["0m", "3e"].
+    function validSlots(l) {
+      return l is list && l.size() <= 42
+        && (l.size() == 0 || l.join(',').matches('^[0-6][a-z0-9]{1,8}(,[0-6][a-z0-9]{1,8})*$'));
+    }
+    function validNote(s) { return s is string && s.size() <= 100; }
+    // Everything personal carries an expiry (about 3 months); expired documents may be cleaned up.
+    function validExpiry(t) {
+      return t is timestamp && t > request.time && t < request.time + duration.value(200, 'd');
+    }
+    function expired(d) { return 'expireAt' in d && d.expireAt is timestamp && d.expireAt < request.time; }
+    // "2026-10-13" as the UTC midnight of that day.
+    function dayStart(s) {
+      let p = s.split('-');
+      return timestamp.date(int(p[0]), int(p[1]), int(p[2]));
+    }
+
+    /* ---------- branches ---------- */
+
+    function validBranch(d) {
+      return d.keys().hasOnly(['name', 'active', 'closeDow', 'closeMin', 'publishDow', 'lateOk', 'shifts', 'need', 'hours', 'updatedAt'])
+        && d.name is string && d.name.size() >= 1 && d.name.size() <= 40 && d.name == d.name.trim()
+        && !d.name.matches('.*[<>\\x{0000}-\\x{001F}\\x{202A}-\\x{202E}].*')
+        && d.active is bool
+        && d.closeDow is int && d.closeDow >= 0 && d.closeDow <= 6
+        && d.closeMin is int && d.closeMin >= 0 && d.closeMin <= 1440
+        && d.publishDow is int && d.publishDow >= 0 && d.publishDow <= 6
+        && d.shifts is list && d.shifts.size() >= 1 && d.shifts.size() <= 4
+        && d.lateOk is bool
+        && d.need is map && d.need.size() <= 28
+        && d.hours is map && d.hours.size() <= 28
+        && d.updatedAt == request.time;
+    }
+
+    match /branches/{bid} {
+      // Any staff account, also before approval: sign-up needs the list of branches.
+      allow read: if isUser();
+      allow create: if isAdmin() && validId(bid) && validBranch(request.resource.data);
+      // The branch's scheduler changes deadlines, shifts and staffing, but not the name or whether it is active.
+      allow update: if validBranch(request.resource.data)
+        && (isAdmin() || (runs(bid)
+            && request.resource.data.name == resource.data.name
+            && request.resource.data.active == resource.data.active));
+      allow delete: if isAdmin();
+    }
+
+    /* ---------- members: one per account ---------- */
+
+    function validMember(d) {
+      return d.keys().hasOnly(['name', 'username', 'branch', 'role', 'status', 'createdAt', 'updatedAt', 'expireAt', 'replaces'])
+        && validName(d.name)
+        && d.username is string && d.username.matches('^[a-z0-9][a-z0-9._-]{1,19}$')
+        && validId(d.branch)
+        && d.role in ['staff', 'scheduler']
+        && d.status in ['pending', 'approved', 'disabled']
+        && d.createdAt is timestamp
+        && (!('expireAt' in d) || d.expireAt is timestamp)
+        && (!('replaces' in d) || (d.replaces is string && d.replaces.size() <= 128));
+    }
+
+    match /members/{uid} {
+      allow get: if isOwner(uid) || isAdmin() || (resource != null && runs(resource.data.branch));
+      allow list: if isAdmin() || runs(resource.data.branch);
+      // Signing up: always as a pending employee, under the account's own username.
+      allow create: if isOwner(uid)
+        && validMember(request.resource.data)
+        && request.resource.data.keys().hasOnly(['name', 'username', 'branch', 'role', 'status', 'createdAt'])
+        && request.resource.data.username == myUsername()
+        && request.resource.data.createdAt == request.time
+        && exists(/databases/$(db)/documents/branches/$(request.resource.data.branch))
+        && get(/databases/$(db)/documents/branches/$(request.resource.data.branch)).data.active == true
+        // Everyone starts as a pending employee; only the main admin's own record starts approved.
+        && request.resource.data.role == 'staff'
+        && (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status == 'approved'));
+      // Nobody edits their own record. The scheduler approves, disables and fixes names of employees
+      // in the branch; roles and branch moves belong to the admin.
+      allow update: if validMember(request.resource.data)
+        && request.resource.data.username == resource.data.username
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
+        && (isAdmin() || (request.auth.uid != uid
+            && runs(resource.data.branch)
+            && resource.data.role == 'staff'
+            && request.resource.data.role == 'staff'
+            && request.resource.data.branch == resource.data.branch));
+      // Deleting my own account, rejecting a request, or cleaning up someone disabled long ago.
+      allow delete: if isOwner(uid) || isAdmin()
+        || (request.auth.uid != uid && runs(resource.data.branch) && resource.data.role == 'staff'
+            && resource.data.status in ['pending', 'disabled']);
+    }
+
+    /* ---------- availability: one per person per week ---------- */
+
+    function weekPath(b, w) { return /databases/$(db)/documents/schedules/$(b + '_' + w); }
+    // closeMin is minutes after midnight on closeDow (of the week before); 1440 = the end of that day.
+    // The week's document carries the closing time (worked out in Israel time by the scheduler's
+    // app, which creates the document ahead of time). Once the week is published it is closed.
+    // After the closing time a late submission is accepted only if the branch allows it (lateOk);
+    // the scheduler sees it marked as late, since updatedAt is the server's clock.
+    function openForSubmission(b, w) {
+      return !exists(weekPath(b, w))
+        || (get(weekPath(b, w)).data.status != 'published'
+            && (!('closesAt' in get(weekPath(b, w)).data)
+                || request.time < get(weekPath(b, w)).data.closesAt
+                || get(/databases/$(db)/documents/branches/$(b)).data.lateOk == true));
+    }
+    function validAvailability(d, id) {
+      return d.keys().hasOnly(['branch', 'week', 'uid', 'name', 'slots', 'note', 'updatedAt', 'expireAt', 'by'])
+        && validId(d.branch) && validWeek(d.week)
+        && d.uid is string && d.uid.size() >= 1 && d.uid.size() <= 128
+        && id == d.branch + '_' + d.week + '_' + d.uid
+        && validName(d.name)
+        && validSlots(d.slots)
+        && validNote(d.note)
+        && d.updatedAt == request.time
+        && validExpiry(d.expireAt)
+        && d.by in ['self', 'manager'];
+    }
+
+    match /availability/{id} {
+      // Only the person and whoever runs their branch. Other employees never see it.
+      allow get: if (approved() && resource == null)
+        || (resource != null && ((approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch)));
+      allow list: if (approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch);
+      allow create, update: if validAvailability(request.resource.data, id)
+        && ((inBranch(request.resource.data.branch)
+              && request.resource.data.uid == request.auth.uid
+              && request.resource.data.name == me().name
+              && request.resource.data.by == 'self'
+              && openForSubmission(request.resource.data.branch, request.resource.data.week))
+            // The scheduler can enter availability for someone (no smartphone, after the deadline).
+            || (runs(request.resource.data.branch) && request.resource.data.by == 'manager'));
+      allow delete: if (approved() && resource.data.uid == request.auth.uid
+              && openForSubmission(resource.data.branch, resource.data.week))
+        || runs(resource.data.branch)
+        || (approved() && expired(resource.data));
+    }
+
+    /* ---------- standing availability ("every week") ---------- */
+
+    match /standing/{uid} {
+      allow get: if (approved() && request.auth.uid == uid) || (resource != null && runs(resource.data.branch));
+      allow list: if runs(resource.data.branch);
+      allow create, update: if request.resource.data.keys().hasOnly(['branch', 'uid', 'name', 'slots', 'note', 'updatedAt'])
+        && validNote(request.resource.data.note)
+        && validId(request.resource.data.branch)
+        && request.resource.data.uid == uid
+        && validName(request.resource.data.name)
+        && validSlots(request.resource.data.slots)
+        && request.resource.data.updatedAt == request.time
+        && ((isOwner(uid) && inBranch(request.resource.data.branch) && request.resource.data.name == me().name)
+            || runs(request.resource.data.branch));
+      allow delete: if isOwner(uid) || (resource != null && runs(resource.data.branch));
+    }
+
+    /* ---------- time-off requests ---------- */
+
+    match /timeoff/{id} {
+      allow get: if resource != null && ((approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch));
+      allow list: if (approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch);
+      allow create: if request.resource.data.keys().hasOnly(['branch', 'uid', 'name', 'from', 'to', 'note', 'createdAt', 'expireAt'])
+        && validId(request.resource.data.branch)
+        && request.resource.data.uid is string && request.resource.data.uid.size() <= 128
+        && validName(request.resource.data.name)
+        && validWeek(request.resource.data.from) && validWeek(request.resource.data.to)
+        && request.resource.data.from <= request.resource.data.to
+        && validNote(request.resource.data.note)
+        && request.resource.data.createdAt == request.time
+        && validExpiry(request.resource.data.expireAt)
+        && ((inBranch(request.resource.data.branch)
+              && request.resource.data.uid == request.auth.uid
+              && request.resource.data.name == me().name)
+            || runs(request.resource.data.branch));
+      allow update: if false;
+      allow delete: if (approved() && resource.data.uid == request.auth.uid)
+        || runs(resource.data.branch)
+        || (approved() && expired(resource.data));
+    }
+
+    /* ---------- the week: one public document per branch per week ---------- */
+
+    // 'open' = taking availability (no names in it yet); 'published' = the schedule everyone sees.
+    function validWeekDoc(d, id) {
+      return d.keys().hasOnly(['branch', 'week', 'status', 'closesAt', 'slots', 'need', 'changed', 'changedFor', 'publishedAt', 'updatedAt', 'expireAt'])
+        && validId(d.branch) && validWeek(d.week)
+        && id == d.branch + '_' + d.week
+        && d.status in ['open', 'published']
+        && (!('closesAt' in d) || d.closesAt is timestamp)
+        && d.slots is map && d.slots.size() <= 42
+        && (d.status == 'published' || d.slots.size() == 0)
+        && d.need is map && d.need.size() <= 42
+        && d.changed is list && d.changed.size() <= 42
+        && d.changedFor is list && d.changedFor.size() <= 80
+        && (!('publishedAt' in d) || d.publishedAt is timestamp)
+        && d.updatedAt == request.time
+        && validExpiry(d.expireAt);
+    }
+
+    match /schedules/{id} {
+      allow get: if (approved() && resource == null)
+        || (resource != null && (runs(resource.data.branch) || inBranch(resource.data.branch)));
+      allow list: if runs(resource.data.branch) || inBranch(resource.data.branch);
+      allow create, update: if runs(request.resource.data.branch) && validWeekDoc(request.resource.data, id);
+      allow delete: if runs(resource.data.branch) || (approved() && expired(resource.data));
+    }
+
+    /* ---------- drafts: the schedule being built, only for whoever runs the branch ---------- */
+
+    match /drafts/{id} {
+      allow get: if (resource == null && anyScheduler()) || (resource != null && runs(resource.data.branch));
+      allow list: if runs(resource.data.branch);
+      allow create, update: if runs(request.resource.data.branch)
+        && request.resource.data.keys().hasOnly(['branch', 'week', 'slots', 'updatedAt', 'expireAt'])
+        && validId(request.resource.data.branch) && validWeek(request.resource.data.week)
+        && id == request.resource.data.branch + '_' + request.resource.data.week
+        && request.resource.data.slots is map && request.resource.data.slots.size() <= 42
+        && request.resource.data.updatedAt == request.time
+        && validExpiry(request.resource.data.expireAt);
+      allow delete: if runs(resource.data.branch);
+    }
+
+    /* ---------- the score board: approved staff only, under the name from the schedule ---------- */
+
+    match /players/{uid} {
+      allow read: if approved() || isAdmin();
+      allow create, update: if isOwner(uid) && approved()
+        && request.resource.data.keys().hasOnly(['name', 'total', 'updatedAt', 'onboarded', 'known'])
+        && request.resource.data.name == me().name
+        && request.resource.data.total is int
+        && request.resource.data.total >= 0
+        && request.resource.data.total <= 1000000
+        // Team progress (optional fields): onboarding finished, and % known per category as
+        // "breads:40,pastries:100" (up to 20 categories, lowercase ids, 0-100).
+        && (!('onboarded' in request.resource.data) || request.resource.data.onboarded is bool)
+        && (!('known' in request.resource.data) || (request.resource.data.known is string
+            && request.resource.data.known.size() <= 400
+            && request.resource.data.known.matches('^$|^[a-z]{1,20}:(100|[1-9]?[0-9])(,[a-z]{1,20}:(100|[1-9]?[0-9])){0,19}$')))
+        && request.resource.data.updatedAt == request.time;
+      // Mine, or cleaned up by a scheduler (someone who left, a leftover from the old nickname board).
+      allow delete: if isOwner(uid) || anyScheduler();
+    }
+
+    match /daily/{docId} {
+      allow read: if approved() || isAdmin();
+      allow create: if approved()
+        && request.resource.data.keys().hasOnly(['uid', 'name', 'date', 'score', 'createdAt', 'expireAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.name == me().name
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && docId == request.resource.data.date + '_' + request.auth.uid
+        // Only today's challenge (Israel is UTC+2/+3), with a few hours' slack.
+        && request.time > dayStart(request.resource.data.date) - duration.value(4, 'h')
+        && request.time < dayStart(request.resource.data.date) + duration.value(30, 'h')
+        && request.resource.data.score is int
+        && request.resource.data.score >= 0 && request.resource.data.score <= 10
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expireAt is timestamp
+        && request.resource.data.expireAt > request.time
+        && request.resource.data.expireAt < request.time + duration.value(90, 'd');
+      allow update: if false;            // one score per day, no retries
+      // Expired scores can be cleaned up by any approved employee (stands in for a TTL policy).
+      allow delete: if isOwner(resource.data.uid) || anyScheduler()
+        || (approved() && resource.data.expireAt < request.time);
+    }
+
+    // Personal learning progress, so it follows the account to a new phone. Only its owner.
+    match /progress/{uid} {
+      allow get: if isOwner(uid) && approved();
+      allow create, update: if isOwner(uid) && approved()
+        && request.resource.data.keys().hasOnly(['data', 'updatedAt'])
+        && request.resource.data.data is string
+        && request.resource.data.data.size() <= 100000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isOwner(uid) || anyScheduler();
+    }
+
+    // Nickname reservations from the old board: no longer used, the admin may clear them.
+    match /names/{nameKey} {
+      allow read, delete: if isAdmin();
+      allow create, update: if false;
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
