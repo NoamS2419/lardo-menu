@@ -252,8 +252,9 @@ service cloud.firestore {
         || (resource != null && runs(resource.data.branch));
       allow list: if runs(resource.data.branch);
       allow create, update: if runs(request.resource.data.branch)
-        && request.resource.data.keys().hasOnly(['branch', 'week', 'slots', 'updatedAt', 'expireAt'])
+        && request.resource.data.keys().hasOnly(['branch', 'week', 'slots', 'need', 'updatedAt', 'expireAt'])
         && validId(request.resource.data.branch) && validWeek(request.resource.data.week)
+        && (!('need' in request.resource.data) || (request.resource.data.need is map && request.resource.data.need.size() <= 42))
         && id == request.resource.data.branch + '_' + request.resource.data.week
         && request.resource.data.slots is map && request.resource.data.slots.size() <= 42
         && request.resource.data.updatedAt == request.time
