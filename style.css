@@ -650,7 +650,10 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .name-form input[aria-invalid="true"] { border-color: var(--bad); }
 .form-err { color: var(--bad); font-weight: var(--fw-bold); margin: 0; min-height: 1.2em; }
 .settings { margin-top: var(--sp-5); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.settings summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-weight: var(--fw-bold); }
+.settings summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: var(--fw-bold); list-style: none; }
+.settings summary::-webkit-details-marker { display: none; }
+.settings summary::after { content: "▾"; color: var(--muted); }
+.settings[open] summary::after { content: "▴"; }
 .settings h2 { font-size: var(--fs-3); margin-top: var(--sp-4); }
 .settings > :last-child { margin-bottom: var(--sp-4); }
 .done-today { background: var(--surface-2); border-radius: var(--r-2); padding: var(--sp-3) var(--sp-4); }

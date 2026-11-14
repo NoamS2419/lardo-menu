@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "rules": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore --project demo-lardo \"node rules.test.mjs\"",
-    "dev": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore,auth --project demo-lardo \"node dev-server.mjs\""
+    "dev": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore,auth --project demo-lardo \"node dev-server.mjs\"",
+    "dev:empty": "cp ../firestore.rules emulator.rules && firebase emulators:exec --only firestore,auth --project demo-lardo \"node dev-server.mjs --empty\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",

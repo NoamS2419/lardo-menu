@@ -1,7 +1,7 @@
 /* Local test site on the Firebase emulators, with test accounts (so testing never needs Or).
    Run: cd tests && npm run dev, then open http://localhost:8123/?emu
    Accounts (password "password1"): noam (admin), or (scheduler), roni and lia (approved), dan (pending).
-   Pass --empty for an empty project with the old rules live, to rehearse launch day. */
+   Run `npm run dev:empty` for an empty project with the old rules live, to rehearse launch day. */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
