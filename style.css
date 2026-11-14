@@ -333,6 +333,9 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .daily-sub { display: block; font-size: var(--fs-2); color: var(--muted); margin-bottom: var(--sp-1); }
 .daily-name { display: block; font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-5); margin: 0; color: var(--text); }
 .daily-line { display: block; font-size: var(--fs-2); color: var(--muted); }
+.daily-price { display: block; margin-top: var(--sp-2); font-weight: var(--fw-bold); color: var(--gold-text); }
+.thumb-wrap img, .daily .daily-img { mix-blend-mode: multiply; }
+.btn-wide + .btn-wide { margin-top: var(--sp-3); }
 .daily .daily-img, .daily .ph { aspect-ratio: 16 / 9; }
 
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
@@ -882,7 +885,9 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .more[open] summary::after { content: "▴"; }
 .btn.danger { color: var(--bad-text); border-color: var(--bad); }
 .more .field { margin-top: var(--sp-2); }
-.person .form-err:empty { display: none; }
+.person .form-err:empty, .auth-form .form-err:empty { display: none; }
+.auth-form .field { margin-bottom: var(--sp-4); }
+.auth-form button[type=submit] { margin-top: var(--sp-5); }
 .radios { border: 0; padding: 0; margin: 0 0 var(--sp-3); display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-3); }
 .radios legend { font-weight: var(--fw-bold); margin-bottom: var(--sp-1); width: 100%; }
 .radios label { display: inline-flex; align-items: center; gap: var(--sp-1); min-height: 44px; }
