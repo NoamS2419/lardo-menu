@@ -2,15 +2,12 @@
 
 import { db, esc, setPage, announce, focusMain, meter, fillMeters } from './core.js';
 import { progress, saveProgress } from './progress.js';
-import { teamProgressEnabled, cloudEnabled, myPlayer, claimName, syncTotal, submitDaily, loadBoard, loadDaily, deleteMe, cleanupExpired } from './cloud.js';
+import { teamProgressEnabled, cloudEnabled, myPlayer, syncTotal, submitDaily, loadBoard, loadDaily, leaveBoard, cleanupExpired } from './cloud.js';
+import { account, loadMember } from './account.js';
 import { jerusalemDate } from './learn.js';
 
 // After an await the person may have moved on; don't paint over another page.
 const stillHere = () => location.hash === '#/team';
-
-const NOTICE_START = () => (teamProgressEnabled() ? 'השם, הניקוד, ואם בחרת גם ההתקדמות שלך, יופיעו בטבלה' : 'השם יופיע בטבלת הניקוד,');
-const NOTICE_REST = ' שפתוחה לצפייה לכל מי שמחזיק בקישור לאתר. מומלץ כינוי. אפשר למחוק אותו ואת הניקוד בכל רגע מהעמוד הזה. ההשתתפות בטבלה היא רשות, והיא בשביל הכיף ולא להערכת עובדים.';
-const notice = () => `${NOTICE_START()}${NOTICE_REST}`;
 
 const table = (caption, rows, scoreLabel, scoreOf) => rows.length
   ? `<table class="board">
@@ -75,54 +72,6 @@ function progressHtml(players) {
     </section>`;
 }
 
-function nameForm(current = '') {
-  return `
-    <form class="name-form" id="name-form" novalidate>
-      <label for="nick">השם או הכינוי שלך</label>
-      <input id="nick" name="nick" type="text" maxlength="20" autocomplete="off" autocapitalize="off"
-             placeholder="למשל: נועה מהדלפק" value="${esc(current)}" aria-describedby="nick-notice nick-err">
-      <p id="nick-notice" class="hint">${notice()}</p>
-      <p id="nick-err" class="form-err" role="alert"></p>
-      <button class="btn" type="submit">${current ? 'שמירה' : 'הצטרפות לטבלה'}</button>
-    </form>`;
-}
-
-function bindNameForm(after) {
-  const form = document.getElementById('name-form');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const err = document.getElementById('nick-err');
-    const btn = form.querySelector('button');
-    // aria-disabled, not disabled: a disabled button drops keyboard focus to <body>.
-    if (btn.getAttribute('aria-disabled') === 'true') return;
-    btn.setAttribute('aria-disabled', 'true');
-    err.textContent = '';
-    form.nick.removeAttribute('aria-invalid');
-    const fail = (msg) => {
-      err.textContent = msg;
-      form.nick.setAttribute('aria-invalid', 'true');
-      form.nick.focus();
-    };
-    try {
-      const r = await claimName(form.nick.value, progress.gameXp || 0);
-      if (r.error) return fail(r.error);
-      // A daily score from before joining goes up now (submitDaily is safe to repeat).
-      const today = jerusalemDate();
-      if (progress.daily[today] != null) submitDaily(today, progress.daily[today]).catch(() => {});
-      if (!stillHere()) return;
-      after();
-      focusMain();
-      announce(`נרשמת בשם ${r.name}`);
-    } catch (ex) {
-      if (ex.code === 'RESET' && stillHere()) { viewTeam(); return; }
-      fail('לא הצלחנו להתחבר. בדקו את החיבור לאינטרנט ונסו שוב.');
-      console.error(ex);
-    } finally {
-      btn.removeAttribute('aria-disabled');
-    }
-  });
-}
-
 export async function viewTeam() {
   const date = jerusalemDate();
   const todayScore = progress.daily[date];
@@ -139,39 +88,45 @@ export async function viewTeam() {
     return;
   }
 
-  const me = myPlayer();
-  if (!me) {
+  let member = null;
+  if (account()) { try { member = await loadMember(); } catch (e) { member = null; } }
+  if (!stillHere()) return;
+  if (!member || member.status !== 'approved') {
     setPage('הצוות', `
       <h1>טבלת הצוות</h1>
-      <p>כדי להופיע בטבלה צריך שם או כינוי. בלי סיסמה, בלי מייל.</p>
-      ${nameForm()}
+      <p>הטבלה פתוחה לעובדים שאושרו במערכת המשמרות, עם השם מהסידור. המשחקים והאתגר היומי פתוחים לכולם.</p>
+      ${member ? '<p class="note">הבקשה להצטרף עוד ממתינה לאישור.</p>' : '<a class="btn btn-wide" href="#/shifts">כניסה או הרשמה</a>'}
+      ${dailyCta}
     `);
-    bindNameForm(() => viewTeam());
     return;
   }
+  // A daily score from before signing in goes up now (submitDaily is safe to repeat).
+  if (progress.daily[date] != null) submitDaily(date, progress.daily[date]).catch(() => {});
 
   setPage('הצוות', `
     <h1>טבלת הצוות</h1>
     ${dailyCta}
     <div id="boards" aria-busy="true"><p class="empty">הטבלה בטעינה…</p></div>
     <details class="settings">
-      <summary>הכינוי שלי והנתונים שלי</summary>
-      ${nameForm(me.name)}
+      <summary>הנתונים שלי בטבלה</summary>
+      <p>השם בטבלה הוא השם מהסידור: <bdi>${esc(member.name)}</bdi>. רק עובדים מאושרים רואים את הטבלה. היא בשביל הכיף, לא להערכת עובדים.</p>
       ${teamProgressEnabled() ? `
       <h2>ההתקדמות שלי</h2>
       <label class="toggle-row">
         <input type="checkbox" id="share" aria-describedby="share-hint"${progress.shareProgress ? ' checked' : ''}>
         להציג את ההתקדמות שלי לצוות
       </label>
-      <p class="hint" id="share-hint">כבוי: הצוות רואה רק את הכינוי והניקוד. דלוק: גם אחוז המוצרים המוכרים בכל קטגוריה, והאם "שבוע ראשון" הושלם.</p>
+      <p class="hint" id="share-hint">כבוי: הצוות רואה רק את השם והניקוד. דלוק: גם אחוז המוצרים המוכרים בכל קטגוריה, והאם "שבוע ראשון" הושלם.</p>
       <p id="share-msg" role="status"></p>` : ''}
-      <h2>מחיקת הנתונים</h2>
-      <p>מוחק את הכינוי והניקוד מהטבלה ומהטלפון הזה. ההתקדמות האישית שלך בכרטיסיות נשארת בטלפון.</p>
-      <button class="btn btn-no" id="delete-me" type="button">מחיקת הנתונים שלי</button>
+      <h2>ההופעה בטבלה</h2>
+      <label class="toggle-row">
+        <input type="checkbox" id="on-board" aria-describedby="board-hint"${progress.offBoard ? '' : ' checked'}>
+        להופיע בטבלת הצוות
+      </label>
+      <p class="hint" id="board-hint">כבוי: השם והניקוד יורדים מהטבלה ולא נשלחים יותר. למחיקת החשבון כולו: בלשונית משמרות.</p>
       <p id="delete-msg" role="status"></p>
     </details>
   `);
-  bindNameForm(() => viewTeam());
   document.getElementById('share')?.addEventListener('change', async (e) => {
     progress.shareProgress = e.target.checked;
     saveProgress();
@@ -185,17 +140,16 @@ export async function viewTeam() {
       console.error(ex);
     }
   });
-  document.getElementById('delete-me').addEventListener('click', async () => {
-    if (!confirm('למחוק את הכינוי והניקוד שלך מהטבלה?')) return;
+  document.getElementById('on-board').addEventListener('change', async (e) => {
+    progress.offBoard = !e.target.checked;
+    saveProgress();
     const msg = document.getElementById('delete-msg');
     try {
-      await deleteMe();
+      if (progress.offBoard) await leaveBoard(); else await syncTotal(progress.gameXp || 0);
       if (!stillHere()) return;
-      viewTeam();
-      focusMain();
-      announce('הנתונים נמחקו');
+      msg.textContent = progress.offBoard ? 'השם והניקוד הוסרו מהטבלה.' : 'השם והניקוד חזרו לטבלה.';
     } catch (ex) {
-      msg.textContent = 'המחיקה לא הצליחה. נסו שוב בעוד רגע.';
+      msg.textContent = 'לא הצלחנו לעדכן. כדאי לנסות שוב בעוד רגע.';
       console.error(ex);
     }
   });
@@ -213,7 +167,6 @@ export async function viewTeam() {
     cleanupExpired();
   } catch (ex) {
     if (!stillHere()) return;
-    if (ex.code === 'RESET') { viewTeam(); return; }
     boards.innerHTML = '<p class="empty">לא הצלחנו לטעון את הטבלה. נסו לרענן.</p>';
     console.error(ex);
   } finally {

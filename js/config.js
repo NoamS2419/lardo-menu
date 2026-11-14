@@ -9,3 +9,9 @@ export const FIREBASE = {
   apiKey: 'AIzaSyBO0hmmRqyIkskmJbEBhohb5lw4RzEZgg0',
   projectId: 'lardo-menu'
 };
+
+// Local testing only: on localhost with ?emu in the address, everything goes to the Firebase emulators
+// (tests/dev-server.mjs). The live site's CSP doesn't allow these addresses anyway.
+const emu = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+  && new URLSearchParams(location.search).has('emu');
+export const EMULATOR = emu ? { auth: 'http://127.0.0.1:9099', firestore: 'http://127.0.0.1:8085' } : null;

@@ -963,7 +963,7 @@ export function viewGame(id, custom = null) {
         ${ring(pct, 150, 64, `<span id="sc">0</span>/${qs.length}`)}
         <h2 tabindex="-1" id="res" class="result-line">${score === 10 ? 'מושלם' : score >= 8 ? 'כמעט מושלם' : score >= 5 ? 'יפה מאוד' : 'מחר יש עוד הזדמנות'}</h2>
         <p class="sr-only">${score} מתוך ${qs.length}</p>
-        <p id="daily-status" role="status">${named ? 'התוצאה נשלחת לטבלת הצוות…' : cloudEnabled() ? 'רוצים להופיע בטבלת הצוות? אפשר לבחור כינוי בעמוד הצוות.' : 'התוצאה נשמרה בטלפון.'}</p>
+        <p id="daily-status" role="status">${named ? 'התוצאה נשלחת לטבלת הצוות…' : cloudEnabled() ? 'טבלת הצוות פתוחה לעובדים שאושרו במערכת המשמרות.' : 'התוצאה נשמרה בטלפון.'}</p>
         <div class="two">
           <a class="btn btn-no" href="#/">לדף הבית</a>
           ${cloudEnabled() ? '<a class="btn btn-yes" href="#/team">לטבלת הצוות</a>' : '<a class="btn btn-yes" href="#/games">עוד משחקים</a>'}
