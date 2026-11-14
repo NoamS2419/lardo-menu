@@ -7,6 +7,7 @@ import {
 } from './core.js';
 import { progress, setKnown, knownCount, streak, today, levelInfo } from './progress.js';
 import { burst } from './fx.js';
+import { homeCard } from './shifts.js';
 
 /* ---------- data ---------- */
 
@@ -95,6 +96,7 @@ export function viewHome() {
   setPage('', `
     <div class="home">
       <aside class="home-side">
+        <div id="shift-card"></div>
         <h1>מה לומדים היום?</h1>
         ${fresh ? `
         <div class="first-run">

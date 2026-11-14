@@ -60,8 +60,11 @@ export function loadMember(force = false) {
     const acc = account();
     if (!acc) return null;
     await finishPendingSignUp();
-    const m = await getDoc(`members/${acc.uid}`);
+    let m = await getDoc(`members/${acc.uid}`);
+    if (m && m.status === 'pending' && acc.isAdmin) { await approveSelf(); m = await getDoc(`members/${acc.uid}`); }
     const rec = m ? { ...m, uid: acc.uid } : null;
+    // Someone disabled or removed: drop the schedules saved on this phone.
+    if (!rec || rec.status === 'disabled') clearCache();
     writeJson(MEMBER_KEY, rec && { uid: rec.uid, name: rec.name, branch: rec.branch, role: rec.role, status: rec.status, replaces: rec.replaces });
     return rec;
   })();
@@ -103,23 +106,56 @@ const AUTH_ERRORS = {
 export const authMessage = (e) => AUTH_ERRORS[e && e.code] || 'לא הצלחנו להתחבר. כדאי לבדוק את החיבור לאינטרנט ולנסות שוב.';
 
 function memberData(acc, name, branch) {
-  return { name, username: acc.username, branch, role: 'staff', status: acc.isAdmin ? 'approved' : 'pending' };
+  return { name, username: acc.username, branch, role: 'staff', status: 'pending' };
+}
+// The main admin approves their own record (the rules know the admin by uid; for anyone else this is refused).
+const approveSelf = () => setDoc(`members/${account().uid}`, { status: 'approved' }, { mask: ['status'], stamp: ['updatedAt'] }).catch(() => {});
+
+// A new branch with placeholder hours and staffing; the scheduler edits them in the settings.
+export const DEFAULT_BRANCH = {
+  name: 'רעננה', active: true, closeDow: 3, closeMin: 1440, publishDow: 5, lateOk: true,
+  shifts: [{ id: 'm', name: 'בוקר', start: '06:30', end: '14:30' }, { id: 'e', name: 'ערב', start: '14:00', end: '20:30' }],
+  need: { '0m': 2, '0e': 2, '1m': 2, '1e': 2, '2m': 2, '2e': 2, '3m': 2, '3e': 2, '4m': 2, '4e': 2, '5m': 3, '5e': 0 },
+  hours: { '5m': '06:30-15:00' }
+};
+export async function createBranch(id, data) {
+  await setDoc(`branches/${id}`, data, { stamp: ['updatedAt'], exists: false });
+  forgetBranches();
 }
 
-// Saves the member record left over from a sign-up that couldn't finish (offline, or before the rules went live).
+// Saves the member record of a sign-up: right away, or later if it couldn't be saved then
+// (offline, or before the new rules went live). With one branch it is picked automatically.
 async function finishPendingSignUp() {
   const p = readJson(PENDING_KEY);
   const acc = account();
   if (!p || !acc || p.uid !== acc.uid) return;
   try {
-    await setDoc(`members/${acc.uid}`, memberData(acc, p.name, p.branch), { stamp: ['createdAt'], exists: false });
+    let branch = p.branch;
+    if (!branch) {
+      let branches = await loadBranches(true);
+      if (!branches.length && acc.isAdmin) { await createBranch('raanana', DEFAULT_BRANCH); branches = await loadBranches(true); }
+      if (branches.length !== 1) return; // the person picks one (or there is none yet)
+      branch = branches[0].id;
+    }
+    await setDoc(`members/${acc.uid}`, memberData(acc, p.name, branch), { stamp: ['createdAt'], exists: false });
+    if (acc.isAdmin) await approveSelf();
   } catch (e) {
     if (e.status !== 409 && !/exist/i.test(e.message)) return; // try again next time
   }
   writeJson(PENDING_KEY, null);
 }
+export const pendingSignUp = () => { const p = readJson(PENDING_KEY); const acc = account(); return p && acc && p.uid === acc.uid ? p : null; };
 
-export async function signUp({ username, password, name, branch }) {
+// The last step when there is more than one branch (or the record wasn't saved).
+export async function completeSignUp(name, branch) {
+  const acc = account();
+  writeJson(PENDING_KEY, { uid: acc.uid, name, branch });
+  memberPromise = null;
+  await finishPendingSignUp();
+  if (pendingSignUp()) throw new Error('not saved');
+}
+
+export async function signUp({ username, password, name }) {
   const anon = anonymousAccount();
   let anonToken;
   if (anon) { try { anonToken = (await token()).idToken; } catch (e) { anonToken = undefined; } }
@@ -132,7 +168,7 @@ export async function signUp({ username, password, name, branch }) {
     } else throw e;
   }
   const acc = account();
-  writeJson(PENDING_KEY, { uid: acc.uid, name, branch });
+  writeJson(PENDING_KEY, { uid: acc.uid, name, branch: null });
   memberPromise = null;
   await finishPendingSignUp();
   return acc;
@@ -150,9 +186,23 @@ export function signOut() {
   writeJson(MEMBER_KEY, null);
   writeJson(PENDING_KEY, null);
   memberPromise = null;
+  clearCache();
+}
+function clearCache() {
   try {
     Object.keys(localStorage).filter((k) => k.startsWith(CACHE_PREFIX) || k === 'lardo.player.v1').forEach((k) => localStorage.removeItem(k));
   } catch (e) { /* nothing cached */ }
+}
+
+// For the main admin's first setup: the rules file with this account's uid filled in, ready to paste
+// into the Firebase console.
+export async function adminRules() {
+  const acc = account();
+  const res = await fetch('firestore.rules', { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const text = await res.text();
+  if (!text.includes('__ADMIN_UID__')) throw new Error('no placeholder');
+  return text.replace('__ADMIN_UID__', acc.uid);
 }
 
 export const cacheGet = (k) => readJson(CACHE_PREFIX + k);

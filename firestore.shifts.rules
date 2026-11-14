@@ -11,8 +11,10 @@ service cloud.firestore {
         && request.auth.token.email.matches('^[a-z0-9][a-z0-9._-]{1,19}@staff[.]lardo[.]invalid$');
     }
     function myUsername() { return request.auth.token.email.split('@')[0]; }
-    // The main admin (adds branches, appoints schedulers). The address is unique in Firebase Auth.
-    function isAdmin() { return isUser() && request.auth.token.email == 'noam@staff.lardo.invalid'; }
+    // The main admin (adds branches, appoints schedulers): one fixed account, by uid. The site's
+    // admin screen fills in the uid when it copies these rules for publishing; never by email,
+    // since anyone can register a username or change an account's address.
+    function isAdmin() { return isUser() && request.auth.uid == '__ADMIN_UID__'; }
     function isOwner(uid) { return isUser() && request.auth.uid == uid; }
     function memberPath(uid) { return /databases/$(db)/documents/members/$(uid); }
     function me() { return get(memberPath(request.auth.uid)).data; }
@@ -21,7 +23,10 @@ service cloud.firestore {
     function inBranch(b) { return approved() && me().branch == b; }
     // Runs a branch's schedule: its scheduler, or the admin.
     function runs(b) { return isAdmin() || (inBranch(b) && me().role == 'scheduler'); }
-    function anyScheduler() { return isAdmin() || (approved() && me().role == 'scheduler'); }
+    // Whoever runs the branch of this account (for cleaning up after someone who left).
+    function runsMemberOf(uid) {
+      return isAdmin() || (exists(memberPath(uid)) && runs(get(memberPath(uid)).data.branch));
+    }
 
     /* ---------- shared checks ---------- */
 
@@ -105,9 +110,9 @@ service cloud.firestore {
         && request.resource.data.createdAt == request.time
         && exists(/databases/$(db)/documents/branches/$(request.resource.data.branch))
         && get(/databases/$(db)/documents/branches/$(request.resource.data.branch)).data.active == true
-        // Everyone starts as a pending employee; only the main admin's own record starts approved.
+        // Everyone starts as a pending employee (the admin then approves their own record).
         && request.resource.data.role == 'staff'
-        && (request.resource.data.status == 'pending' || (isAdmin() && request.resource.data.status == 'approved'));
+        && request.resource.data.status == 'pending';
       // Nobody edits their own record. The scheduler approves, disables and fixes names of employees
       // in the branch; roles and branch moves belong to the admin.
       allow update: if validMember(request.resource.data)
@@ -243,7 +248,8 @@ service cloud.firestore {
     /* ---------- drafts: the schedule being built, only for whoever runs the branch ---------- */
 
     match /drafts/{id} {
-      allow get: if (resource == null && anyScheduler()) || (resource != null && runs(resource.data.branch));
+      allow get: if (resource == null && (isAdmin() || (approved() && me().role == 'scheduler')))
+        || (resource != null && runs(resource.data.branch));
       allow list: if runs(resource.data.branch);
       allow create, update: if runs(request.resource.data.branch)
         && request.resource.data.keys().hasOnly(['branch', 'week', 'slots', 'updatedAt', 'expireAt'])
@@ -272,8 +278,9 @@ service cloud.firestore {
             && request.resource.data.known.size() <= 400
             && request.resource.data.known.matches('^$|^[a-z]{1,20}:(100|[1-9]?[0-9])(,[a-z]{1,20}:(100|[1-9]?[0-9])){0,19}$')))
         && request.resource.data.updatedAt == request.time;
-      // Mine, or cleaned up by a scheduler (someone who left, a leftover from the old nickname board).
-      allow delete: if isOwner(uid) || anyScheduler();
+      // Mine, or cleaned up by whoever runs my branch (someone who left); the admin also clears
+      // leftovers from the old nickname board.
+      allow delete: if isOwner(uid) || runsMemberOf(uid);
     }
 
     match /daily/{docId} {
@@ -296,7 +303,7 @@ service cloud.firestore {
         && request.resource.data.expireAt < request.time + duration.value(90, 'd');
       allow update: if false;            // one score per day, no retries
       // Expired scores can be cleaned up by any approved employee (stands in for a TTL policy).
-      allow delete: if isOwner(resource.data.uid) || anyScheduler()
+      allow delete: if isOwner(resource.data.uid) || runsMemberOf(resource.data.uid)
         || (approved() && resource.data.expireAt < request.time);
     }
 
@@ -308,7 +315,7 @@ service cloud.firestore {
         && request.resource.data.data is string
         && request.resource.data.data.size() <= 100000
         && request.resource.data.updatedAt == request.time;
-      allow delete: if isOwner(uid) || anyScheduler();
+      allow delete: if isOwner(uid) || runsMemberOf(uid);
     }
 
     // Nickname reservations from the old board: no longer used, the admin may clear them.

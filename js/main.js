@@ -8,7 +8,9 @@ import { viewLearnHub, viewFlashcards, viewGames, viewGame, hintText } from './l
 import { viewTeam } from './team.js';
 import { viewSell } from './catalog.js';
 import { viewOnboard, viewOnboardDay, viewOnboardFinal, viewOnboardCert } from './onboard.js';
-import { cloudEnabled } from './cloud.js';
+import { cloudEnabled } from './fs.js';
+import { viewShifts, viewAvailability, viewTimeOff } from './shifts.js';
+import { viewManage, viewPeople, viewPersonAvailability, viewSettings, viewBuild, viewBranches } from './manage.js';
 
 // With large text the tab bar grows; keep the page's bottom padding in step with its real height.
 const tabs = document.querySelector('.tabs');
@@ -19,9 +21,9 @@ if (tabs && 'ResizeObserver' in window) {
   }).observe(tabs);
 }
 
-// The team tab only shows once the shared board is configured (js/config.js).
+// The shifts tab only shows once Firebase is configured (js/config.js).
 if (!cloudEnabled()) {
-  document.querySelector('.tabs a[data-tab="team"]')?.remove();
+  document.querySelector('.tabs a[data-tab="shifts"]')?.remove();
   document.querySelector('.tabs')?.classList.add('four');
 }
 
@@ -68,6 +70,18 @@ function route() {
     case 'game': viewGame(parts[1]); break;
     case 'accessibility': viewAccessibility(); break;
     case 'team': viewTeam(); break;
+    case 'shifts':
+      if (!parts[1]) viewShifts();
+      else if (parts[1] === 'avail') viewAvailability();
+      else if (parts[1] === 'off') viewTimeOff();
+      else if (parts[1] === 'manage') viewManage();
+      else if (parts[1] === 'people' && parts[2]) viewPersonAvailability(parts[2]);
+      else if (parts[1] === 'people') viewPeople();
+      else if (parts[1] === 'settings') viewSettings();
+      else if (parts[1] === 'build') viewBuild(params.get('w'));
+      else if (parts[1] === 'branches') viewBranches();
+      else viewNotFound();
+      break;
     case 'sell': viewSell(); break;
     case 'onboard':
       if (parts[1] === 'day') viewOnboardDay(parts[2], parts[3]);
@@ -82,7 +96,7 @@ function route() {
 
 // Highlight the tab for the current section.
 function markTab(section) {
-  const tab = { learn: 'learn', onboard: 'learn', games: 'games', game: 'games', search: 'search', team: 'team' }[section] || 'home';
+  const tab = { learn: 'learn', onboard: 'learn', games: 'games', game: 'games', search: 'search', shifts: 'shifts', team: 'shifts' }[section] || 'home';
   document.querySelectorAll('.tabs a').forEach((a) => {
     if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });

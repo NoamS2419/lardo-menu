@@ -7,7 +7,7 @@ import {
 
 const env = await initializeTestEnvironment({
   projectId: 'demo-lardo',
-  firestore: { rules: readFileSync(new URL('../firestore.shifts.rules', import.meta.url), 'utf8'), host: '127.0.0.1', port: 8085 }
+  firestore: { rules: readFileSync(new URL('../firestore.shifts.rules', import.meta.url), 'utf8').replace('__ADMIN_UID__', 'noam'), host: '127.0.0.1', port: 8085 }
 });
 const mail = (u) => `${u}@staff.lardo.invalid`;
 const as = (u) => env.authenticatedContext(u, { email: mail(u) }).firestore();
@@ -70,7 +70,12 @@ await ok('dan signs up', setDoc(doc(dan, 'members/dan'), member('dan', { name: '
 await ok('or signs up', setDoc(doc(or, 'members/or'), member('or', { name: 'אור' })));
 await ok('omer signs up (stays pending)', setDoc(doc(omer, 'members/omer'), member('omer', { name: 'עומר כ.' })));
 await ok('tlv manager signs up in tlv', setDoc(doc(tlv, 'members/tlvboss'), member('tlvboss', { name: 'טל', branch: 'tlv' })));
-await ok('admin signs up as approved', setDoc(doc(noam, 'members/noam'), member('noam', { name: 'נועם ש.', status: 'approved' })));
+await no('admin cannot sign up as approved either', setDoc(doc(noam, 'members/noam'), member('noam', { name: 'נועם ש.', status: 'approved' })));
+await ok('admin signs up (pending)', setDoc(doc(noam, 'members/noam'), member('noam', { name: 'נועם ש.' })));
+await ok('admin approves own record', updateDoc(doc(noam, 'members/noam'), { status: 'approved', updatedAt: now() }));
+const fake = env.authenticatedContext('impostor', { email: mail('noam') }).firestore();
+await no('another account with the admin username is not admin', setDoc(doc(fake, 'branches/fake'), branch()));
+await no('…and cannot read members', getDoc(doc(fake, 'members/roni')));
 await ok('roni reads own record', getDoc(doc(roni, 'members/roni')));
 await no('roni cannot read lia', getDoc(doc(roni, 'members/lia')));
 await no('roni cannot approve self', updateDoc(doc(roni, 'members/roni'), { status: 'approved', updatedAt: now() }));
@@ -217,6 +222,8 @@ await no('score above 10 refused', setDoc(doc(lia, `daily/${today}_lia`), daily(
 await no('a score for another day refused', setDoc(doc(lia, 'daily/2026-01-01_lia'), daily('lia', { name: 'ליה מ', date: '2026-01-01' })));
 await ok('lia reads today\'s scores', getDocs(query(collection(lia, 'daily'), where('date', '==', today))));
 await no('lia cannot delete roni score', deleteDoc(doc(lia, `daily/${today}_roni`)));
+await no('tlv manager cannot remove a raanana score', deleteDoc(doc(tlv, `daily/${today}_roni`)));
+await no('tlv manager cannot remove a raanana player', deleteDoc(doc(tlv, 'players/roni')));
 await ok('or removes a score (employee left)', deleteDoc(doc(or, `daily/${today}_roni`)));
 await ok('roni saves learning progress', setDoc(doc(roni, 'progress/roni'), { data: '{}', updatedAt: now() }));
 await ok('roni reads it back', getDoc(doc(roni, 'progress/roni')));
