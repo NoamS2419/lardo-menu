@@ -909,6 +909,10 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .shift-row { border: 1px solid var(--line); border-radius: var(--r-2); padding: var(--sp-3); margin: 0 0 var(--sp-3); display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-2); }
 .shift-row .field input { width: 100%; min-width: 0; }
 @media (max-width: 420px) { .shift-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .shift-row .field:first-of-type { grid-column: 1 / -1; } }
+.shift-row.list-row, .shift-row.list-row .field:first-of-type { grid-template-columns: minmax(0, 1fr); grid-column: auto; }
+.list-row textarea { width: 100%; }
+.list-row [data-remove] { justify-self: start; }
+.menu-filter { margin: 0 0 var(--sp-3); }
 .shift-row legend { font-weight: var(--fw-bold); padding-inline: var(--sp-1); }
 .sch.need input { width: 100%; min-height: 44px; font: inherit; text-align: center; border: 1px solid var(--control); border-radius: var(--r-1); background: var(--surface); color: var(--text); }
 
