@@ -226,11 +226,13 @@ export async function deleteAccount() {
     av.forEach((d) => writes.push(deleteWrite(`availability/${d.id}`)));
     off.forEach((d) => writes.push(deleteWrite(`timeoff/${d.id}`)));
     daily.forEach((d) => writes.push(deleteWrite(`daily/${d.id}`)));
-    writes.push(deleteWrite(`standing/${acc.uid}`), deleteWrite(`players/${acc.uid}`), deleteWrite(`progress/${acc.uid}`));
+    writes.push(deleteWrite(`standing/${acc.uid}`), deleteWrite(`players/${acc.uid}`));
   }
   // One write at a time: a week that is already closed refuses only its own delete.
   await Promise.allSettled(writes.map((w) => commit([w])));
-  if (m) await commit([deleteWrite(`members/${acc.uid}`)]);
+  // progress goes in the same commit as the member record (the rules allow it only then).
+  if (m) await commit([deleteWrite(`progress/${acc.uid}`), deleteWrite(`members/${acc.uid}`)]);
+  else await commit([deleteWrite(`progress/${acc.uid}`)]).catch(() => null);
   const a = await token();
   await authCall('delete', { idToken: a.idToken }).catch(() => { /* already gone */ });
   signOut();

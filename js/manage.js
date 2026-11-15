@@ -61,12 +61,13 @@ async function cleanup(branch) {
     const now = new Date();
     // Filtered here rather than in the query, so no composite index is needed.
     const old = (rows) => rows.filter((d) => d.expireAt && d.expireAt < now);
-    const [av, sch, dr, off, mem] = await Promise.all([
+    const [av, sch, dr, off, mem, pend] = await Promise.all([
       list('availability', [['branch', '==', branch.id]], { limit: 1000 }).then(old),
       list('schedules', [['branch', '==', branch.id]], { limit: 200 }).then(old),
       list('drafts', [['branch', '==', branch.id]], { limit: 200 }).then(old),
       list('timeoff', [['branch', '==', branch.id]], { limit: 500 }).then(old),
-      list('members', [['branch', '==', branch.id], ['status', '==', 'disabled']], { limit: 100 })
+      list('members', [['branch', '==', branch.id], ['status', '==', 'disabled']], { limit: 100 }),
+      list('members', [['branch', '==', branch.id], ['status', '==', 'pending']], { limit: 100 })
     ]);
     const writes = [
       ...av.map((d) => deleteWrite(`availability/${d.id}`)),
@@ -75,7 +76,10 @@ async function cleanup(branch) {
       ...off.map((d) => deleteWrite(`timeoff/${d.id}`))
     ];
     // Someone who left more than 3 months ago: their record, standing availability and board entries go too.
-    for (const m of mem.filter((x) => x.expireAt && x.expireAt < now)) {
+    // A sign-up nobody approved within 3 months is removed the same way.
+    const stale = new Date(now.getTime() - 90 * 86400000);
+    const gone = [...mem.filter((x) => x.expireAt && x.expireAt < now), ...pend.filter((x) => x.createdAt && x.createdAt < stale)];
+    for (const m of gone) {
       writes.push(deleteWrite(`standing/${m.id}`), deleteWrite(`players/${m.id}`), deleteWrite(`progress/${m.id}`), deleteWrite(`members/${m.id}`));
     }
     await Promise.allSettled(writes.map((w) => commit([w])));

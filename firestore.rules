@@ -346,7 +346,8 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['data', 'updatedAt'])
         && (!('data' in request.resource.data) || (request.resource.data.data is string && request.resource.data.data.size() <= 20000))
         && request.resource.data.updatedAt == request.time;
-      allow delete: if isOwner(uid) || runsMemberOf(uid);
+      // Only together with deleting the account (else delete + recreate would skip the rate limit).
+      allow delete: if (isOwner(uid) && !existsAfter(memberPath(uid))) || runsMemberOf(uid);
     }
 
     // Nickname reservations from the old board: no longer used, the admin may clear them.
@@ -360,19 +361,18 @@ service cloud.firestore {
     function editsMenu() { return isAdmin() || (approved() && me().role == 'scheduler'); }
     function optText(d, k, max) { return !(k in d) || (d[k] is string && d[k].size() <= max); }
     function validProductEdit(d) {
-      return d.keys().hasOnly(['name', 'description', 'price', 'category', 'hidden', 'pitch', 'isNew', 'by', 'updatedAt'])
+      return d.keys().hasOnly(['name', 'description', 'price', 'category', 'hidden', 'pitch', 'isNew', 'updatedAt'])
         && (!('name' in d) || (d.name is string && d.name.size() >= 1 && d.name.size() <= 60))
         && optText(d, 'description', 600)
         && optText(d, 'pitch', 300)
-        && optText(d, 'by', 20)
         && (!('price' in d) || d.price == null || ((d.price is int || d.price is float) && d.price >= 0 && d.price <= 10000))
         && (!('category' in d) || (d.category is string && d.category.matches('^[a-z]{1,20}$')))
         && (!('hidden' in d) || d.hidden is bool)
         && (!('isNew' in d) || (d.isNew is bool && (!d.isNew || ('name' in d && 'category' in d))));
     }
-    // A list of texts (FAQ or tips): at most 40 entries; the whole document stays small.
+    // A list of texts (FAQ or tips), stored as one JSON string of at most 30,000 characters.
     function validList(d) {
-      return d.keys().hasOnly(['items', 'by', 'updatedAt']) && d.items is list && d.items.size() <= 40 && optText(d, 'by', 20);
+      return d.keys().hasOnly(['json', 'updatedAt']) && d.json is string && d.json.size() <= 30000;
     }
     match /menu/{id} {
       allow read: if true;

@@ -3,7 +3,7 @@
    Routes: #/shifts/menu, #/shifts/menu/p/<id>, #/shifts/menu/new, #/shifts/menu/faq, #/shifts/menu/tips */
 
 import { db, setDb, esc, setPage, announce, priceLabel, backLink } from './core.js';
-import { account, loadMember, runsBranch } from './account.js';
+import { loadMember, runsBranch } from './account.js';
 import { setDoc, deleteDoc } from './fs.js';
 import { productDocId } from './menu.js';
 import { loadData } from './catalog.js';
@@ -101,7 +101,7 @@ export async function viewMenuProduct(id) {
         const data = {
           name, category: form['m-cat'].value, price,
           description: cleanLong(form['m-desc'].value, 600), pitch: cleanLong(form['m-pitch'].value, 300),
-          hidden: !isNewForm && form['m-hidden'].checked, by: account().username
+          hidden: !isNewForm && form['m-hidden'].checked
         };
         if (p.is_new) data.isNew = true;
         try {
@@ -185,7 +185,7 @@ export async function viewMenuList(kind) {
           const out = readForm().map((it) => ({ ...it, [ka]: clean(it[ka], ma), [kb]: cleanLong(it[kb], mb) }))
             .filter((it) => it[ka] && it[kb]).slice(0, 40);
           try {
-            await setDoc(`menu/${L.docId}`, { items: out, by: account().username }, { stamp: ['updatedAt'] });
+            await setDoc(`menu/${L.docId}`, { json: JSON.stringify(out) }, { stamp: ['updatedAt'] });
             await reload();
           } catch (ex) {
             document.getElementById('form-err').textContent = ex.status === 403 ? 'אין הרשאה לשמור.' : 'לא הצלחנו לשמור. כדאי לנסות שוב.';
