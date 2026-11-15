@@ -107,6 +107,9 @@ function markTab(section) {
   });
 }
 
+// Not inside someone else's frame (clickjacking): GitHub Pages can't send X-Frame-Options.
+if (window.top !== window.self) document.documentElement.hidden = true;
+
 (async function start() {
   try {
     setDb(await loadData());

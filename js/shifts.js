@@ -635,14 +635,14 @@ export async function viewTimeOff() {
     const mine = (await list('timeoff', [['uid', '==', me.uid]])).sort((x, y) => x.from.localeCompare(y.from));
     if (!here()) return;
     const min = today();
-    const max = addDays(min, 100);
+    const max = addDays(min, 90);
     setPage('בקשת חופש', `
       <a class="back" href="#/shifts"><span aria-hidden="true">→</span> משמרות</a>
       <h1>בקשת חופש</h1>
       <p>הבקשה מגיעה לאור, שמתחשב בה כשהסידור נבנה. אין צורך לכתוב סיבה.</p>
       <form class="name-form" id="off-form" novalidate>
         <div class="field"><label for="from">מתאריך</label><input id="from" name="from" type="date" min="${min}" max="${max}" required></div>
-        <div class="field"><label for="to">עד תאריך (כולל)</label><input id="to" name="to" type="date" min="${min}" max="${max}"></div>
+        <div class="field"><label for="to">עד תאריך (כולל)</label><input id="to" name="to" type="date" min="${min}" max="${addDays(max, 60)}"></div>
         <div class="field"><label for="onote">הערה (לא חובה)</label><input id="onote" name="onote" type="text" maxlength="100" placeholder="למשל: רק בבוקר"></div>
         <p class="form-err" id="form-err" role="alert"></p>
         <button class="btn btn-wide" type="submit">שליחת הבקשה</button>
@@ -657,9 +657,11 @@ export async function viewTimeOff() {
       busy(form.querySelector('[type=submit]'), async () => {
         const from = form.from.value; const to = form.to.value || from;
         const err = document.getElementById('form-err');
-        if (!from || from < min || to > max) { err.textContent = 'צריך לבחור תאריך מהיום ועד 3 חודשים קדימה.'; form.from.focus(); return; }
+        if (!from || from < min || from > max) { err.textContent = 'צריך לבחור תאריך מהיום ועד 3 חודשים קדימה.'; form.from.focus(); return; }
         if (to < from) { err.textContent = 'תאריך הסיום לפני תאריך ההתחלה.'; form.to.focus(); return; }
-        const id = `${me.uid}_${from}_${Date.now().toString(36)}`;
+        if (to > addDays(from, 60)) { err.textContent = 'בקשה אחת יכולה להיות עד 60 יום. לתקופה ארוכה יותר כדאי לדבר עם הניהול.'; form.to.focus(); return; }
+        if (mine.some((o) => o.from === from)) { err.textContent = 'כבר יש בקשה שמתחילה בתאריך הזה. אפשר לבטל אותה ולשלוח חדשה.'; form.from.focus(); return; }
+        const id = `${me.uid}_${from}`; // one request per start day (the rules check this)
         try {
           await setDoc(`timeoff/${id}`, { branch: me.branch, uid: me.uid, name: me.name, from, to, note: form.onote.value.replace(/\s+/g, ' ').trim().slice(0, 100), expireAt: expiry(addDays(to, -7)) }, { stamp: ['createdAt'] });
         } catch (ex) { err.textContent = 'לא הצלחנו לשלוח. כדאי לנסות שוב.'; console.error(ex); return; }

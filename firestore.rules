@@ -14,7 +14,9 @@ service cloud.firestore {
     // The main admin (adds branches, appoints schedulers): one fixed account, by uid. The site's
     // admin screen fills in the uid when it copies these rules for publishing; never by email,
     // since anyone can register a username or change an account's address.
-    function isAdmin() { return isUser() && request.auth.uid == '__ADMIN_UID__'; }
+    // The main admin's uid: filled in by the site's "copy rules" button (the only place it appears).
+    function adminUid() { return '__ADMIN_UID__'; }
+    function isAdmin() { return isUser() && request.auth.uid == adminUid(); }
     function isOwner(uid) { return isUser() && request.auth.uid == uid; }
     function memberPath(uid) { return /databases/$(db)/documents/members/$(uid); }
     function me() { return get(memberPath(request.auth.uid)).data; }
@@ -25,7 +27,7 @@ service cloud.firestore {
     function runs(b) { return isAdmin() || (inBranch(b) && me().role == 'scheduler'); }
     // Whoever runs the branch of this account (for cleaning up after someone who left).
     function runsMemberOf(uid) {
-      return isAdmin() || (exists(memberPath(uid)) && runs(get(memberPath(uid)).data.branch));
+      return isAdmin() || (uid != adminUid() && exists(memberPath(uid)) && runs(get(memberPath(uid)).data.branch));
     }
 
     /* ---------- shared checks ---------- */
@@ -39,6 +41,14 @@ service cloud.firestore {
     }
     function validId(s) { return s is string && s.matches('^[a-z][a-z0-9-]{1,19}$'); }
     function validWeek(s) { return s is string && s.matches('^\\d{4}-\\d{2}-\\d{2}$'); }
+    // A real, nearby week: a Sunday from last week up to 6 weeks ahead (no writes to made-up weeks).
+    function nearWeek(s) {
+      return validWeek(s) && dayStart(s).dayOfWeek() == 7
+        && dayStart(s) > request.time - duration.value(8, 'd')
+        && dayStart(s) < request.time + duration.value(42, 'd');
+    }
+    // At most one write every 3 seconds to the same document (stops write loops).
+    function notTooSoon() { return resource == null || request.time > resource.data.updatedAt + duration.value(3, 's'); }
     // Slot keys are "<day 0-6><shift id>", e.g. ["0m", "3e"].
     function validSlots(l) {
       return l is list && l.size() <= 42
@@ -119,14 +129,19 @@ service cloud.firestore {
         && request.resource.data.username == resource.data.username
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.updatedAt == request.time
-        && (isAdmin() || (request.auth.uid != uid
+        && (isAdmin() || (request.auth.uid != uid && uid != adminUid()
             && runs(resource.data.branch)
+            // "same person as an old account" may only point at someone in the same branch
+            && (!('replaces' in request.resource.data)
+                || request.resource.data.replaces == resource.data.get('replaces', '')
+                || (request.resource.data.replaces != adminUid() && exists(memberPath(request.resource.data.replaces))
+                    && get(memberPath(request.resource.data.replaces)).data.branch == resource.data.branch))
             && resource.data.role == 'staff'
             && request.resource.data.role == 'staff'
             && request.resource.data.branch == resource.data.branch));
       // Deleting my own account, rejecting a request, or cleaning up someone disabled long ago.
       allow delete: if isOwner(uid) || isAdmin()
-        || (request.auth.uid != uid && runs(resource.data.branch) && resource.data.role == 'staff'
+        || (request.auth.uid != uid && uid != adminUid() && runs(resource.data.branch) && resource.data.role == 'staff'
             && resource.data.status in ['pending', 'disabled']);
     }
 
@@ -147,7 +162,7 @@ service cloud.firestore {
     }
     function validAvailability(d, id) {
       return d.keys().hasOnly(['branch', 'week', 'uid', 'name', 'slots', 'note', 'updatedAt', 'expireAt', 'by'])
-        && validId(d.branch) && validWeek(d.week)
+        && validId(d.branch) && nearWeek(d.week)
         && d.uid is string && d.uid.size() >= 1 && d.uid.size() <= 128
         && id == d.branch + '_' + d.week + '_' + d.uid
         && validName(d.name)
@@ -160,17 +175,21 @@ service cloud.firestore {
 
     match /availability/{id} {
       // Only the person and whoever runs their branch. Other employees never see it.
-      allow get: if (approved() && resource == null)
+      // A missing document can be asked for only by its owner (the id ends with their uid), so
+      // "not found" vs "no permission" never tells anyone whether a coworker submitted.
+      allow get: if (approved() && resource == null && id.matches('^[a-z0-9-]{1,20}_\\d{4}-\\d{2}-\\d{2}_' + request.auth.uid + '$'))
         || (resource != null && ((approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch)));
       allow list: if (approved() && resource.data.uid == request.auth.uid) || runs(resource.data.branch);
-      allow create, update: if validAvailability(request.resource.data, id)
+      allow create, update: if validAvailability(request.resource.data, id) && notTooSoon()
         && ((inBranch(request.resource.data.branch)
               && request.resource.data.uid == request.auth.uid
               && request.resource.data.name == me().name
               && request.resource.data.by == 'self'
               && openForSubmission(request.resource.data.branch, request.resource.data.week))
             // The scheduler can enter availability for someone (no smartphone, after the deadline).
-            || (runs(request.resource.data.branch) && request.resource.data.by == 'manager'));
+            || (runs(request.resource.data.branch) && request.resource.data.by == 'manager'
+                && exists(memberPath(request.resource.data.uid))
+                && get(memberPath(request.resource.data.uid)).data.branch == request.resource.data.branch));
       allow delete: if (approved() && resource.data.uid == request.auth.uid
               && openForSubmission(resource.data.branch, resource.data.week))
         || runs(resource.data.branch)
@@ -182,7 +201,7 @@ service cloud.firestore {
     match /standing/{uid} {
       allow get: if (approved() && request.auth.uid == uid) || (resource != null && runs(resource.data.branch));
       allow list: if runs(resource.data.branch);
-      allow create, update: if request.resource.data.keys().hasOnly(['branch', 'uid', 'name', 'slots', 'note', 'updatedAt'])
+      allow create, update: if notTooSoon() && request.resource.data.keys().hasOnly(['branch', 'uid', 'name', 'slots', 'note', 'updatedAt'])
         && validNote(request.resource.data.note)
         && validId(request.resource.data.branch)
         && request.resource.data.uid == uid
@@ -205,6 +224,11 @@ service cloud.firestore {
         && validName(request.resource.data.name)
         && validWeek(request.resource.data.from) && validWeek(request.resource.data.to)
         && request.resource.data.from <= request.resource.data.to
+        // One request per person per start day, from yesterday up to 3 months ahead, at most 60 days long.
+        && id == request.resource.data.uid + '_' + request.resource.data.from
+        && dayStart(request.resource.data.from) > request.time - duration.value(2, 'd')
+        && dayStart(request.resource.data.from) < request.time + duration.value(92, 'd')
+        && dayStart(request.resource.data.to) <= dayStart(request.resource.data.from) + duration.value(60, 'd')
         && validNote(request.resource.data.note)
         && request.resource.data.createdAt == request.time
         && validExpiry(request.resource.data.expireAt)
@@ -269,18 +293,22 @@ service cloud.firestore {
     match /players/{uid} {
       allow read: if approved() || isAdmin();
       allow create, update: if isOwner(uid) && approved()
-        && request.resource.data.keys().hasOnly(['name', 'total', 'updatedAt', 'onboarded', 'known'])
+        && request.resource.data.keys().hasOnly(['name', 'total', 'onboarded', 'known'])
         && request.resource.data.name == me().name
         && request.resource.data.total is int
         && request.resource.data.total >= 0
-        && request.resource.data.total <= 1000000
+        // No "when did they last play" on the board: the time of the last update is kept in the
+        // private progress/{uid} document, written in the same commit (and limited to once per 3 s).
+        && getAfter(/databases/$(db)/documents/progress/$(uid)).data.updatedAt == request.time
+        // Scores grow by playing: at most 20000 to start with, and +500 per update.
+        && (resource == null ? request.resource.data.total <= 20000
+            : request.resource.data.total <= resource.data.total + 500)
         // Team progress (optional fields): onboarding finished, and % known per category as
         // "breads:40,pastries:100" (up to 20 categories, lowercase ids, 0-100).
         && (!('onboarded' in request.resource.data) || request.resource.data.onboarded is bool)
         && (!('known' in request.resource.data) || (request.resource.data.known is string
             && request.resource.data.known.size() <= 400
-            && request.resource.data.known.matches('^$|^[a-z]{1,20}:(100|[1-9]?[0-9])(,[a-z]{1,20}:(100|[1-9]?[0-9])){0,19}$')))
-        && request.resource.data.updatedAt == request.time;
+            && request.resource.data.known.matches('^$|^[a-z]{1,20}:(100|[1-9]?[0-9])(,[a-z]{1,20}:(100|[1-9]?[0-9])){0,19}$')));
       // Mine, or cleaned up by whoever runs my branch (someone who left); the admin also clears
       // leftovers from the old nickname board.
       allow delete: if isOwner(uid) || runsMemberOf(uid);
@@ -313,10 +341,10 @@ service cloud.firestore {
     // Personal learning progress, so it follows the account to a new phone. Only its owner.
     match /progress/{uid} {
       allow get: if isOwner(uid) && approved();
-      allow create, update: if isOwner(uid) && approved()
+      // Private to the person: the time of the last score-board update (see players).
+      allow create, update: if isOwner(uid) && approved() && notTooSoon()
         && request.resource.data.keys().hasOnly(['data', 'updatedAt'])
-        && request.resource.data.data is string
-        && request.resource.data.data.size() <= 100000
+        && (!('data' in request.resource.data) || (request.resource.data.data is string && request.resource.data.data.size() <= 20000))
         && request.resource.data.updatedAt == request.time;
       allow delete: if isOwner(uid) || runsMemberOf(uid);
     }
