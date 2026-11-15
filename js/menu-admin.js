@@ -2,14 +2,14 @@
    Changes are saved as menu edits in Firestore (see menu.js) and shown to everyone on their next visit.
    Routes: #/shifts/menu, #/shifts/menu/p/<id>, #/shifts/menu/new, #/shifts/menu/faq, #/shifts/menu/tips */
 
-import { db, setDb, esc, setPage, announce, priceLabel } from './core.js';
+import { db, setDb, esc, setPage, announce, priceLabel, backLink } from './core.js';
 import { account, loadMember, runsBranch } from './account.js';
 import { setDoc, deleteDoc } from './fs.js';
 import { productDocId } from './menu.js';
 import { loadData } from './catalog.js';
 import { busy, errorState, loadingHtml } from './shifts.js';
 
-const back = (href, label) => `<a class="back" href="${href}"><span aria-hidden="true">→</span> ${label}</a>`;
+const back = backLink;
 const field = (id, label, input, hint = '') => `
   <div class="field"><label for="${id}">${label}</label>${hint ? `<p class="hint">${hint}</p>` : ''}${input}</div>`;
 const clean = (s, max) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, max);

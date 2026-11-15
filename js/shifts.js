@@ -2,7 +2,7 @@
    "my shifts" and the published schedule. Or's screens are in manage.js. All text from people
    (names, notes) goes through esc(). */
 
-import { esc, setPage, announce, focusMain, rosette } from './core.js';
+import { esc, setPage, announce, focusMain, rosette, stillAt } from './core.js';
 import {
   cloudEnabled, account, loadMember, cachedMember, isApproved, runsBranch, loadBranches, loadBranch,
   checkUsername, checkDisplayName, checkPassword, signUp, signIn, signOut, authMessage, deleteAccount,
@@ -12,10 +12,9 @@ import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from '
 import { installCardHtml, bindInstallCard } from './install.js';
 import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
-  expiry, slotKey, hoursOf, openSlots, timeRange
+  expiry, slotKey, hoursOf, openSlots, timeRange, weekId
 } from './week.js';
 
-const stillAt = (h) => () => location.hash === h;
 
 /* ---------- small pieces shared with manage.js ---------- */
 
@@ -95,7 +94,6 @@ export function scheduleTable(branch0, week, sched, myIds = new Set()) {
     </div>`;
 }
 
-const weekId = (branch, week) => `${branch}_${week}`;
 // A published week keeps the shift names and hours it was published with.
 export const asPublished = (branch, sched) => (sched && sched.shifts ? { ...branch, shifts: sched.shifts, hours: sched.hours || {} } : branch);
 
