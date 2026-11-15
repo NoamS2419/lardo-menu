@@ -573,8 +573,24 @@ export async function viewAvailability(forMember = null) {
       b.setAttribute('aria-pressed', String(on));
       b.textContent = on ? '✓ אפשר' : '';
       count();
+      dirty = true;
     }));
     const form = document.getElementById('avail-form');
+    // Taps that weren't sent yet: ask before leaving (links, tabs, closing the page).
+    let dirty = false;
+    form.addEventListener('input', () => { dirty = true; });
+    form.addEventListener('change', () => { dirty = true; });
+    const LEAVE = 'הזמינות עוד לא נשלחה. לצאת בלי לשלוח?';
+    const onLink = (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!dirty || !a || !here()) return;
+      if (!confirm(LEAVE)) { e.preventDefault(); e.stopPropagation(); } else dirty = false;
+    };
+    const onUnload = (e) => { if (dirty && here()) { e.preventDefault(); e.returnValue = ''; } };
+    document.addEventListener('click', onLink, true);
+    window.addEventListener('beforeunload', onUnload);
+    const stop = () => { if (here()) return; document.removeEventListener('click', onLink, true); window.removeEventListener('beforeunload', onUnload); window.removeEventListener('hashchange', stop); };
+    window.addEventListener('hashchange', stop);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       busy(form.querySelector('[type=submit]'), async () => {
@@ -597,6 +613,7 @@ export async function viewAvailability(forMember = null) {
           return;
         }
         if (!here()) return;
+        dirty = false;
         location.hash = back;
         announce(byManager ? 'הזמינות נשמרה' : `הזמינות הוגשה. אפשר לשנות ${deadlineText(branch)}.`);
       });
