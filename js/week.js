@@ -65,6 +65,9 @@ export function deadlineText(branch) {
 // About 3 months of keeping things, counted from the end of the week.
 export const expiry = (week) => new Date(utcDay(week) + (7 + 90) * 864e5);
 
+// Documents for one branch's week are named "<branch>_<week>", e.g. "raanana_2026-11-22".
+export const weekId = (branch, week) => `${branch}_${week}`;
+
 export const slotKey = (dow, shiftId) => `${dow}${shiftId}`;
 
 // A shift's hours on a given day (a slot can override the branch's usual hours, e.g. Friday).

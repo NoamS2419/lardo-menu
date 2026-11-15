@@ -2,6 +2,8 @@
 
 אתר פנימי ללימוד המוצרים וסידור המשמרות לעובדי הסניף. אתר סטטי (HTML/CSS/JS בלי בנייה), יושב על GitHub Pages.
 
+למתכנתים: הסבר מלא על המבנה, התפקידים, הנתונים ואיך משנים דברים נמצא ב-[ARCHITECTURE.md](ARCHITECTURE.md).
+
 - `data/products.json` — כל המוצרים. נוצר ע"י `tools/build.py` משליפת וולט + הערות הצוות; לא לערוך ידנית. רענון ומבנה: [tools/README.md](tools/README.md).
 - `data/images/` — תמונות המוצרים (מורדות ע"י ה־Action "Refresh from Wolt").
 - `js/main.js` — נקודת הכניסה: טעינת הנתונים, ניתוב בין דפים, תמונה חלופית.

@@ -2,7 +2,7 @@
    the schedule, branch settings, and (for the main admin) branches and who runs them.
    The rules decide what each account may do; these screens only offer it. */
 
-import { esc, setPage, announce, focusMain, rosette } from './core.js';
+import { esc, setPage, announce, focusMain, rosette, backLink, stillAt } from './core.js';
 import {
   ADMIN_USERNAME, account, loadMember, runsBranch, loadBranches, loadBranch, forgetBranches, createBranch, DEFAULT_BRANCH,
   checkDisplayName
@@ -10,7 +10,7 @@ import {
 import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from './fs.js';
 import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, weekRangeText, closesAt, deadlineText,
-  expiry, slotKey, hoursOf, openSlots, timeRange
+  expiry, slotKey, hoursOf, openSlots, timeRange, weekId
 } from './week.js';
 import { busy, errorState, loadingHtml, plural, slotLabel, scheduleTable, viewAvailability } from './shifts.js';
 import { shareImage } from './share.js';
@@ -22,9 +22,7 @@ async function removeFromBoard(uid) {
   await Promise.allSettled([deleteDoc(`players/${uid}`), ...daily.map((d) => deleteDoc(`daily/${d.id}`))]);
 }
 
-const stillAt = (h) => () => location.hash === h;
-const back = (href, label) => `<a class="back" href="${href}"><span aria-hidden="true">→</span> ${label}</a>`;
-const weekId = (b, w) => `${b}_${w}`;
+const back = backLink;
 // Slots whose people or start times differ between two schedules.
 function slotsDiffer(a = {}, b = {}) {
   const sig = (l) => (l || []).map((p) => `${p.uid}@${p.start || ''}`).sort().join(',');

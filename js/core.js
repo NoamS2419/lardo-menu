@@ -34,6 +34,11 @@ export const priceLabel = (p) => {
   return shekel(p.price) ?? 'המחיר בקופה';
 };
 
+// "← back" link at the top of an inner page.
+export const backLink = (href, label) => `<a class="back" href="${href}"><span aria-hidden="true">→</span> ${label}</a>`;
+// For async screens: true while the person is still on the page that started the work.
+export const stillAt = (hash) => () => location.hash === hash;
+
 export const initial = (name) => esc((name || '?').trim().charAt(0));
 
 // Wolt image URLs take a width; local files live under data/.
