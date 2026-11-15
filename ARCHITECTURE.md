@@ -40,6 +40,7 @@ hide something: if the rules allow a read, anyone signed in can make it.
 | `js/shifts.js` | Employee shift screens: sign in, my shifts, availability, time off, the home-page card. |
 | `js/manage.js` | Scheduler screens: team and approvals, settings, building and publishing the schedule. |
 | `js/share.js` | Draws the published week as a picture for WhatsApp (canvas, no outside service). |
+| `js/calendar.js` | "Add to calendar": my upcoming shifts as an `.ics` file, made in the browser. |
 | `js/install.js` | "Install on your phone" card (iPhone steps, Android install prompt). |
 | `sw.js` | Service worker: caches the site for offline use. **Bump `VERSION` when you change files.** |
 | `firestore.rules` | Who may read and write what. Tested in `tests/rules.test.mjs`. |
