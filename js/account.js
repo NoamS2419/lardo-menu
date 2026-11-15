@@ -165,7 +165,7 @@ export async function signUp({ username, password, name }) {
     await passwordSignUp(emailOf(username), password, anonToken);
   } catch (e) {
     // The old anonymous account is gone on the server: make a fresh account instead.
-    if (anonToken && (e.code === 'USER_NOT_FOUND' || e.code === 'INVALID_ID_TOKEN' || e.code === 'TOKEN_EXPIRED')) {
+    if (anonToken && ['USER_NOT_FOUND', 'INVALID_ID_TOKEN', 'TOKEN_EXPIRED', 'OPERATION_NOT_ALLOWED'].includes(e.code)) {
       await passwordSignUp(emailOf(username), password);
     } else throw e;
   }
