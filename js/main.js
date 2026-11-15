@@ -1,6 +1,7 @@
 /* Entry point: loads the data, routes between pages, image fallbacks. */
 
 import { db, setDb, main, focusMain, initial, esc } from './core.js';
+import { viewMenuAdmin, viewMenuProduct, viewMenuList } from './menu-admin.js';
 import {
   loadData, viewHome, viewCategory, viewProduct, viewSearch, viewFaq, viewAccessibility, viewNotFound
 } from './catalog.js';
@@ -80,6 +81,10 @@ function route() {
       else if (parts[1] === 'settings') viewSettings();
       else if (parts[1] === 'build') viewBuild(params.get('w'));
       else if (parts[1] === 'branches') viewBranches();
+      else if (parts[1] === 'menu' && parts[2] === 'p') viewMenuProduct(parts[3]);
+      else if (parts[1] === 'menu' && parts[2] === 'new') viewMenuProduct(null);
+      else if (parts[1] === 'menu' && parts[2]) viewMenuList(parts[2]);
+      else if (parts[1] === 'menu') viewMenuAdmin();
       else viewNotFound();
       break;
     case 'sell': viewSell(); break;

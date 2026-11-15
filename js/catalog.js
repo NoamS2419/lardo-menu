@@ -8,6 +8,7 @@ import {
 import { progress, setKnown, knownCount, streak, today, levelInfo } from './progress.js';
 import { burst } from './fx.js';
 import { homeCard } from './shifts.js';
+import { loadMenuEdits, applyMenuEdits } from './menu.js';
 
 /* ---------- data ---------- */
 
@@ -15,6 +16,8 @@ export async function loadData() {
   const res = await fetch(DATA_URL, { cache: 'no-cache' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const raw = await res.json();
+  // The schedulers' changes (hide, rename, price, new products, FAQ, tips) go on top of the Wolt snapshot.
+  const hidden = applyMenuEdits(raw, await loadMenuEdits());
   const products = (raw.products || []).filter((p) => p && p.id && p.name);
   const byCat = new Map();
   for (const p of products) {
@@ -32,7 +35,7 @@ export async function loadData() {
       ...(p.aliases || []), ...(p.ingredients || []), ...(p.choices || []), ...(p.tags || [])
     ].join(' '));
   }
-  return { categories, products, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
+  return { categories, allCategories: raw.categories || [], products, hidden, byId, byCat, faq: raw.customer_faq || [], updated: raw.updated,
     situations: raw.sales_situations && Array.isArray(raw.sales_situations.items) ? raw.sales_situations : { draft: true, items: [] } };
 }
 
