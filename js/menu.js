@@ -5,8 +5,9 @@
    Documents:
      menu/p_<productId>  changes to one product, or a whole new product (isNew: true)
                          fields: name, description, price, category, hidden, pitch, isNew
-     menu/faq            { items: [{ topic, text }] }   replaces the customer questions page
-     menu/tips           { items: [{ id, title, tip }] } replaces the sales tips texts */
+     menu/faq            { json: '[{ topic, text }]' }    replaces the customer questions page
+     menu/tips           { json: '[{ id, title, tip }]' } replaces the sales tips texts
+                         (a JSON string, so the rules can cap its size) */
 
 import { listPublic, cloudEnabled } from './fs.js';
 
@@ -59,11 +60,12 @@ export function applyMenuEdits(raw, rows) {
     if (row.hidden) hiddenIds.add(id);
   }
 
-  const faq = rows.find((r) => r.id === 'faq');
-  if (faq && Array.isArray(faq.items)) raw.customer_faq = faq.items.filter((f) => f && f.topic && f.text);
+  const listOf = (id) => { const r = rows.find((x) => x.id === id); try { return r && JSON.parse(r.json); } catch (e) { return null; } };
+  const faq = { items: listOf('faq') };
+  if (Array.isArray(faq.items)) raw.customer_faq = faq.items.filter((f) => f && f.topic && f.text);
 
-  const tips = rows.find((r) => r.id === 'tips');
-  if (tips && Array.isArray(tips.items)) {
+  const tips = { items: listOf('tips') };
+  if (Array.isArray(tips.items)) {
     // Product links stay with the tip they belonged to in the snapshot.
     const old = new Map(((raw.sales_situations || {}).items || []).map((t) => [t.id, t]));
     raw.sales_situations = {

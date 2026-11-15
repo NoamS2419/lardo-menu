@@ -269,32 +269,36 @@ await pause();
 await ok('roni saves learning progress', setDoc(doc(roni, 'progress/roni'), { data: '{}', updatedAt: now() }));
 await ok('roni reads it back', getDoc(doc(roni, 'progress/roni')));
 await no('lia cannot read roni progress', getDoc(doc(lia, 'progress/roni')));
+await no('roni cannot delete own progress on its own (rate-limit reset)', deleteDoc(doc(roni, 'progress/roni')));
 await no('or cannot read roni progress', getDoc(doc(or, 'progress/roni')));
 await no('nobody writes old nickname reservations', setDoc(doc(roni, 'names/x'), { uid: 'roni' }));
 await no('unknown collections are closed', getDoc(doc(noam, 'secrets/x')));
 
 /* ---------- menu edits ---------- */
-const edit = (x = {}) => ({ name: 'קרואסון', description: 'חמאה', price: 14, hidden: false, pitch: 'עם קפה', by: 'or', updatedAt: now(), ...x });
+const edit = (x = {}) => ({ name: 'קרואסון', description: 'חמאה', price: 14, hidden: false, pitch: 'עם קפה', updatedAt: now(), ...x });
 await ok('scheduler edits a product', setDoc(doc(or, 'menu/p_abc123'), edit()));
 await ok('scheduler hides a product', setDoc(doc(or, 'menu/p_abc124'), { hidden: true, updatedAt: now() }));
 await ok('scheduler adds a new product', setDoc(doc(or, 'menu/p_new-x1'), edit({ isNew: true, category: 'pastries' })));
 await no('new product needs a category', setDoc(doc(or, 'menu/p_new-x2'), edit({ isNew: true })));
 await ok('admin edits a product', setDoc(doc(noam, 'menu/p_abc125'), edit({ price: 9.5 })));
-await ok('scheduler edits the FAQ', setDoc(doc(or, 'menu/faq'), { items: [{ topic: 'שמירה', text: 'במקפיא' }], updatedAt: now() }));
-await ok('scheduler edits the tips', setDoc(doc(or, 'menu/tips'), { items: [{ id: 'a', title: 'ת', tip: 'ט' }], updatedAt: now() }));
+await ok('scheduler edits the FAQ', setDoc(doc(or, 'menu/faq'), { json: JSON.stringify([{ topic: 'שמירה', text: 'במקפיא' }]), updatedAt: now() }));
+await no('a FAQ over 30,000 characters is refused', setDoc(doc(or, 'menu/faq'), { json: 'x'.repeat(30001), updatedAt: now() }));
+await no('the FAQ as a raw list is refused', setDoc(doc(or, 'menu/faq'), { items: [{ topic: 'a', text: 'b' }], updatedAt: now() }));
+await no('menu edits do not carry who edited (public collection)', setDoc(doc(or, 'menu/p_abc126'), edit({ by: 'or' })));
+await ok('scheduler edits the tips', setDoc(doc(or, 'menu/tips'), { json: JSON.stringify([{ id: 'a', title: 'ת', tip: 'ט' }]), updatedAt: now() }));
 await no('staff cannot edit the menu', setDoc(doc(roni, 'menu/p_abc123'), edit()));
 await no('signed-out cannot edit the menu', setDoc(doc(nobody, 'menu/p_abc123'), edit()));
 await no('pending cannot edit the menu', setDoc(doc(omer, 'menu/p_abc123'), edit()));
 await no('negative price refused', setDoc(doc(or, 'menu/p_abc123'), edit({ price: -1 })));
 await no('unknown fields refused', setDoc(doc(or, 'menu/p_abc123'), edit({ image: 'https://evil' })));
-await no('bad doc id refused', setDoc(doc(or, 'menu/settings'), { items: [], updatedAt: now() }));
+await no('bad doc id refused', setDoc(doc(or, 'menu/settings'), { json: '[]', updatedAt: now() }));
 await no('too-long description refused', setDoc(doc(or, 'menu/p_abc123'), edit({ description: 'x'.repeat(601) })));
 await ok('anyone reads the menu edits', getDocs(collection(nobody, 'menu')));
 await no('staff cannot delete menu edits', deleteDoc(doc(roni, 'menu/p_abc123')));
 await ok('scheduler resets a product to Wolt', deleteDoc(doc(or, 'menu/p_abc123')));
 
 /* ---------- leaving ---------- */
-await ok('roni deletes own account record', deleteDoc(doc(roni, 'members/roni')));
+await ok('roni deletes own account record together with progress', (() => { const b = writeBatch(roni); b.delete(doc(roni, 'progress/roni')); b.delete(doc(roni, 'members/roni')); return b.commit(); })());
 await no('after leaving: no schedule', getDoc(doc(roni, `schedules/raanana_${W}`)));
 await ok('or may delete own record (leaving)', deleteDoc(doc(or, 'members/or')));
 await no('after leaving: or cannot read drafts', getDoc(doc(or, `drafts/raanana_${W}`)));
