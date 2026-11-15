@@ -327,6 +327,33 @@ service cloud.firestore {
       allow create, update: if false;
     }
 
+    /* ---------- menu edits: the schedulers' changes on top of the Wolt snapshot ----------
+       Everyone may read them (the menu is open to all). Schedulers and the admin edit them. */
+    function editsMenu() { return isAdmin() || (approved() && me().role == 'scheduler'); }
+    function optText(d, k, max) { return !(k in d) || (d[k] is string && d[k].size() <= max); }
+    function validProductEdit(d) {
+      return d.keys().hasOnly(['name', 'description', 'price', 'category', 'hidden', 'pitch', 'isNew', 'by', 'updatedAt'])
+        && (!('name' in d) || (d.name is string && d.name.size() >= 1 && d.name.size() <= 60))
+        && optText(d, 'description', 600)
+        && optText(d, 'pitch', 300)
+        && optText(d, 'by', 20)
+        && (!('price' in d) || d.price == null || ((d.price is int || d.price is float) && d.price >= 0 && d.price <= 10000))
+        && (!('category' in d) || (d.category is string && d.category.matches('^[a-z]{1,20}$')))
+        && (!('hidden' in d) || d.hidden is bool)
+        && (!('isNew' in d) || (d.isNew is bool && (!d.isNew || ('name' in d && 'category' in d))));
+    }
+    // A list of texts (FAQ or tips): at most 40 entries; the whole document stays small.
+    function validList(d) {
+      return d.keys().hasOnly(['items', 'by', 'updatedAt']) && d.items is list && d.items.size() <= 40 && optText(d, 'by', 20);
+    }
+    match /menu/{id} {
+      allow read: if true;
+      allow create, update: if editsMenu() && request.resource.data.updatedAt == request.time
+        && ((id.matches('^p_[A-Za-z0-9_-]{1,40}$') && validProductEdit(request.resource.data))
+            || (id in ['faq', 'tips'] && validList(request.resource.data)));
+      allow delete: if editsMenu();
+    }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

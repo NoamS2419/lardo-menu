@@ -174,3 +174,10 @@ export async function list(collection, where = [], { orderBy, desc, limit = 300 
   const rows = await call(`${docsBase()}:runQuery`, { body: { structuredQuery }, token: a.idToken });
   return rows.filter((r) => r.document).map((r) => ({ id: r.document.name.split('/').pop(), ...decodeFields(r.document.fields) }));
 }
+
+// Reads a whole small collection that the rules leave open to everyone (the menu edits),
+// without signing in. Up to 300 documents.
+export async function listPublic(collection) {
+  const r = await call(`${docsBase()}/${collection}?pageSize=300`, { method: 'GET' });
+  return (r.documents || []).map((d) => ({ id: d.name.split('/').pop(), ...decodeFields(d.fields) }));
+}
