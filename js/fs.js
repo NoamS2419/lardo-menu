@@ -64,9 +64,11 @@ export const authCall = (method, body) => call(`${authBase()}/accounts:${method}
 
 // Signs in, or (with the old anonymous account's token) links a username to it, keeping its uid.
 export async function passwordSignUp(email, password, anonIdToken) {
-  const r = anonIdToken
-    ? await authCall('update', { idToken: anonIdToken, email, password, returnSecureToken: true })
-    : await authCall('signUp', { email, password, returnSecureToken: true });
+  // signUp with the anonymous idToken links the email and password to that same account (like the
+  // official SDK does). accounts:update is refused while email enumeration protection is on.
+  const r = await authCall('signUp', anonIdToken
+    ? { idToken: anonIdToken, email, password, returnSecureToken: true }
+    : { email, password, returnSecureToken: true });
   const a = { ...fromAuthReply(r), email };
   setAuth(a);
   return a;
