@@ -9,7 +9,7 @@
    Product photos: their names change when they change, so the saved copy is used first.
    Only this site's own files are touched; the board, accounts and shifts (Google) always go to the network. */
 
-const VERSION = 'v15';
+const VERSION = 'v16';
 const SHELL = `lardo-shell-${VERSION}`;
 const PHOTOS = 'lardo-photos';
 const DATA = 'data/products.json';
@@ -17,7 +17,7 @@ const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icon.svg', DATA,
   'js/main.js', 'js/core.js', 'js/catalog.js', 'js/learn.js', 'js/onboard.js', 'js/team.js',
   'js/cloud.js', 'js/config.js', 'js/progress.js', 'js/fx.js',
-  'js/fs.js', 'js/week.js', 'js/account.js', 'js/shifts.js', 'js/manage.js', 'js/share.js', 'js/menu.js', 'js/menu-admin.js', 'js/install.js',
+  'js/fs.js', 'js/week.js', 'js/account.js', 'js/shifts.js', 'js/manage.js', 'js/share.js', 'js/menu.js', 'js/menu-admin.js', 'js/install.js', 'js/calendar.js',
   'fonts/frank-ruhl-libre-hebrew-400-normal.woff2', 'fonts/frank-ruhl-libre-hebrew-500-normal.woff2',
   'fonts/frank-ruhl-libre-latin-400-normal.woff2', 'fonts/frank-ruhl-libre-latin-500-normal.woff2',
   'fonts/cormorant-garamond-latin-600-normal.woff2'

@@ -88,3 +88,14 @@ export function openSlots(branch, need = branch.need) {
   }
   return out;
 }
+
+// "היום בסוף היום" / "מחר בשעה 20:00" when submission for `week` closes today or tomorrow, else ''.
+export function closingSoonText(branch, week, now = new Date()) {
+  const closeDay = addDays(week, -7 + branch.closeDow);
+  const t = today(now);
+  const day = closeDay === t ? 'היום' : closeDay === addDays(t, 1) ? 'מחר' : '';
+  if (!day) return '';
+  if (branch.closeMin >= 1440) return `${day} בסוף היום`;
+  const h = String(Math.floor(branch.closeMin / 60)).padStart(2, '0');
+  return `${day} בשעה ${ltr(`${h}:${String(branch.closeMin % 60).padStart(2, '0')}`)}`;
+}

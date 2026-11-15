@@ -12,8 +12,9 @@ import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from '
 import { installCardHtml, bindInstallCard } from './install.js';
 import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
-  expiry, slotKey, hoursOf, openSlots, timeRange, weekId
+  expiry, slotKey, hoursOf, openSlots, timeRange, weekId, closingSoonText
 } from './week.js';
+import { shiftsIcs, downloadIcs } from './calendar.js';
 
 
 /* ---------- small pieces shared with manage.js ---------- */
@@ -171,18 +172,21 @@ export async function homeCard(top, bottom = top) {
     const branch = await loadBranch(member.branch);
     if (!branch) return;
     const tw = thisWeek(); const nw = nextWeek();
-    const [a, b, mine] = await Promise.all([
+    const [a, b, mine, standing] = await Promise.all([
       loadPublished(branch.id, tw), loadPublished(branch.id, nw),
-      getDoc(`availability/${weekId(branch.id, nw)}_${member.uid}`).catch(() => null)
+      getDoc(`availability/${weekId(branch.id, nw)}_${member.uid}`).catch(() => null),
+      getDoc(`standing/${member.uid}`).catch(() => null)
     ]);
     if (!top.isConnected) return;
     const all = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
     const list = all.slice(0, 3);
     const changed = unseenChange(member, branch.id, tw, a) || unseenChange(member, branch.id, nw, b);
     const late = Date.now() > closesAt(branch, nw).getTime();
-    const due = !b && !mine && !(late && !branch.lateOk);
-    const availLine = b ? '' : mine ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
+    const due = !b && !mine && !standing && !(late && !branch.lateOk);
+    const soon = due && !late ? closingSoonText(branch, nw) : '';
+    const availLine = b ? '' : mine || standing ? `<span class="sc-ok">✓ הזמינות לשבוע הבא הוגשה</span>`
       : !due ? ''
+      : soon ? `<span class="sc-warn"><strong>תזכורת:</strong> ההגשה לשבוע הבא נסגרת ${soon}, ועוד לא הוגשה זמינות.</span>`
       : `<span class="sc-warn">עוד לא הוגשה זמינות לשבוע הבא. ${late ? 'המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם.' : `אפשר ${esc(deadlineText(branch))}.`}</span>`;
     if (!list.length && !changed && !due) {
       put(bottom, shiftRow('המשמרות שלי', a || b ? 'אין לך משמרות בימים הקרובים.' : 'הסידור עוד לא פורסם.'));
@@ -461,9 +465,10 @@ async function viewHub(member, here) {
   if (b) {
     availCard = '<p>הסידור לשבוע הבא פורסם, וההגשה נסגרה.</p>';
   } else {
+    const soon = !mine && !standing && !late ? closingSoonText(branch, nw) : '';
     const status = mine ? `<p class="ok-line">✓ הזמינות לשבוע ${weekRange(nw)} הוגשה.</p>`
       : standing ? `<p class="ok-line">✓ הזמינות הקבועה שלך תיכנס לשבוע ${weekRange(nw)}.</p>`
-      : `<p class="warn-line">עוד לא הוגשה זמינות לשבוע ${weekRange(nw)}.</p>`;
+      : `<p class="warn-line">${soon ? `<strong>תזכורת:</strong> ההגשה נסגרת ${soon}. ` : ''}עוד לא הוגשה זמינות לשבוע ${weekRange(nw)}.</p>`;
     const when = late
       ? (branch.lateOk ? '<p class="hint">המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם.</p>' : '<p class="hint">ההגשה נסגרה. אחרי המועד, שינויים רק דרך ניהול הסידור.</p>')
       : `<p class="hint">אפשר להגיש ולשנות ${esc(deadlineText(branch))}.</p>`;
@@ -478,6 +483,7 @@ async function viewHub(member, here) {
       <h2 id="mine-h">המשמרות שלי</h2>
       ${changed ? `<p class="change-line" role="status">המשמרות שלך השתנו מאז הפעם הקודמת.${marked ? ' השינויים מסומנים "עודכן".' : ''}</p>` : ''}
       ${a || b ? myShiftsHtml(branch, mineList) : '<p class="muted">הסידור עוד לא פורסם.</p>'}
+      ${mineList.length ? '<button class="btn ghost small" type="button" id="to-cal">הוספה ליומן בטלפון</button>' : ''}
     </section>
     <section aria-labelledby="avail-h" class="block">
       <h2 id="avail-h">זמינות לשבוע הבא</h2>
@@ -493,6 +499,10 @@ async function viewHub(member, here) {
   `);
   bindAccount();
   bindInstallCard();
+  document.getElementById('to-cal')?.addEventListener('click', () => {
+    downloadIcs(shiftsIcs(mineList, member.uid, `לאר דו פאן ${branch.name || ''}`.trim()), 'lardo-shifts.ics');
+    announce('קובץ היומן נוצר. פותחים אותו ומאשרים הוספה ליומן.');
+  });
   markSeen(branch.id, tw, a);
   markSeen(branch.id, nw, b);
 }
