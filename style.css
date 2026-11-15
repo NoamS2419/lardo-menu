@@ -655,6 +655,11 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .name-form input { font: inherit; min-height: 48px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--control); border-radius: var(--r-1); background: var(--surface); color: var(--text); }
 .name-form input[aria-invalid="true"] { border-color: var(--bad); }
 .form-err { color: var(--bad); font-weight: var(--fw-bold); margin: 0; min-height: 1.2em; }
+.install-card { margin: var(--sp-5) 0; padding: var(--sp-4); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); text-align: start; }
+.install-card h2 { font-size: var(--fs-4); margin: 0 0 var(--sp-2); }
+.install-card .steps { padding-inline-start: var(--sp-5); margin: var(--sp-3) 0; display: grid; gap: var(--sp-2); }
+.hub-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
+.hub-head h1 { margin-bottom: var(--sp-2); }
 .settings { margin-top: var(--sp-5); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .settings summary { min-height: 48px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-weight: var(--fw-bold); list-style: none; }
 .settings summary::-webkit-details-marker { display: none; }

@@ -9,6 +9,7 @@ import {
   pendingSignUp, completeSignUp, cacheGet, cachePut, adminRules
 } from './account.js';
 import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from './fs.js';
+import { installCardHtml, bindInstallCard } from './install.js';
 import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
   expiry, slotKey, hoursOf, openSlots, timeRange
@@ -262,7 +263,8 @@ function bindPasswordToggles(root = document) {
 }
 
 function viewAuth(mode = 'in') {
-  setPage('משמרות', authHtml(mode));
+  setPage('משמרות', `${mode === 'new' ? installCardHtml({ beforeSignIn: true }) : ''}${authHtml(mode)}`);
+  bindInstallCard();
   document.querySelectorAll('.seg-btn').forEach((b) => b.addEventListener('click', () => {
     viewAuth(b.dataset.mode);
     document.querySelector(`.seg-btn[data-mode="${b.dataset.mode}"]`)?.focus();
@@ -426,7 +428,8 @@ export async function viewShifts() {
   if (!member) { await viewFinishSignUp().catch((ex) => errorState(ex, '/shifts')); return; }
   if (member.status === 'pending') {
     stateScreen('הבקשה נשלחה לאור', 'כשהבקשה תאושר, המשמרות ייפתחו כאן. בינתיים התפריט והמשחקים פתוחים כרגיל.',
-      '<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>');
+      `<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>${installCardHtml({ force: true })}`);
+    bindInstallCard();
     document.getElementById('again').addEventListener('click', (e) => { e.preventDefault(); viewShifts(); });
     return;
   }
@@ -470,7 +473,7 @@ async function viewHub(member, here) {
     availCard = `${status}${when}${can ? `<a class="btn btn-wide" href="#/shifts/avail">${mine ? 'שינוי הזמינות' : 'הגשת זמינות'}</a>` : ''}`;
   }
   setPage('משמרות', `
-    <h1>משמרות</h1>
+    <div class="hub-head"><h1>משמרות</h1><a class="btn ghost small" href="#/">לתפריט ולמשחקים</a></div>
     ${a && a.offline ? '<p class="note">אין חיבור. מוצג הסידור שנשמר בטלפון.</p>' : ''}
     ${runsBranch(member) ? '<a class="row-link manage-link" href="#/shifts/manage"><span class="row-title">ניהול סידור</span><span aria-hidden="true">←</span></a>' : ''}
     <section aria-labelledby="mine-h" class="block">
@@ -487,9 +490,11 @@ async function viewHub(member, here) {
     ${b ? `<section class="block">${scheduleTable(branch, nw, b, myIdsOf(member))}</section>` : ''}
     ${!b ? `<p class="hint">הסידור לשבוע הבא יתפרסם ביום ${DAYS[branch.publishDow]}.</p>` : ''}
     <p><a href="#/team">טבלת הצוות</a></p>
+    ${installCardHtml()}
     ${accountHtml(member)}
   `);
   bindAccount();
+  bindInstallCard();
   markSeen(branch.id, tw, a);
   markSeen(branch.id, nw, b);
 }
