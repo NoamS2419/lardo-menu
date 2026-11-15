@@ -170,6 +170,9 @@ const standing = (uid, over = {}) => ({ branch: 'raanana', uid, name: 'רוני 
 await ok('roni saves standing availability', setDoc(doc(roni, 'standing/roni'), standing('roni')));
 await no('roni cannot save standing for lia', setDoc(doc(roni, 'standing/lia'), standing('lia')));
 await no('lia cannot read roni standing', getDoc(doc(lia, 'standing/roni')));
+await no('lia cannot list standing availability', getDocs(query(collection(lia, 'standing'), where('branch', '==', 'raanana'))));
+await no('lia cannot read roni member record (when it was updated)', getDoc(doc(lia, 'members/roni')));
+await no('lia cannot list members', getDocs(query(collection(lia, 'members'), where('branch', '==', 'raanana'))));
 await ok('or lists standing for the branch', getDocs(query(collection(or, 'standing'), where('branch', '==', 'raanana'))));
 await no('pending omer cannot save standing', setDoc(doc(omer, 'standing/omer'), standing('omer', { name: 'עומר כ.' })));
 await ok('roni removes standing', deleteDoc(doc(roni, 'standing/roni')));
@@ -178,6 +181,7 @@ await ok('roni asks for time off', setDoc(doc(roni, 'timeoff/t1'), off('roni')))
 await no('roni cannot ask time off for lia', setDoc(doc(roni, 'timeoff/t2'), off('lia')));
 await no('time off with from after to refused', setDoc(doc(roni, 'timeoff/t3'), off('roni', { from: '2026-12-05' })));
 await no('lia cannot read roni time off', getDoc(doc(lia, 'timeoff/t1')));
+await no('lia cannot list time off', getDocs(query(collection(lia, 'timeoff'), where('branch', '==', 'raanana'))));
 await ok('or lists time off', getDocs(query(collection(or, 'timeoff'), where('branch', '==', 'raanana'))));
 await ok('roni lists own time off', getDocs(query(collection(roni, 'timeoff'), where('uid', '==', 'roni'))));
 await ok('roni cancels time off', deleteDoc(doc(roni, 'timeoff/t1')));

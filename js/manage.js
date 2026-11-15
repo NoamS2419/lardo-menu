@@ -515,7 +515,7 @@ export async function viewBuild(weekParam) {
         const n = countFor(m.id);
         const mk = marked(m.id);
         const kind = !s ? 'לא הוגש' : s.kind === 'late' ? 'באיחור' : s.kind === 'standing' ? 'קבוע' : s.kind === 'manager' ? 'הוזן בניהול' : '';
-        return `<li><span><bdi>${esc(m.name)}</bdi>: ${plural(n, 'משמרת אחת', 'משמרות')}${mk != null ? ` מתוך ${mk} שסומנו` : ''}${kind ? ` <span class="tag">${kind}</span>` : ''}${s && s.note ? `<br><span class="hint">“<bdi>${esc(s.note)}</bdi>”</span>` : ''}</span></li>`;
+        return `<li><span><bdi>${esc(m.name)}</bdi>: ${mk != null ? `<strong>${n}</strong> מתוך ${mk} שהוגשו` : plural(n, 'משמרת אחת', 'משמרות')}${kind ? ` <span class="tag">${kind}</span>` : ''}${s && s.note ? `<br><span class="hint">“<bdi>${esc(s.note)}</bdi>”</span>` : ''}</span></li>`;
       }).join('')}</ul>`;
     }
 
@@ -533,7 +533,7 @@ export async function viewBuild(weekParam) {
         <button class="btn btn-wide" type="button" id="publish"${isPast ? ' aria-disabled="true"' : ''}>${published ? 'פרסום העדכון' : 'פרסום הסידור'}</button>
         ${published ? '<button class="btn ghost btn-wide" type="button" id="share">תמונה לוואטסאפ</button>' : ''}
       </div>
-      <section class="block" aria-labelledby="sum-h"><h2 id="sum-h">כמה משמרות לכל אחד</h2><div id="summary">${summaryHtml()}</div></section>
+      <section class="block" aria-labelledby="sum-h"><h2 id="sum-h">כמה משמרות לכל אחד</h2><p class="hint">שובצו מתוך המשמרות שסומנו "אפשר" בהגשה.</p><div id="summary">${summaryHtml()}</div></section>
 
       <dialog id="slot-dlg" class="sheet" aria-labelledby="dlg-h">
         <form method="dialog" class="sheet-in">
