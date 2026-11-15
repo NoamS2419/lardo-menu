@@ -9,7 +9,7 @@
    Product photos: their names change when they change, so the saved copy is used first.
    Only this site's own files are touched; the board, accounts and shifts (Google) always go to the network. */
 
-const VERSION = 'v16';
+const VERSION = 'v17';
 const SHELL = `lardo-shell-${VERSION}`;
 const PHOTOS = 'lardo-photos';
 const DATA = 'data/products.json';

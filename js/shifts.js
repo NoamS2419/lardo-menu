@@ -14,7 +14,7 @@ import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, closesAt, deadlineText,
   expiry, slotKey, hoursOf, openSlots, timeRange, weekId, closingSoonText
 } from './week.js';
-import { shiftsIcs, downloadIcs } from './calendar.js';
+import { shiftsIcs, openIcs } from './calendar.js';
 
 
 /* ---------- small pieces shared with manage.js ---------- */
@@ -430,7 +430,7 @@ export async function viewShifts() {
   if (!member) { await viewFinishSignUp().catch((ex) => errorState(ex, '/shifts')); return; }
   if (member.status === 'pending') {
     stateScreen('הבקשה נשלחה לאור', 'כשהבקשה תאושר, המשמרות ייפתחו כאן. בינתיים התפריט והמשחקים פתוחים כרגיל.',
-      `<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>${installCardHtml({ force: true })}`);
+      `<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>${installCardHtml()}`);
     bindInstallCard();
     document.getElementById('again').addEventListener('click', (e) => { e.preventDefault(); viewShifts(); });
     return;
@@ -477,6 +477,7 @@ async function viewHub(member, here) {
   }
   setPage('משמרות', `
     <div class="hub-head"><h1>משמרות</h1><a class="btn ghost small" href="#/">לתפריט ולמשחקים</a></div>
+    ${installCardHtml()}
     ${a && a.offline ? '<p class="note">אין חיבור. מוצג הסידור שנשמר בטלפון.</p>' : ''}
     ${runsBranch(member) ? '<a class="row-link manage-link" href="#/shifts/manage"><span class="row-title">ניהול סידור</span><span aria-hidden="true">←</span></a>' : ''}
     <section aria-labelledby="mine-h" class="block">
@@ -494,13 +495,12 @@ async function viewHub(member, here) {
     ${b ? `<section class="block">${scheduleTable(branch, nw, b, myIdsOf(member))}</section>` : ''}
     ${!b ? `<p class="hint">הסידור לשבוע הבא יתפרסם ביום ${DAYS[branch.publishDow]}.</p>` : ''}
     <p><a href="#/team">טבלת הצוות</a></p>
-    ${installCardHtml()}
     ${accountHtml(member)}
   `);
   bindAccount();
   bindInstallCard();
   document.getElementById('to-cal')?.addEventListener('click', () => {
-    downloadIcs(shiftsIcs(mineList, member.uid, `לאר דו פאן ${branch.name || ''}`.trim()), 'lardo-shifts.ics');
+    openIcs(shiftsIcs(mineList, member.uid, `לאר דו פאן ${branch.name || ''}`.trim()), 'lardo-shifts.ics');
     announce('קובץ היומן נוצר. פותחים אותו ומאשרים הוספה ליומן.');
   });
   markSeen(branch.id, tw, a);

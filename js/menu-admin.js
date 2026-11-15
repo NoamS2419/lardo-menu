@@ -40,11 +40,11 @@ export async function viewMenuAdmin() {
     const groups = db.allCategories.map((c) => {
       const items = allProducts().filter((p) => p.category === c.id).sort((a, b) => a.name.localeCompare(b.name, 'he'));
       if (!items.length) return '';
-      return `<h2>${esc(c.name)}</h2><ul class="rows">${items.map((p) => `
+      return `<section class="menu-group"><h2>${esc(c.name)}</h2><ul class="rows">${items.map((p) => `
         <li><a class="row-link" href="#/shifts/menu/p/${encodeURIComponent(p.id)}">
           <span class="row-title">${esc(p.name)}</span>
           <span>${isHidden(p) ? '<span class="tag">מוסתר</span>' : p.is_new ? '<span class="tag">חדש</span>' : p.edited ? '<span class="tag">נערך</span>' : ''}</span>
-          <span class="row-sub full"><bdi>${esc(priceLabel(p))}</bdi></span></a></li>`).join('')}</ul>`;
+          <span class="row-sub full"><bdi>${esc(priceLabel(p))}</bdi></span></a></li>`).join('')}</ul></section>`;
     }).join('');
     setPage('התפריט והמוצרים', `
       ${back('#/shifts/manage', 'ניהול סידור')}
@@ -55,7 +55,20 @@ export async function viewMenuAdmin() {
         <li><a class="row-link" href="#/shifts/menu/faq"><span class="row-title">שאלות של לקוחות</span><span></span></a></li>
         <li><a class="row-link" href="#/shifts/menu/tips"><span class="row-title">טיפים למכירה</span><span></span></a></li>
       </ul>
+      <div class="field menu-filter"><label for="m-filter">חיפוש מוצר</label><input id="m-filter" type="search" autocomplete="off"></div>
+      <p class="muted" id="m-none" hidden>לא נמצא מוצר בשם הזה.</p>
       ${groups}`);
+    // Filters the long list by name as you type.
+    document.getElementById('m-filter').addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      let any = false;
+      document.querySelectorAll('.menu-group').forEach((g) => {
+        let shown = 0;
+        g.querySelectorAll('li').forEach((li) => { const ok = li.querySelector('.row-title').textContent.includes(q); li.hidden = !ok; shown += ok; });
+        g.hidden = !shown; any = any || shown > 0;
+      });
+      document.getElementById('m-none').hidden = any;
+    });
   } catch (ex) { errorState(ex, route); }
 }
 

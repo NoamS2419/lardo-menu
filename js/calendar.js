@@ -38,8 +38,17 @@ export function shiftsIcs(shifts, uid, placeName) {
   return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//lardo//shifts//HE', 'CALSCALE:GREGORIAN', ...events, 'END:VCALENDAR', ''].join('\r\n');
 }
 
-// Hands the file to the phone: iPhone and Android offer to add it to the calendar.
-export function downloadIcs(ics, fileName = 'shifts.ics') {
+// Hands the file to the phone's calendar.
+// iPhone: opening a text/calendar address shows the calendar's own "add all" screen (a download
+// would land in the Files app instead). Elsewhere (Android, computers) the file is downloaded and
+// opens in the calendar app from the download notice.
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+export function openIcs(ics, fileName = 'shifts.ics') {
+  if (isIOS()) {
+    location.href = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+    return;
+  }
   const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
   const a = document.createElement('a');
   a.href = url;
