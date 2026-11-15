@@ -266,7 +266,8 @@ export function viewGames() {
     <h1>משחקים</h1>
     <div class="level">
       ${ring(lvl.pct, 64, 27, `${lvl.pct}%`)}
-      <span class="level-name">${esc(lvl.name)} · ${lvl.points} נקודות</span>
+      <span class="level-name">${esc(lvl.name)}</span>
+      <span class="level-sub">${lvl.points} נקודות</span>
       <span class="level-sub">${lvl.next ? `עוד ${lvl.toNext} נקודות ל${esc(lvl.next)}` : 'הדרגה הגבוהה ביותר'}</span>
       <span class="level-sub">כל תשובה נכונה: 10 נקודות</span>
     </div>

@@ -168,7 +168,11 @@ body {
 @media (min-width: 900px) { body { padding-bottom: 0; } }
 
 a { color: var(--accent); text-underline-offset: 3px; }
-h1, h2, h3 { line-height: 1.25; color: var(--text); }
+h1, h2, h3 { line-height: 1.25; color: var(--text); text-wrap: balance; }
+p, .note, .hint { text-wrap: pretty; }
+::selection { background: var(--accent-soft); color: var(--text); }
+input, textarea { caret-color: var(--accent); }
+button, a, .btn, .av-btn, .cell, .opt, summary, label { touch-action: manipulation; }
 h1 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-6); margin: var(--sp-1) 0 var(--sp-4); letter-spacing: 0; }
 h2 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-5); margin: var(--sp-6) 0 var(--sp-3); }
 h3 { font-weight: var(--fw-bold); font-size: var(--fs-3); margin: var(--sp-5) 0 var(--sp-2); }
@@ -335,6 +339,8 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .daily-line { display: block; font-size: var(--fs-2); color: var(--muted); }
 .daily-price { display: block; margin-top: var(--sp-2); font-weight: var(--fw-bold); color: var(--gold-text); }
 .thumb-wrap img, .daily .daily-img { mix-blend-mode: multiply; }
+/* The daily photo blends with its card, which is dark in dark mode: keep it as is there. */
+@media (prefers-color-scheme: dark) { .daily .daily-img { mix-blend-mode: normal; } }
 .btn-wide + .btn-wide { margin-top: var(--sp-3); }
 .daily .daily-img, .daily .ph { aspect-ratio: 16 / 9; }
 
@@ -927,6 +933,7 @@ main:has(.publish-bar) { scroll-padding-bottom: 160px; }
 dialog.sheet {
   width: 100%; max-width: 560px; max-height: 88vh; margin: auto auto 0; padding: 0;
   border: 0; border-radius: var(--r-2) var(--r-2) 0 0; background: var(--surface); color: var(--text);
+  overflow-y: auto; overscroll-behavior: contain;
 }
 @media (min-width: 640px) { dialog.sheet { margin: auto; border-radius: var(--r-2); } }
 dialog.sheet::backdrop { background: rgba(42, 33, 28, .5); }
