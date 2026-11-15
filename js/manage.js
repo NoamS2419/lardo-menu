@@ -4,7 +4,7 @@
 
 import { esc, setPage, announce, focusMain, rosette } from './core.js';
 import {
-  account, loadMember, runsBranch, loadBranches, loadBranch, forgetBranches, createBranch, DEFAULT_BRANCH,
+  ADMIN_USERNAME, account, loadMember, runsBranch, loadBranches, loadBranch, forgetBranches, createBranch, DEFAULT_BRANCH,
   checkDisplayName
 } from './account.js';
 import { getDoc, setDoc, deleteDoc, list, setWrite, deleteWrite, commit } from './fs.js';
@@ -165,7 +165,8 @@ export async function viewPeople() {
     const pending = members.filter((m) => m.status === 'pending');
     const staff = members.filter((m) => m.status === 'approved');
     const off = members.filter((m) => m.status === 'disabled');
-    const editable = (m) => isAdmin || (m.id !== me.uid && m.role === 'staff');
+    // The scheduler manages employees, never the main admin (the rules refuse it too).
+    const editable = (m) => isAdmin || (m.id !== me.uid && m.role === 'staff' && m.username !== ADMIN_USERNAME);
 
     const row = (m) => `
       <li class="person" data-uid="${esc(m.id)}">

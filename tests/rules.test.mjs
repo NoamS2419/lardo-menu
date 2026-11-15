@@ -2,7 +2,7 @@
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import { readFileSync } from 'node:fs';
 import {
-  doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, collection, getDocs, query, where
+  doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, collection, getDocs, query, where, writeBatch
 } from 'firebase/firestore';
 
 const env = await initializeTestEnvironment({
@@ -34,7 +34,14 @@ const branch = (over = {}) => ({
   need: { '0m': 2, '0e': 2 }, hours: {}, updatedAt: now(), ...over
 });
 const member = (username, over = {}) => ({ name: 'רוני ל.', username, branch: 'raanana', role: 'staff', status: 'pending', createdAt: now(), ...over });
-const W = '2026-11-22';
+// Dates relative to today, since the rules only accept nearby weeks and days.
+const isoDay = (ms) => new Date(ms).toISOString().slice(0, 10);
+const todayUtc = Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate());
+const W = isoDay(todayUtc + ((7 - new Date(todayUtc).getUTCDay()) % 7 || 7) * 864e5); // next Sunday
+const W2 = isoDay(Date.parse(W) + 7 * 864e5);
+const inDays = (n) => isoDay(todayUtc + n * 864e5);
+// The rules allow one write per 3 seconds to the same document.
+const pause = () => new Promise((r) => setTimeout(r, 3200));
 const avail = (uid, over = {}) => ({
   branch: 'raanana', week: W, uid, name: 'רוני ל.', slots: ['0m', '2e'], note: '', updatedAt: now(), expireAt: exp(), by: 'self', ...over
 });
@@ -96,6 +103,11 @@ await ok('or approves dan', updateDoc(doc(or, 'members/dan'), { status: 'approve
 await no('or cannot promote roni to scheduler', updateDoc(doc(or, 'members/roni'), { role: 'scheduler', updatedAt: now() }));
 await no('or cannot move roni to another branch', updateDoc(doc(or, 'members/roni'), { branch: 'tlv', updatedAt: now() }));
 await no('or cannot change a username', updateDoc(doc(or, 'members/roni'), { username: 'zzz', updatedAt: now() }));
+await no('or cannot rename the admin', updateDoc(doc(or, 'members/noam'), { name: 'מישהו', updatedAt: now() }));
+await no('or cannot disable the admin', updateDoc(doc(or, 'members/noam'), { status: 'disabled', updatedAt: now() }));
+await no('or cannot delete the admin record', deleteDoc(doc(or, 'members/noam')));
+await no('or cannot link an account to someone outside the branch', updateDoc(doc(or, 'members/dan'), { replaces: 'stranger', updatedAt: now() }));
+await no('or cannot link an account to the admin', updateDoc(doc(or, 'members/dan'), { replaces: 'noam', updatedAt: now() }));
 await no('or cannot edit own record', updateDoc(doc(or, 'members/or'), { name: 'אור המלך', updatedAt: now() }));
 await no('tlv manager cannot approve in raanana', updateDoc(doc(tlv, 'members/omer'), { status: 'approved', updatedAt: now() }));
 await no('tlv manager cannot read a raanana member', getDoc(doc(tlv, 'members/roni')));
@@ -109,43 +121,53 @@ await no('or cannot delete the branch', deleteDoc(doc(or, 'branches/raanana')));
 
 /* ---------- availability ---------- */
 await ok('roni submits availability', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni')));
+await pause();
 await ok('roni changes it', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['1m'], note: 'עד 14:00' })));
 await ok('roni reads own', getDoc(doc(roni, `availability/raanana_${W}_roni`)));
-await ok('roni gets 404-style read of own missing week', getDoc(doc(roni, 'availability/raanana_2026-11-29_roni')));
+await ok('roni gets 404-style read of own missing week', getDoc(doc(roni, `availability/raanana_${W2}_roni`)));
 await no('pending omer cannot submit', setDoc(doc(omer, `availability/raanana_${W}_omer`), avail('omer', { name: 'עומר כ.' })));
 await no('roni cannot submit for lia', setDoc(doc(roni, `availability/raanana_${W}_lia`), avail('lia', { name: 'ליה מ' })));
 await no('roni cannot submit under a wrong name', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { name: 'מישהו' })));
 await no('roni cannot submit as manager', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { by: 'manager' })));
 await no('roni cannot submit into another branch', setDoc(doc(roni, `availability/tlv_${W}_roni`), avail('roni', { branch: 'tlv' })));
-await no('doc id must match the fields', setDoc(doc(roni, 'availability/raanana_2026-11-29_roni'), avail('roni')));
+await no('doc id must match the fields', setDoc(doc(roni, `availability/raanana_${W2}_roni`), avail('roni')));
 await no('note over 100 chars refused', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { note: 'x'.repeat(101) })));
 await no('bad slot keys refused', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['9zz!'] })));
 await no('missing expiry refused', setDoc(doc(roni, `availability/raanana_${W}_roni`), (({ expireAt, ...r }) => r)(avail('roni'))));
 await no('lia cannot read roni availability', getDoc(doc(lia, `availability/raanana_${W}_roni`)));
+await no('lia cannot even ask about a missing roni document (no existence oracle)', getDoc(doc(lia, `availability/raanana_${W2}_roni`)));
+await no('roni cannot write availability for a made-up far week', setDoc(doc(roni, 'availability/raanana_2099-01-04_roni'), avail('roni', { week: '2099-01-04' })));
+await no('roni cannot write availability for a past week', setDoc(doc(roni, 'availability/raanana_2026-01-04_roni'), avail('roni', { week: '2026-01-04' })));
+await no('a week must start on Sunday', setDoc(doc(roni, `availability/raanana_${inDays(9)}_roni`), avail('roni', { week: inDays(9) })));
+await no('a second write within 3 seconds is refused', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['0m'] })));
 await no('lia cannot list the week', getDocs(query(collection(lia, 'availability'), where('branch', '==', 'raanana'), where('week', '==', W))));
 await ok('lia lists her own', getDocs(query(collection(lia, 'availability'), where('uid', '==', 'lia'))));
 await ok('or lists the week', getDocs(query(collection(or, 'availability'), where('branch', '==', 'raanana'), where('week', '==', W))));
 await no('tlv manager cannot list raanana', getDocs(query(collection(tlv, 'availability'), where('branch', '==', 'raanana'), where('week', '==', W))));
 await no('tlv manager cannot read roni availability', getDoc(doc(tlv, `availability/raanana_${W}_roni`)));
 await ok('or enters availability for dan', setDoc(doc(or, `availability/raanana_${W}_dan`), avail('dan', { name: 'דן כ.', by: 'manager' })));
+await no('or cannot enter availability for someone outside the branch', setDoc(doc(or, `availability/raanana_${W}_stranger`), avail('stranger', { name: 'זר', by: 'manager' })));
 await no('or cannot enter availability in another branch', setDoc(doc(or, `availability/tlv_${W}_dan`), avail('dan', { branch: 'tlv', name: 'דן כ.', by: 'manager' })));
 
 /* ---------- the deadline ---------- */
 await no('roni cannot create the week doc', setDoc(doc(roni, `schedules/raanana_${W}`), weekDoc()));
 await ok('or opens the week, closing in an hour', setDoc(doc(or, `schedules/raanana_${W}`), weekDoc({ closesAt: future() })));
+await pause();
 await ok('before the deadline: roni submits', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni')));
 await ok('or moves the deadline to the past', setDoc(doc(or, `schedules/raanana_${W}`), weekDoc({ closesAt: past() })));
+await pause();
 await ok('late, branch allows late: roni submits', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['3m'] })));
 await ok('or turns late submissions off', updateDoc(doc(or, 'branches/raanana'), { lateOk: false, updatedAt: now() }));
 await no('late, branch strict: roni refused', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['4m'] })));
 await no('late, branch strict: roni cannot delete either', deleteDoc(doc(roni, `availability/raanana_${W}_roni`)));
+await pause();
 await ok('late, branch strict: or still enters for roni', setDoc(doc(or, `availability/raanana_${W}_roni`), avail('roni', { by: 'manager' })));
 await ok('or turns late submissions back on', updateDoc(doc(or, 'branches/raanana'), { lateOk: true, updatedAt: now() }));
 
 /* ---------- drafts and publishing ---------- */
 await ok('or saves a draft', setDoc(doc(or, `drafts/raanana_${W}`), draft()));
 await no('roni cannot read the draft', getDoc(doc(roni, `drafts/raanana_${W}`)));
-await no('roni cannot read a missing draft', getDoc(doc(roni, 'drafts/raanana_2026-11-29')));
+await no('roni cannot read a missing draft', getDoc(doc(roni, `drafts/raanana_${W2}`)));
 await no('roni cannot list drafts', getDocs(query(collection(roni, 'drafts'), where('branch', '==', 'raanana'))));
 await no('roni cannot write a draft', setDoc(doc(roni, `drafts/raanana_${W}`), draft()));
 await no('tlv manager cannot read the raanana draft', getDoc(doc(tlv, `drafts/raanana_${W}`)));
@@ -161,6 +183,7 @@ await ok('roni reads the published schedule', getDoc(doc(roni, `schedules/raanan
 await ok('roni lists the branch schedules', getDocs(query(collection(roni, 'schedules'), where('branch', '==', 'raanana'))));
 await no('tlv manager cannot read the raanana schedule', getDoc(doc(tlv, `schedules/raanana_${W}`)));
 await no('after publishing: roni cannot change availability', setDoc(doc(roni, `availability/raanana_${W}_roni`), avail('roni', { slots: ['5m'] })));
+await pause();
 await ok('after publishing: or can still fix availability', setDoc(doc(or, `availability/raanana_${W}_roni`), avail('roni', { by: 'manager' })));
 await ok('admin (stand-in) reads the draft', getDoc(doc(noam, `drafts/raanana_${W}`)));
 await ok('admin (stand-in) republishes', setDoc(doc(noam, `schedules/raanana_${W}`), weekDoc({ status: 'published', slots: { '0m': [] }, changed: ['0m'], changedFor: ['roni'], publishedAt: now() })));
@@ -176,20 +199,24 @@ await no('lia cannot list members', getDocs(query(collection(lia, 'members'), wh
 await ok('or lists standing for the branch', getDocs(query(collection(or, 'standing'), where('branch', '==', 'raanana'))));
 await no('pending omer cannot save standing', setDoc(doc(omer, 'standing/omer'), standing('omer', { name: 'עומר כ.' })));
 await ok('roni removes standing', deleteDoc(doc(roni, 'standing/roni')));
-const off = (uid, over = {}) => ({ branch: 'raanana', uid, name: 'רוני ל.', from: '2026-12-01', to: '2026-12-03', note: '', createdAt: now(), expireAt: exp(), ...over });
-await ok('roni asks for time off', setDoc(doc(roni, 'timeoff/t1'), off('roni')));
-await no('roni cannot ask time off for lia', setDoc(doc(roni, 'timeoff/t2'), off('lia')));
-await no('time off with from after to refused', setDoc(doc(roni, 'timeoff/t3'), off('roni', { from: '2026-12-05' })));
-await no('lia cannot read roni time off', getDoc(doc(lia, 'timeoff/t1')));
+const off = (uid, over = {}) => ({ branch: 'raanana', uid, name: 'רוני ל.', from: inDays(5), to: inDays(7), note: '', createdAt: now(), expireAt: exp(), ...over });
+await ok('roni asks for time off', setDoc(doc(roni, `timeoff/roni_${inDays(5)}`), off('roni')));
+await no('time off needs the uid_from id', setDoc(doc(roni, 'timeoff/anything'), off('roni', { from: inDays(6), to: inDays(6) })));
+await no('time off too far ahead refused', setDoc(doc(roni, `timeoff/roni_${inDays(120)}`), off('roni', { from: inDays(120), to: inDays(121) })));
+await no('time off in the past refused', setDoc(doc(roni, `timeoff/roni_${inDays(-10)}`), off('roni', { from: inDays(-10), to: inDays(-9) })));
+await no('time off longer than 60 days refused', setDoc(doc(roni, `timeoff/roni_${inDays(8)}`), off('roni', { from: inDays(8), to: inDays(80) })));
+await no('roni cannot ask time off for lia', setDoc(doc(roni, `timeoff/lia_${inDays(5)}`), off('lia')));
+await no('time off with from after to refused', setDoc(doc(roni, `timeoff/roni_${inDays(9)}`), off('roni', { from: inDays(9) })));
+await no('lia cannot read roni time off', getDoc(doc(lia, `timeoff/roni_${inDays(5)}`)));
 await no('lia cannot list time off', getDocs(query(collection(lia, 'timeoff'), where('branch', '==', 'raanana'))));
 await ok('or lists time off', getDocs(query(collection(or, 'timeoff'), where('branch', '==', 'raanana'))));
 await ok('roni lists own time off', getDocs(query(collection(roni, 'timeoff'), where('uid', '==', 'roni'))));
-await ok('roni cancels time off', deleteDoc(doc(roni, 'timeoff/t1')));
+await ok('roni cancels time off', deleteDoc(doc(roni, `timeoff/roni_${inDays(5)}`)));
 
 /* ---------- disabling ---------- */
 await ok('or disables dan', updateDoc(doc(or, 'members/dan'), { status: 'disabled', expireAt: exp(), updatedAt: now() }));
 await no('disabled dan cannot read the schedule', getDoc(doc(dan, `schedules/raanana_${W}`)));
-await no('disabled dan cannot submit', setDoc(doc(dan, 'availability/raanana_2026-11-29_dan'), avail('dan', { name: 'דן כ.', week: '2026-11-29' })));
+await no('disabled dan cannot submit', setDoc(doc(dan, `availability/raanana_${W2}_dan`), avail('dan', { name: 'דן כ.', week: W2 })));
 await no('disabled dan cannot re-approve self', updateDoc(doc(dan, 'members/dan'), { status: 'approved', updatedAt: now() }));
 await no('disabled dan cannot read the board', getDocs(collection(dan, 'players')));
 await ok('or rejects omer (deletes the request)', deleteDoc(doc(or, 'members/omer')));
@@ -207,13 +234,22 @@ await ok('any approved employee may clean an expired schedule', deleteDoc(doc(li
 await ok('or cleans expired availability', deleteDoc(doc(or, 'availability/raanana_2026-07-05_roni')));
 
 /* ---------- the score board ---------- */
-const player = (over = {}) => ({ name: 'רוני ל.', total: 120, updatedAt: now(), ...over });
-await ok('roni writes own score under the schedule name', setDoc(doc(roni, 'players/roni'), player()));
-await ok('roni shares progress', setDoc(doc(roni, 'players/roni'), player({ onboarded: true, known: 'breads:40,pastries:100' })));
-await no('roni cannot use a nickname', setDoc(doc(roni, 'players/roni'), player({ name: 'המלך' })));
-await no('roni cannot write lia score', setDoc(doc(roni, 'players/lia'), player({ name: 'ליה מ' })));
-await no('negative total refused', setDoc(doc(roni, 'players/roni'), player({ total: -1 })));
-await no('bad known string refused', setDoc(doc(roni, 'players/roni'), player({ known: 'x:999' })));
+const player = (over = {}) => ({ name: 'רוני ל.', total: 120, ...over });
+// A score goes up together with the private progress/{uid} timestamp (the rate limit).
+const score = (ctx, uid, data) => { const b = writeBatch(ctx); b.set(doc(ctx, `players/${uid}`), data); b.set(doc(ctx, `progress/${uid}`), { updatedAt: now() }); return b.commit(); };
+await no('a score without the progress timestamp is refused', setDoc(doc(roni, 'players/roni'), player()));
+await ok('roni writes own score under the schedule name', score(roni, 'roni', player()));
+await no('players carry no timestamp', score(roni, 'roni', { ...player(), updatedAt: now() }));
+await pause();
+await ok('roni shares progress', score(roni, 'roni', player({ onboarded: true, known: 'breads:40,pastries:100' })));
+await pause();
+await no('a score cannot jump by more than 500', score(roni, 'roni', player({ total: 700 })));
+await pause();
+await no('a new score above 20000 is refused', score(lia, 'lia', { name: 'ליה מ.', total: 20001 }));
+await no('roni cannot use a nickname', score(roni, 'roni', player({ name: 'המלך' })));
+await no('roni cannot write lia score', score(roni, 'lia', player({ name: 'ליה מ' })));
+await no('negative total refused', score(roni, 'roni', player({ total: -1 })));
+await no('bad known string refused', score(roni, 'roni', player({ known: 'x:999' })));
 await no('anonymous account cannot write a score', setDoc(doc(anonUser, 'players/anon1'), { name: 'anon', total: 1, updatedAt: now() }));
 await no('anonymous account cannot read the board', getDocs(collection(anonUser, 'players')));
 await no('visitor cannot read the board', getDocs(collection(nobody, 'players')));
@@ -229,6 +265,7 @@ await no('lia cannot delete roni score', deleteDoc(doc(lia, `daily/${today}_roni
 await no('tlv manager cannot remove a raanana score', deleteDoc(doc(tlv, `daily/${today}_roni`)));
 await no('tlv manager cannot remove a raanana player', deleteDoc(doc(tlv, 'players/roni')));
 await ok('or removes a score (employee left)', deleteDoc(doc(or, `daily/${today}_roni`)));
+await pause();
 await ok('roni saves learning progress', setDoc(doc(roni, 'progress/roni'), { data: '{}', updatedAt: now() }));
 await ok('roni reads it back', getDoc(doc(roni, 'progress/roni')));
 await no('lia cannot read roni progress', getDoc(doc(lia, 'progress/roni')));

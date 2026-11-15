@@ -28,7 +28,11 @@ export async function syncTotal(total) {
   if (!cloudEnabled() || !myPlayer() || progress.offBoard) return;
   const m = await loadMember();
   if (!m || m.status !== 'approved') return;
-  await setDoc(`players/${m.uid}`, { name: m.name, total: Math.max(0, Math.floor(total)), ...extraFields() }, { stamp: ['updatedAt'] });
+  // The board entry carries no time; the private progress document holds it (the rules' rate limit).
+  await commit([
+    setWrite(`players/${m.uid}`, { name: m.name, total: Math.max(0, Math.floor(total)), ...extraFields() }),
+    setWrite(`progress/${m.uid}`, {}, { stamp: ['updatedAt'] })
+  ]);
 }
 
 // One score per person per day; the rules refuse a second one.
