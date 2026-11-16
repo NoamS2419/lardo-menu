@@ -963,3 +963,4 @@ dialog.sheet::backdrop { background: rgba(42, 33, 28, .5); }
   dialog.sheet[open] { animation: sheet-up var(--dur-2) var(--ease); }
   @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 }
+.install-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }

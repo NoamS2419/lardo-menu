@@ -43,7 +43,10 @@ export function installCardHtml({ beforeSignIn = false, force = false } = {}) {
       <h2 id="install-h">${beforeSignIn ? 'כדאי קודם להתקין את האפליקציה' : 'להתקנה בטלפון'}</h2>
       <p>${beforeSignIn ? 'כך הסידור תמיד במסך הבית. אחרי ההתקנה פותחים אותה ונרשמים מתוכה.' : 'כך הסידור והמשמרות נפתחים ממסך הבית, כמו אפליקציה.'}</p>
       ${body}
-      <button class="btn ghost small" type="button" data-install-close>לא עכשיו</button>
+      <div class="install-actions">
+        <button class="btn small" type="button" data-install-close>בוצע</button>
+        <button class="btn ghost small" type="button" data-install-close>לא עכשיו</button>
+      </div>
     </section>`;
 }
 
@@ -55,8 +58,9 @@ export function bindInstallCard(root = document) {
     deferredPrompt = null;
     root.querySelector('.install-card')?.remove();
   });
-  root.querySelector('[data-install-close]')?.addEventListener('click', () => {
+  // "בוצע" and "לא עכשיו" both hide the card on this phone for good.
+  root.querySelectorAll('[data-install-close]').forEach((b) => b.addEventListener('click', () => {
     try { localStorage.setItem(DISMISS_KEY, '1'); } catch (e) { /* private mode */ }
     root.querySelector('.install-card')?.remove();
-  });
+  }));
 }
