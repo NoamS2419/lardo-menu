@@ -450,10 +450,12 @@ async function viewHub(member, here) {
   const branch = await loadBranch(member.branch);
   if (!branch) { stateScreen('הסניף לא נמצא', 'כדאי לדבר עם אור.'); return; }
   const tw = thisWeek(); const nw = nextWeek();
-  const [a, b, mine, standing] = await Promise.all([
+  const [a, b, mine, standing, waiting] = await Promise.all([
     loadPublished(branch.id, tw), loadPublished(branch.id, nw),
     getDoc(`availability/${weekId(branch.id, nw)}_${member.uid}`),
-    getDoc(`standing/${member.uid}`)
+    getDoc(`standing/${member.uid}`),
+    // Whoever runs the branch sees new join requests right here.
+    runsBranch(member) ? list('members', [['branch', '==', branch.id], ['status', '==', 'pending']], { limit: 100 }).catch(() => []) : []
   ]);
   if (!here()) return;
   const mineList = myShifts(branch, member, [{ week: tw, sched: a }, { week: nw, sched: b }]);
@@ -479,6 +481,7 @@ async function viewHub(member, here) {
     <div class="hub-head"><h1>משמרות</h1><a class="btn ghost small" href="#/">לתפריט ולמשחקים</a></div>
     ${installCardHtml()}
     ${a && a.offline ? '<p class="note">אין חיבור. מוצג הסידור שנשמר בטלפון.</p>' : ''}
+    ${waiting.length ? `<a class="row-link manage-link join-link" href="#/shifts/people"><span class="row-title">${waiting.length === 1 ? 'בקשת הצטרפות אחת מחכה לאישור' : `${waiting.length} בקשות הצטרפות מחכות לאישור`}</span><span aria-hidden="true">←</span></a>` : ''}
     ${runsBranch(member) ? '<a class="row-link manage-link" href="#/shifts/manage"><span class="row-title">ניהול סידור</span><span aria-hidden="true">←</span></a>' : ''}
     <section aria-labelledby="mine-h" class="block">
       <h2 id="mine-h">המשמרות שלי</h2>

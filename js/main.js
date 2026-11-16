@@ -10,7 +10,7 @@ import { viewTeam } from './team.js';
 import { viewSell } from './catalog.js';
 import { viewOnboard, viewOnboardDay, viewOnboardFinal, viewOnboardCert } from './onboard.js';
 import { cloudEnabled } from './fs.js';
-import { cachedMember } from './account.js';
+import { cachedMember, account } from './account.js';
 import { listenForInstallPrompt } from './install.js';
 
 listenForInstallPrompt();
@@ -125,7 +125,7 @@ if (window.top !== window.self) document.documentElement.hidden = true;
   // Shifts are the heart of the site for the team: an approved employee who opens the site lands there
   // (the menu is one tap away). Visitors and everyone else start on the menu as before.
   const m = cachedMember();
-  if (!location.hash && m && m.status === 'approved') history.replaceState(null, '', '#/shifts');
+  if (!location.hash && ((m && m.status === 'approved') || account()?.isAdmin)) history.replaceState(null, '', '#/shifts');
   window.addEventListener('hashchange', route);
   route();
 })();
