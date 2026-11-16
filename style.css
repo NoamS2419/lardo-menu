@@ -189,8 +189,8 @@ p, .note, .hint { text-wrap: pretty; }
 ::selection { background: var(--accent-soft); color: var(--text); }
 input, textarea { caret-color: var(--accent); }
 button, a, .btn, .av-btn, .cell, .opt, summary, label { touch-action: manipulation; }
-h1 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-6); margin: var(--sp-1) 0 var(--sp-4); letter-spacing: 0; }
-h2 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-5); margin: var(--sp-6) 0 var(--sp-3); }
+h1 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-6); margin: var(--sp-1) 0 var(--sp-4); letter-spacing: -0.01em; line-height: 1.15; }
+h2 { font-family: var(--display); font-weight: var(--fw-display); font-size: var(--fs-5); margin: var(--sp-6) 0 var(--sp-3); letter-spacing: -0.005em; }
 h3 { font-weight: var(--fw-bold); font-size: var(--fs-3); margin: var(--sp-5) 0 var(--sp-2); }
 p { margin: 0 0 var(--sp-3); }
 
@@ -297,7 +297,7 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
   min-height: 48px; padding: var(--sp-2) var(--sp-5);
   font: var(--fw-medium) var(--fs-3) / 1.3 var(--font);
   border: 1px solid var(--ink-btn); border-radius: var(--r-1);
-  background: var(--ink-btn); color: var(--on-ink); letter-spacing: .02em;
+  background: var(--ink-btn); color: var(--on-ink); letter-spacing: 0;
   text-decoration: none; cursor: pointer; text-align: center;
 }
 @media (hover: hover) { .btn:hover { background: var(--ink-btn-hover); border-color: var(--ink-btn-hover); } }
@@ -976,7 +976,7 @@ dialog.sheet {
   overflow-y: auto; overscroll-behavior: contain;
 }
 @media (min-width: 640px) { dialog.sheet { margin: auto; border-radius: var(--r-2); } }
-dialog.sheet::backdrop { background: rgba(42, 33, 28, .5); }
+dialog.sheet::backdrop { background: rgba(42, 33, 28, calc(.5 * var(--fade, 1))); }
 .sheet-in { padding: var(--sp-4); display: grid; gap: var(--sp-3); }
 .sheet-in h2 { margin: 0; font-size: var(--fs-4); }
 .need-field input { max-width: 120px; }
@@ -1017,3 +1017,25 @@ dialog.sheet::backdrop { background: rgba(42, 33, 28, .5); }
 .sch thead th.sh-pm { color: var(--evening); background: var(--evening-bg); }
 .sh-ico.sun { color: var(--morning); }
 .sh-ico.moon { color: var(--evening); }
+
+/* ---------- round 19: feel (press, drag, glass) ---------- */
+/* Press: things shrink a little under the finger, so every tap answers at once. */
+.btn, .opt, .av-btn, .cell, .pick-btn, .tabs a, .row-link, .chips a { -webkit-tap-highlight-color: transparent; }
+@media (prefers-reduced-motion: no-preference) {
+  .av-btn, .cell, .pick-btn { transition: transform 100ms ease-out; }
+  .btn:active, .opt:active, .av-btn:active, .cell:active, .pick-btn:active, .tabs a:active, .row-link:active, .chips a:active { transform: scale(.97); }
+}
+/* The bottom bar lets the page show through a little. */
+@media (max-width: 899px) {
+  .tabs { background: color-mix(in srgb, var(--surface) 82%, transparent); -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%); }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .tabs { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* The pick sheet: a grab handle; drag down to close (phones). */
+.sheet-grab { display: none; width: 36px; height: 5px; border-radius: 3px; background: var(--control); margin: 0 auto calc(-1 * var(--sp-2)); }
+@media (pointer: coarse) and (max-width: 639px) {
+  .sheet-grab { display: block; }
+  .sheet-grab, dialog.sheet h2 { touch-action: none; }
+}
+dialog.sheet.settling { transition: transform 300ms cubic-bezier(.2, .8, .2, 1); }

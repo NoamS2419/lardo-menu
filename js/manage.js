@@ -37,6 +37,44 @@ async function purgeMember(uid, branchId) {
   await deleteDoc(`members/${uid}`);
 }
 
+// Phones: drag the sheet down by its handle or title to close it (Esc, "סיום" and the backdrop still work).
+// It follows the finger 1:1 downwards, resists upwards, and closes past 40% of its height or on a flick.
+function dragToClose(dlg) {
+  const phone = () => matchMedia('(pointer: coarse) and (max-width: 639px)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let startY = 0; let dy = 0; let moves = []; let dragging = false;
+  const set = (y) => {
+    dlg.style.setProperty('transform', y ? `translateY(${y}px)` : '');
+    dlg.style.setProperty('--fade', String(Math.max(0, 1 - Math.max(0, y) / dlg.offsetHeight)));
+  };
+  dlg.addEventListener('pointerdown', (e) => {
+    if (!phone() || !e.target.closest('.sheet-grab, h2')) return;
+    dragging = true; startY = e.clientY; dy = 0; moves = [{ y: e.clientY, t: e.timeStamp }];
+    dlg.classList.remove('settling');
+    e.target.setPointerCapture(e.pointerId);
+  });
+  dlg.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const raw = e.clientY - startY;
+    dy = raw >= 0 ? raw : -(1 - 1 / ((-raw * 0.55) / dlg.offsetHeight + 1)) * dlg.offsetHeight; // rubber band upwards
+    moves = [...moves.slice(-4), { y: e.clientY, t: e.timeStamp }];
+    set(dy);
+  });
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    const first = moves[0]; const last = moves[moves.length - 1];
+    const v = last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0; // px per ms
+    const projected = dy + (v * 0.998) / (1 - 0.998); // where a flick would carry it
+    dlg.classList.add('settling');
+    if (projected > dlg.offsetHeight * 0.4) {
+      set(dlg.offsetHeight);
+      setTimeout(() => { dlg.close(); dlg.classList.remove('settling'); set(0); }, 300);
+    } else set(0);
+  };
+  dlg.addEventListener('pointerup', end);
+  dlg.addEventListener('pointercancel', end);
+}
+
 const back = backLink;
 // Slots whose people or start times differ between two schedules.
 function slotsDiffer(a = {}, b = {}) {
@@ -564,6 +602,7 @@ export async function viewBuild(weekParam) {
 
       <dialog id="slot-dlg" class="sheet" aria-labelledby="dlg-h">
         <form method="dialog" class="sheet-in">
+          <div class="sheet-grab" aria-hidden="true"></div>
           <h2 id="dlg-h" tabindex="-1"></h2>
           <div class="field need-field"><label for="dlg-need">כמה אנשים צריך בשבוע הזה</label><input id="dlg-need" type="number" min="0" max="20" inputmode="numeric"></div>
           <ul class="pick-counts" id="dlg-counts" aria-label="מי יכול במשמרת הזו"></ul>
@@ -626,6 +665,7 @@ export async function viewBuild(weekParam) {
     });
     dlg.addEventListener('close', () => { const k = current; redraw(k); });
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); }); // tap on the dimmed backdrop
+    dragToClose(dlg);
     document.getElementById('dlg-list').addEventListener('click', (e) => {
       const b = e.target.closest('.pick-btn');
       if (!b) return;
