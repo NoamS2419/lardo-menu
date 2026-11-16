@@ -67,6 +67,16 @@ export const slotLabel = (branch, dow, shift, week) => {
   return `${DAYS[dow]}${week ? ` ${short(dayDate(week, dow))}` : ''}, ${shift.name} ${timeRange(h.start, h.end)}`;
 };
 
+// Column heads: morning shifts get a sun and a warm color, later ones a moon and a cool color.
+const SUN = '<svg class="sh-ico sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON = '<svg class="sh-ico moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+export const shiftTone = (s) => (String(s.start || '') < '12:00' ? 'am' : 'pm');
+export const shiftHead = (s, withHours = true) =>
+  `<th scope="col" class="sh-${shiftTone(s)}">${shiftTone(s) === 'am' ? SUN : MOON}${esc(s.name)}${withHours ? `<span class="d">${esc(timeRange(s.start, s.end))}</span>` : ''}</th>`;
+// Today's row stands out in every week table.
+export const dayRow = (week, dow) => (dayDate(week, dow) === today() ? ' class="today"' : '');
+export const todayTag = (week, dow) => (dayDate(week, dow) === today() ? ' <span class="tag today-tag">היום</span>' : '');
+
 // The published schedule as a real table: rows are days, columns are shifts.
 export function scheduleTable(branch0, week, sched, myIds = new Set()) {
   const branch = asPublished(branch0, sched);
@@ -83,13 +93,13 @@ export function scheduleTable(branch0, week, sched, myIds = new Set()) {
         return `<li class="${me ? 'me' : ''}"><bdi>${esc(p.name)}</bdi>${p.start ? ` <span class="start">${esc(p.start)}</span>` : ''}${me ? '<span class="sr-only"> (אני)</span>' : ''}</li>`;
       }).join('')}</ul>` : '<span class="muted">אין שיבוץ</span>'}</td>`;
     }).join('');
-    return `<tr><th scope="row">${DAYS[dow]}<span class="d">${short(dayDate(week, dow))}</span></th>${cells}</tr>`;
+    return `<tr${dayRow(week, dow)}><th scope="row">${DAYS[dow]}${todayTag(week, dow)}<span class="d">${short(dayDate(week, dow))}</span></th>${cells}</tr>`;
   }).join('');
   return `
     <div class="sch-wrap">
       <table class="sch">
         <caption>הסידור לשבוע ${weekRange(week)}</caption>
-        <thead><tr><td></td>${shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(timeRange(s.start, s.end))}</span></th>`).join('')}</tr></thead>
+        <thead><tr><td></td>${shifts.map((s) => shiftHead(s)).join('')}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -145,7 +155,7 @@ function myShiftsHtml(branch, list) {
   if (!list.length) return '<p class="muted">אין לך משמרות קרובות.</p>';
   return `<ul class="my-shifts">${list.map((x) => {
     const h = x.hours;
-    return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${esc(x.shift.name)}, ${esc(timeRange(h.start, h.end))}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
+    return `<li${x.changed ? ' class="changed"' : ''}><span class="ms-day">${DAYS[x.dow]}, ${short(x.date)}</span><span class="ms-sub">${shiftTone(x.shift) === 'am' ? SUN : MOON}${esc(x.shift.name)}, ${esc(timeRange(h.start, h.end))}${x.start ? `<span class="start"> · התחלה ב־${esc(x.start)}</span>` : ''}${x.changed ? ' <span class="tag upd">עודכן</span>' : ''}</span></li>`;
   }).join('')}</ul>`;
 }
 
@@ -207,7 +217,18 @@ export async function homeCard(top, bottom = top) {
   }
 }
 
+// "נשארו 3 ימים" / "נשאר יום אחד" / "נשארו 5 שעות", until the deadline.
+function timeLeft(at) {
+  const ms = at.getTime() - Date.now();
+  if (ms < 864e5) { const h = Math.max(1, Math.ceil(ms / 36e5)); return h === 1 ? 'נשארה שעה אחת' : `נשארו ${h} שעות`; }
+  const d = Math.ceil(ms / 864e5);
+  return d === 1 ? 'נשאר יום אחד' : d === 2 ? 'נשארו יומיים' : `נשארו ${d} ימים`;
+}
+
 /* ---------- sign in / sign up ---------- */
+
+// The way from shifts to the menu, flashcards and games.
+const MENU_BTN = '<a class="btn ghost btn-wide menu-btn" href="#/">לתפריט ולמשחקים</a>';
 
 const NOTICE_HTML = `
   <ul class="notice">
@@ -265,7 +286,7 @@ function bindPasswordToggles(root = document) {
 }
 
 function viewAuth(mode = 'in') {
-  setPage('משמרות', `${mode === 'new' ? installCardHtml({ beforeSignIn: true }) : ''}${authHtml(mode)}`);
+  setPage('משמרות', `${mode === 'new' ? installCardHtml({ beforeSignIn: true }) : ''}${authHtml(mode)}${MENU_BTN}`);
   bindInstallCard();
   document.querySelectorAll('.seg-btn').forEach((b) => b.addEventListener('click', () => {
     viewAuth(b.dataset.mode);
@@ -429,7 +450,7 @@ export async function viewShifts() {
   if (!member) { await viewFinishSignUp().catch((ex) => errorState(ex, '/shifts')); return; }
   if (member.status === 'pending') {
     stateScreen('הבקשה נשלחה לאור', 'כשהבקשה תאושר, המשמרות ייפתחו כאן. בינתיים התפריט והמשחקים פתוחים כרגיל.',
-      `<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>${installCardHtml()}`);
+      `<a class="btn ghost" href="#/shifts" id="again">בדיקה אם הבקשה אושרה</a>${MENU_BTN}${installCardHtml()}`);
     bindInstallCard();
     document.getElementById('again').addEventListener('click', (e) => { e.preventDefault(); viewShifts(); });
     return;
@@ -466,18 +487,24 @@ async function viewHub(member, here) {
   if (b) {
     availCard = '<p>הסידור לשבוע הבא פורסם, וההגשה נסגרה.</p>';
   } else {
-    const soon = !mine && !standing && !late ? closingSoonText(branch, nw) : '';
-    const status = mine ? `<p class="ok-line">✓ הזמינות לשבוע ${weekRange(nw)} הוגשה.</p>`
-      : standing ? `<p class="ok-line">✓ הזמינות הקבועה שלך תיכנס לשבוע ${weekRange(nw)}.</p>`
-      : `<p class="warn-line">${soon ? `<strong>תזכורת:</strong> ההגשה נסגרת ${soon}. ` : ''}עוד לא הוגשה זמינות לשבוע ${weekRange(nw)}.</p>`;
-    const when = late
-      ? (branch.lateOk ? '<p class="hint">המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם.</p>' : '<p class="hint">ההגשה נסגרה. אחרי המועד, שינויים רק דרך ניהול הסידור.</p>')
-      : `<p class="hint">אפשר להגיש ולשנות ${esc(deadlineText(branch))}.</p>`;
+    // One bar that says where things stand: orange until submitted, green after, grey once closed.
     const can = !late || branch.lateOk;
-    availCard = `${status}${when}${can ? `<a class="btn btn-wide" href="#/shifts/avail">${mine ? 'שינוי הזמינות' : 'הגשת זמינות'}</a>` : ''}`;
+    const range = weekRange(nw);
+    let bar;
+    if (mine || standing) {
+      bar = `<p class="bar bar-ok" role="status">${mine ? `✓ הגשת זמינות לשבוע ${range}` : `✓ הזמינות הקבועה שלך תיכנס לשבוע ${range}`}</p>
+        ${can ? '<p><a href="#/shifts/avail">לשינוי</a></p>' : ''}`;
+    } else if (can) {
+      bar = `<p class="bar bar-warn" role="status">${late ? 'המועד עבר, אבל אפשר עוד להגיש עד שהסידור יפורסם' : `${timeLeft(closeAt)} להגיש זמינות לשבוע ${range}`}</p>
+        ${late ? '' : `<p class="hint">אפשר להגיש ולשנות ${esc(deadlineText(branch))}.</p>`}
+        <a class="btn ok btn-wide" href="#/shifts/avail">להגשת זמינות</a>`;
+    } else {
+      bar = '<p class="bar bar-closed" role="status">ההגשה נסגרה. הסידור יפורסם בקרוב.</p>';
+    }
+    availCard = bar;
   }
   setPage('משמרות', `
-    <div class="hub-head"><h1>משמרות</h1><a class="btn ghost small" href="#/">לתפריט ולמשחקים</a></div>
+    <h1>משמרות</h1>
     ${installCardHtml()}
     ${a && a.offline ? '<p class="note">אין חיבור. מוצג הסידור שנשמר בטלפון.</p>' : ''}
     ${waiting.length ? `<a class="row-link manage-link join-link" href="#/shifts/people"><span class="row-title">${waiting.length === 1 ? 'בקשת הצטרפות אחת מחכה לאישור' : `${waiting.length} בקשות הצטרפות מחכות לאישור`}</span><span aria-hidden="true">←</span></a>` : ''}
@@ -488,6 +515,7 @@ async function viewHub(member, here) {
       ${a || b ? myShiftsHtml(branch, mineList) : '<p class="muted">הסידור עוד לא פורסם.</p>'}
       ${mineList.length ? '<button class="btn ghost small" type="button" id="to-cal">הוספה ליומן בטלפון</button>' : ''}
     </section>
+    ${MENU_BTN}
     <section aria-labelledby="avail-h" class="block">
       <h2 id="avail-h">זמינות לשבוע הבא</h2>
       ${availCard}
@@ -541,7 +569,7 @@ export async function viewAvailability(forMember = null) {
     const openKeys = new Set(open.map((s) => s.key));
 
     const rows = WORK_DAYS.map((dow) => `
-      <tr><th scope="row">${DAYS[dow]}<span class="d">${short(dayDate(week, dow))}</span></th>
+      <tr${dayRow(week, dow)}><th scope="row">${DAYS[dow]}${todayTag(week, dow)}<span class="d">${short(dayDate(week, dow))}</span></th>
       ${branch.shifts.map((s) => {
         const k = slotKey(dow, s.id);
         if (!openKeys.has(k)) return '<td class="av-closed">סגור</td>';
@@ -561,7 +589,7 @@ export async function viewAvailability(forMember = null) {
         <div class="sch-wrap">
           <table class="sch av">
             <caption class="sr-only">זמינות לשבוע ${weekRange(week)}</caption>
-            <thead><tr><td></td>${branch.shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(timeRange(s.start, s.end))}</span></th>`).join('')}</tr></thead>
+            <thead><tr><td></td>${branch.shifts.map((s) => shiftHead(s)).join('')}</tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -574,7 +602,7 @@ export async function viewAvailability(forMember = null) {
         ${byManager ? '' : `<label class="toggle-row"><input type="checkbox" id="keep"${standing ? ' checked' : ''}${locked ? ' disabled' : ''}> לשמור גם לשבועות הבאים</label>
         <p class="hint">כשמסומן, הזמינות הזו תיכנס לבד לכל שבוע עד שמשנים אותה.</p>`}
         <p class="form-err" id="form-err" role="alert"></p>
-        ${locked ? '' : `<button class="btn btn-wide" type="submit">${byManager ? 'שמירה' : 'שליחה'}</button>`}
+        ${locked ? '' : `<button class="btn ok btn-wide" type="submit">${byManager ? 'שמירה' : 'שליחה'}</button>`}
       </form>`);
 
     const count = () => {

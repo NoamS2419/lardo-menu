@@ -12,7 +12,7 @@ import {
   DAYS, WORK_DAYS, thisWeek, nextWeek, today, addDays, dayDate, short, weekRange, weekRangeText, closesAt, deadlineText,
   expiry, slotKey, hoursOf, openSlots, timeRange, weekId
 } from './week.js';
-import { busy, errorState, loadingHtml, plural, slotLabel, scheduleTable, viewAvailability } from './shifts.js';
+import { busy, errorState, loadingHtml, plural, slotLabel, scheduleTable, viewAvailability, shiftHead, dayRow, todayTag } from './shifts.js';
 import { shareImage } from './share.js';
 
 // Someone who leaves comes off the team table at once: their board entry and daily scores go.
@@ -193,12 +193,12 @@ export async function viewPeople() {
         </div>
         ${editable(m) ? `<div class="person-actions">
           ${m.status === 'pending' ? `
-            <button class="btn small" type="button" data-act="approve">אישור</button>
-            <button class="btn ghost small" type="button" data-act="reject">דחייה</button>` : ''}
+            <button class="btn ok small" type="button" data-act="approve">אישור</button>
+            <button class="btn ghost small danger" type="button" data-act="reject">דחייה</button>` : ''}
           ${m.status === 'approved' ? `
             <a class="btn ghost small" href="#/shifts/people/${encodeURIComponent(m.id)}">הזנת זמינות</a>
             <button class="btn ghost small danger" type="button" data-act="disable">השבתה</button>` : ''}
-          ${m.status === 'disabled' ? '<button class="btn ghost small" type="button" data-act="enable">החזרה לצוות</button><button class="btn ghost small danger" type="button" data-act="purge">מחיקה לגמרי</button>' : ''}
+          ${m.status === 'disabled' ? '<button class="btn ok small" type="button" data-act="enable">החזרה לצוות</button><button class="btn bad small" type="button" data-act="purge">מחיקה לגמרי</button>' : ''}
           <details class="more"><summary>עוד פעולות</summary>
             <div class="field"><label for="name-${esc(m.id)}">השם בסידור</label>
               <div class="pw"><input id="name-${esc(m.id)}" type="text" maxlength="20" value="${esc(m.name)}"><button class="btn ghost small" type="button" data-act="rename">שמירה</button></div></div>
@@ -218,7 +218,7 @@ export async function viewPeople() {
       <section class="block" aria-labelledby="pend-h">
         <h2 id="pend-h">בקשות הצטרפות</h2>
         ${pending.length ? `<ul class="people">${pending.map(row).join('')}</ul>` : '<p class="muted">אין בקשות חדשות.</p>'}
-        ${pending.length > 1 ? '<button class="btn ghost small" type="button" id="reject-all">דחיית כל הבקשות</button>' : ''}
+        ${pending.length > 1 ? '<button class="btn ghost small danger" type="button" id="reject-all">דחיית כל הבקשות</button>' : ''}
       </section>
       <section class="block" aria-labelledby="staff-h">
         <h2 id="staff-h">בצוות</h2>
@@ -349,7 +349,7 @@ export async function viewSettings() {
           <p class="hint">0 = המשמרת סגורה. לשבוע חריג (חג) אפשר לשנות במסך הבנייה, לשבוע הזה בלבד.</p>
           <div class="sch-wrap"><table class="sch need">
             <caption class="sr-only">כמה אנשים בכל משמרת</caption>
-            <thead><tr><td></td>${branch.shifts.map((s) => `<th scope="col">${esc(s.name)}</th>`).join('')}</tr></thead>
+            <thead><tr><td></td>${branch.shifts.map((s) => shiftHead(s, false)).join('')}</tr></thead>
             <tbody>${WORK_DAYS.map((d) => `<tr><th scope="row">${DAYS[d]}</th>${branch.shifts.map((s) => {
               const k = slotKey(d, s.id);
               return `<td><input type="number" min="0" max="20" inputmode="numeric" id="need-${k}" value="${Number(branch.need[k] || 0)}" aria-label="${DAYS[d]}, ${esc(s.name)}: כמה אנשים"></td>`;
@@ -515,9 +515,12 @@ export async function viewBuild(weekParam) {
       const missing = Math.max(0, need - people.length);
       const label = `${slotLabel(branch, o.dow, o.shift, week)}: ${people.length} מתוך ${need}${missing ? `, חסר ${missing}` : ''}${people.length ? `. ${people.map((p) => p.name + (p.start ? ` מ־${p.start}` : '')).join(', ')}` : ''}`;
       const clash = people.some((p) => status(p.uid, o.key, o.dow).can === false);
-      return `<button type="button" class="cell${missing ? ' short' : ''}${clash ? ' clash' : ''}" data-k="${o.key}" aria-label="${esc(label)}">
-        <span class="cell-count">${missing ? `חסר ${missing}` : `${people.length}/${need}`}</span>
+      const can = staff.filter((m) => status(m.id, o.key, o.dow).can === true).length;
+      const canText = can ? plural(can, 'אחד יכול', 'יכולים') : 'אף אחד לא יכול';
+      return `<button type="button" class="cell${missing ? ' short' : need ? ' full' : ''}${clash ? ' clash' : ''}" data-k="${o.key}" aria-label="${esc(`${label}. ${canText}`)}">
+        <span class="cell-count">${missing ? `חסר ${missing}` : `✓ ${people.length}/${need}`}</span>
         ${people.map((p) => `<span class="cell-name${status(p.uid, o.key, o.dow).can === false ? ' bad' : ''}"><bdi>${esc(p.name)}</bdi>${p.start ? ` <span class="start">${esc(p.start)}</span>` : ''}</span>`).join('')}
+        <span class="cell-can${can ? '' : ' none'}">${canText}</span>
       </button>`;
     }
 
@@ -525,8 +528,8 @@ export async function viewBuild(weekParam) {
       const keys = new Set(open().map((o) => o.key));
       return `<table class="sch build">
         <caption class="sr-only">בניית הסידור לשבוע ${weekRange(week)}</caption>
-        <thead><tr><td></td>${branch.shifts.map((s) => `<th scope="col">${esc(s.name)}<span class="d">${esc(timeRange(s.start, s.end))}</span></th>`).join('')}</tr></thead>
-        <tbody>${WORK_DAYS.map((d) => `<tr><th scope="row">${DAYS[d]}<span class="d">${short(dayDate(week, d))}</span></th>${branch.shifts.map((s) => {
+        <thead><tr><td></td>${branch.shifts.map((s) => shiftHead(s)).join('')}</tr></thead>
+        <tbody>${WORK_DAYS.map((d) => `<tr${dayRow(week, d)}><th scope="row">${DAYS[d]}${todayTag(week, d)}<span class="d">${short(dayDate(week, d))}</span></th>${branch.shifts.map((s) => {
           const k = slotKey(d, s.id);
           return keys.has(k) ? `<td>${cellHtml(open().find((o) => o.key === k))}</td>` : `<td class="sch-closed"><button type="button" class="cell closed" data-k="${k}" aria-label="${esc(slotLabel(branch, d, s, week))}: סגורה. לפתוח לשבוע הזה">סגור</button></td>`;
         }).join('')}</tr>`).join('')}</tbody>
@@ -554,7 +557,7 @@ export async function viewBuild(weekParam) {
       <div class="sch-wrap" id="grid">${gridHtml()}</div>
       <p class="hint" id="save-state" role="status"></p>
       <div class="publish-bar">
-        <button class="btn btn-wide" type="button" id="publish"${isPast ? ' aria-disabled="true"' : ''}>${published ? 'פרסום העדכון' : 'פרסום הסידור'}</button>
+        <button class="btn ok btn-wide" type="button" id="publish"${isPast ? ' aria-disabled="true"' : ''}>${published ? 'פרסום העדכון' : 'פרסום הסידור'}</button>
         ${published ? '<button class="btn ghost btn-wide" type="button" id="share">תמונה לוואטסאפ</button>' : ''}
       </div>
       <section class="block" aria-labelledby="sum-h"><h2 id="sum-h">כמה משמרות לכל אחד</h2><p class="hint">שובצו מתוך המשמרות שסומנו "אפשר" בהגשה.</p><div id="summary">${summaryHtml()}</div></section>
@@ -563,6 +566,7 @@ export async function viewBuild(weekParam) {
         <form method="dialog" class="sheet-in">
           <h2 id="dlg-h" tabindex="-1"></h2>
           <div class="field need-field"><label for="dlg-need">כמה אנשים צריך בשבוע הזה</label><input id="dlg-need" type="number" min="0" max="20" inputmode="numeric"></div>
+          <ul class="pick-counts" id="dlg-counts" aria-label="מי יכול במשמרת הזו"></ul>
           <ul class="pick" id="dlg-list"></ul>
           <p class="sr-only" id="dlg-live" aria-live="polite"></p>
           <button class="btn btn-wide" value="done">סיום</button>
@@ -575,7 +579,7 @@ export async function viewBuild(weekParam) {
           <div id="pub-body"></div>
           <div class="two">
             <button class="btn ghost" value="cancel" autofocus>ביטול</button>
-            <button class="btn" value="ok" id="pub-ok">פרסום</button>
+            <button class="btn ok" value="ok" id="pub-ok">פרסום</button>
           </div>
         </form>
       </dialog>
@@ -598,12 +602,15 @@ export async function viewBuild(weekParam) {
       document.getElementById('dlg-need').value = Number(state.need[current] || 0);
       const rank = (m) => { const st = status(m.id, current, o.dow); return st.can === true ? 0 : st.can === null ? 1 : 2; };
       const rows = staff.slice().sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name, 'he'));
+      const n = (r) => rows.filter((m) => rank(m) === r).length;
+      const countsEl = document.getElementById('dlg-counts');
+      if (countsEl) countsEl.innerHTML = `<li class="c-yes">${n(0) === 1 ? 'אחד יכול' : `${n(0)} יכולים`}</li><li class="c-no">${n(2) === 1 ? 'אחד לא יכול' : `${n(2)} לא יכולים`}</li><li class="c-none">${n(1) === 1 ? 'אחד לא הגיש' : `${n(1)} לא הגישו`}</li>`;
       document.getElementById('dlg-list').innerHTML = rows.map((m) => {
         const st = status(m.id, current, o.dow);
         const p = people.find((x) => x.uid === m.id);
-        return `<li class="pick-row${st.can === false ? ' cant' : ''}">
+        return `<li class="pick-row${st.can === false ? ' cant' : st.can ? ' can' : ''}">
           <button type="button" class="pick-btn" data-uid="${esc(m.id)}" aria-pressed="${Boolean(p)}" aria-label="לשבץ את ${esc(m.name)}">${p ? '✓' : '+'}</button>
-          <span class="pick-name"><bdi>${esc(m.name)}</bdi><span class="pick-sub">${esc(st.label)}${st.note ? `, “<bdi>${esc(st.note)}</bdi>”` : ''} · ${plural(countFor(m.id), 'משמרת אחת', 'משמרות')}</span></span>
+          <span class="pick-name"><bdi>${esc(m.name)}</bdi><span class="pick-sub">${st.can === true ? '✓ ' : st.can === false ? '✕ ' : ''}${esc(st.label)}${st.note ? `, “<bdi>${esc(st.note)}</bdi>”` : ''} · ${plural(countFor(m.id), 'משמרת אחת', 'משמרות')}</span></span>
           ${p ? `<label class="sr-only" for="st-${esc(m.id)}">שעת התחלה ל${esc(m.name)}</label>
           <select id="st-${esc(m.id)}" class="pick-start" data-uid="${esc(m.id)}"><option value="">${esc(hoursOf(branch, o.dow, o.shift).start)}</option>${START_TIMES.map((t) => `<option${p.start === t ? ' selected' : ''}>${t}</option>`).join('')}</select>` : ''}
         </li>`;
