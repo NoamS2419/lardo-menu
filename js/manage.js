@@ -643,13 +643,15 @@ export async function viewBuild(weekParam) {
       const rows = staff.slice().sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name, 'he'));
       const n = (r) => rows.filter((m) => rank(m) === r).length;
       const countsEl = document.getElementById('dlg-counts');
-      if (countsEl) countsEl.innerHTML = `<li class="c-yes">${n(0) === 1 ? 'אחד יכול' : `${n(0)} יכולים`}</li><li class="c-no">${n(2) === 1 ? 'אחד לא יכול' : `${n(2)} לא יכולים`}</li><li class="c-none">${n(1) === 1 ? 'אחד לא הגיש' : `${n(1)} לא הגישו`}</li>`;
+      // Only the groups that have someone in them.
+      const chip = (cls, k, one, many) => (n(k) ? `<li class="${cls}">${n(k) === 1 ? one : `${n(k)} ${many}`}</li>` : '');
+      if (countsEl) countsEl.innerHTML = chip('c-yes', 0, 'אחד יכול', 'יכולים') + chip('c-no', 2, 'אחד לא יכול', 'לא יכולים') + chip('c-none', 1, 'אחד לא הגיש', 'לא הגישו');
       document.getElementById('dlg-list').innerHTML = rows.map((m) => {
         const st = status(m.id, current, o.dow);
         const p = people.find((x) => x.uid === m.id);
         return `<li class="pick-row${st.can === false ? ' cant' : st.can ? ' can' : ''}">
           <button type="button" class="pick-btn" data-uid="${esc(m.id)}" aria-pressed="${Boolean(p)}" aria-label="לשבץ את ${esc(m.name)}">${p ? '✓' : '+'}</button>
-          <span class="pick-name"><bdi>${esc(m.name)}</bdi><span class="pick-sub">${st.can === true ? '✓ ' : st.can === false ? '✕ ' : ''}${esc(st.label)}${st.note ? `, “<bdi>${esc(st.note)}</bdi>”` : ''} · ${plural(countFor(m.id), 'משמרת אחת', 'משמרות')}</span></span>
+          <span class="pick-name"><bdi>${esc(m.name)}</bdi><span class="pick-sub">${st.can === true ? '✓ ' : st.can === false ? '✕ ' : ''}${esc(st.label)}${st.note ? `, “<bdi>${esc(st.note)}</bdi>”` : ''}, ${plural(countFor(m.id), 'משמרת אחת', 'משמרות')}</span></span>
           ${p ? `<label class="sr-only" for="st-${esc(m.id)}">שעת התחלה ל${esc(m.name)}</label>
           <select id="st-${esc(m.id)}" class="pick-start" data-uid="${esc(m.id)}"><option value="">${esc(hoursOf(branch, o.dow, o.shift).start)}</option>${START_TIMES.map((t) => `<option${p.start === t ? ' selected' : ''}>${t}</option>`).join('')}</select>` : ''}
         </li>`;

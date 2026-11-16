@@ -221,7 +221,7 @@ export async function homeCard(top, bottom = top) {
 function timeLeft(at) {
   const ms = at.getTime() - Date.now();
   if (ms < 864e5) { const h = Math.max(1, Math.ceil(ms / 36e5)); return h === 1 ? 'נשארה שעה אחת' : `נשארו ${h} שעות`; }
-  const d = Math.ceil(ms / 864e5);
+  const d = Math.floor(ms / 864e5); // whole days, never more than there really are
   return d === 1 ? 'נשאר יום אחד' : d === 2 ? 'נשארו יומיים' : `נשארו ${d} ימים`;
 }
 
