@@ -22,6 +22,21 @@ async function removeFromBoard(uid) {
   await Promise.allSettled([deleteDoc(`players/${uid}`), ...daily.map((d) => deleteDoc(`daily/${d.id}`))]);
 }
 
+// Deletes someone who left right away instead of after 3 months: everything of theirs, the record last
+// (the rules check the record to know who may delete the rest). Shifts in published weeks stay.
+async function purgeMember(uid, branchId) {
+  const [av, off] = await Promise.all([
+    list('availability', [['branch', '==', branchId], ['uid', '==', uid]], { limit: 200 }).catch(() => []),
+    list('timeoff', [['branch', '==', branchId], ['uid', '==', uid]], { limit: 200 }).catch(() => [])
+  ]);
+  await removeFromBoard(uid);
+  await Promise.allSettled([
+    ...av.map((d) => deleteDoc(`availability/${d.id}`)), ...off.map((d) => deleteDoc(`timeoff/${d.id}`)),
+    deleteDoc(`standing/${uid}`), deleteDoc(`progress/${uid}`)
+  ]);
+  await deleteDoc(`members/${uid}`);
+}
+
 const back = backLink;
 // Slots whose people or start times differ between two schedules.
 function slotsDiffer(a = {}, b = {}) {
@@ -183,7 +198,7 @@ export async function viewPeople() {
           ${m.status === 'approved' ? `
             <a class="btn ghost small" href="#/shifts/people/${encodeURIComponent(m.id)}">הזנת זמינות</a>
             <button class="btn ghost small danger" type="button" data-act="disable">השבתה</button>` : ''}
-          ${m.status === 'disabled' ? '<button class="btn ghost small" type="button" data-act="enable">החזרה לצוות</button>' : ''}
+          ${m.status === 'disabled' ? '<button class="btn ghost small" type="button" data-act="enable">החזרה לצוות</button><button class="btn ghost small danger" type="button" data-act="purge">מחיקה לגמרי</button>' : ''}
           <details class="more"><summary>עוד פעולות</summary>
             <div class="field"><label for="name-${esc(m.id)}">השם בסידור</label>
               <div class="pw"><input id="name-${esc(m.id)}" type="text" maxlength="20" value="${esc(m.name)}"><button class="btn ghost small" type="button" data-act="rename">שמירה</button></div></div>
@@ -240,6 +255,11 @@ export async function viewPeople() {
             await update(m, { status: 'disabled', expireAt: new Date(Date.now() + 90 * 864e5) });
             await removeFromBoard(m.id);
             return done(`${m.name} הושבת`);
+          }
+          case 'purge': {
+            if (!confirm(`למחוק את ${m.name} לגמרי, עם הזמינות ובקשות החופש? אי אפשר לבטל.`)) return undefined;
+            await purgeMember(m.id, branch.id);
+            return done(`${m.name} נמחק`);
           }
           case 'enable': await update(m, { status: 'approved' }); return done(`${m.name} חזר לצוות`);
           case 'rename': {
