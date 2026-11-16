@@ -813,6 +813,8 @@ main { flex: 1; width: 100%; max-width: 1132px; margin: 0 auto; padding: var(--s
 .warn-line { color: var(--warn-text); background: var(--warn-bg); border-inline-start: 3px solid var(--warn-line); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-1); margin: 0 0 var(--sp-2); }
 .change-line { background: var(--accent-soft); border-inline-start: 3px solid var(--accent); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-1); font-weight: var(--fw-medium); }
 .manage-link { margin: 0 0 var(--sp-4); grid-template-columns: 1fr auto; }
+.join-link { background: var(--accent-soft); border-inline-start: 3px solid var(--accent); margin-bottom: var(--sp-2); }
+.join-link .row-title { font-weight: var(--fw-bold); }
 .field { display: grid; gap: var(--sp-1); margin: 0 0 var(--sp-2); }
 .field label { font-weight: var(--fw-bold); }
 .field .hint { margin: 0; font-size: var(--fs-1); }
