@@ -324,17 +324,16 @@ function accountHtml(member) {
     <details class="settings" id="account">
       <summary>החשבון שלי</summary>
       <p>${member ? `השם בסידור: <bdi>${esc(member.name)}</bdi><br>` : ''}שם משתמש: <bdi dir="ltr">${esc(acc.username)}</bdi></p>
-      ${NOTICE_HTML}
       <button class="btn ghost" id="sign-out" type="button">יציאה מהחשבון בטלפון הזה</button>
       ${acc.isAdmin ? `<h2>הגדרה ראשונה (ניהול ראשי)</h2>
       <p>מעתיק את חוקי Firestore, כשהחשבון הזה מוגדר בהם לניהול הראשי, להדבקה במסוף Firebase.</p>
       <button class="btn ghost" id="copy-rules" type="button">העתקת החוקים</button>
       <p id="rules-msg" role="status"></p>
       <textarea id="rules-text" class="rules-text" readonly hidden aria-label="חוקי Firestore"></textarea>` : ''}
-      <h2>מחיקת החשבון</h2>
-      <p>מוחק את החשבון, את הזמינות, את בקשות החופש ואת הניקוד בטבלה. סידורים שכבר פורסמו נשארים עד שנמחקים אחרי 3 חודשים.</p>
       <button class="btn btn-no" id="delete-account" type="button">מחיקת החשבון שלי</button>
       <p id="account-msg" role="status"></p>
+      <details class="more"><summary>מדיניות פרטיות</summary>${NOTICE_HTML}
+        <p>מחיקת החשבון מוחקת גם את הזמינות, בקשות החופש והניקוד. סידורים שכבר פורסמו נמחקים אחרי 3 חודשים.</p></details>
     </details>`;
 }
 
@@ -357,7 +356,7 @@ function bindAccount() {
     announce('יצאת מהחשבון');
   });
   document.getElementById('delete-account')?.addEventListener('click', (e) => busy(e.currentTarget, async () => {
-    if (!confirm('למחוק את החשבון וכל מה שקשור אליו? אי אפשר לבטל.')) return;
+    if (!confirm('למחוק את החשבון? אי אפשר לבטל.')) return;
     try {
       await deleteAccount();
       viewShifts();
